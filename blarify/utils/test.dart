@@ -1,39 +1,101 @@
-void main() {
-  // Class Example
-  var person = Person('Alice', 30);
-  person.greet();
+class Example {
+  // Instance variables
+  int _value; // Private variable
 
-  // Record Example
-  var car = ('Tesla', 'Model S', 2024);
-  print('${car.$1} ${car.$2}, Year: ${car.$3}');
+  // Constructor
+  Example(this._value);
 
-  // Struct-like Immutable Class
-  const p2 = ImmutablePerson('Bob', 40);
-  p2.show();
+  // Named Constructor
+  Example.namedConstructor(this._value) {
+    print("Named constructor called!");
+  }
 
-  // Record Function Example
-  var user = getUser();
-  print('User: ${user.$1}, ${user.$2}');
-}
+  // Factory Constructor
+  factory Example.create(int val) {
+    return Example(val);
+  }
 
-// 1. Class
-class Person {
-  String name;
-  int age;
-  Person(this.name, this.age);
-  void greet() => print('Hi, I am $name.');
-  void thing() {
-    print('I am $age years old.');
+  // Instance Method
+  void display() {
+    print("Value: $_value");
+  }
+
+  // Private Method
+  void _privateMethod() {
+    print("This is a private method.");
+  }
+
+  // Async Method
+  Future<void> asyncMethod() async {
+    await Future.delayed(Duration(seconds: 1));
+    print("Async method executed!");
+  }
+
+  // Generator Method (sync)
+  Iterable<int> syncGenerator() sync* {
+    for (int i = 0; i < _value; i++) {
+      yield i;
+    }
+  }
+
+  // Generator Method (async)
+  Stream<int> asyncGenerator() async* {
+    for (int i = 0; i < _value; i++) {
+      await Future.delayed(Duration(milliseconds: 500));
+      yield i;
+    }
+  }
+
+  // Getter
+  int get value => _value;
+
+  // Setter
+  set value(int newValue) {
+    if (newValue >= 0) {
+      _value = newValue;
+    } else {
+      print("Value cannot be negative");
+    }
+  }
+
+  // Static Method
+  static void staticMethod() {
+    print("This is a static method.");
+  }
+
+  // Operator Overloading
+  Example operator +(Example other) {
+    return Example(this._value + other._value);
   }
 }
 
-// 2. Record Function
-(String, int) getUser() => ('Charlie', 25);
+void main() async {
+  var ex1 = Example(5);
+  ex1.display();
 
-// 3. Immutable Struct-like Class
-class ImmutablePerson {
-  final String name;
-  final int age;
-  const ImmutablePerson(this.name, this.age);
-  void show() => print('$name is $age years old.');
+  var ex2 = Example.namedConstructor(10);
+  ex2.display();
+
+  var ex3 = Example.create(15);
+  ex3.display();
+
+  ex1.value = 20;
+  print("Getter value: ${ex1.value}");
+
+  Example.staticMethod();
+
+  var ex4 = ex1 + ex2;
+  print("Operator overloaded value: ${ex4.value}");
+
+  await ex1.asyncMethod();
+
+  print("Sync Generator:");
+  for (var num in ex1.syncGenerator()) {
+    print(num);
+  }
+
+  print("Async Generator:");
+  await for (var num in ex1.asyncGenerator()) {
+    print(num);
+  }
 }

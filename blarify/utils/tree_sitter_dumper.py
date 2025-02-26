@@ -21,7 +21,11 @@ class TreeSitterDumper:
 
             node_type = f"\033[94m{node.type}\033[0m"
             start_end_points = f"\033[92m[{node.start_point} - {node.end_point}]\033[0m"
-            print("- " * indent + f"{{{node_type}}}: {node.grammar_name} \n\n{node.text.decode('utf-8')}")
+            indent_str = "- " * indent
+
+            print(indent_str + f"{{{node_type}}}: {node.grammar_name}")
+            print(indent_str + node.text.decode("utf-8"))
+
             for child in node.named_children:
                 nodes_to_visit.append({"node": child, "indent": indent + 1})
 
