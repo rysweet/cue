@@ -22,22 +22,50 @@ class DartDefinitions(LanguageDefinitions):
         }
 
     def should_create_node(node: Node) -> bool:
-        print(node.type)
-        if node.type == "method_signature":
-            pass
+        # if node.type == "method_signature":
+        #     return DartDefinitions.is_method_signature_a_definition(node)
+
         return LanguageDefinitions._should_create_node_base_implementation(
             node,
             [
                 "class_definition",
-                "method_signature",
-                "function_declaration",
+                # "lambda_expression",
             ],
         )
 
+    def is_method_signature_a_definition(node: Node) -> bool:
+        is_method_signature = node.type == "method_signature"
+        next_named_sibling = DartDefinitions._get_next_named_sibling(node, skip_comments=True)
+
+        return is_method_signature and next_named_sibling and next_named_sibling.type == "function_body"
+
+    def _get_next_named_sibling(node: Node, skip_comments: bool) -> Optional[Node]:
+        sibling = node.next_named_sibling
+        if skip_comments:
+            while sibling and sibling.type == "comment":
+                sibling = sibling.next_named_sibling
+
+        return sibling
+
     def get_identifier_node(node: Node) -> Node:
+        if node.type == "method_signature":
+            return DartDefinitions._get_method_signature_identifier_node(node)
+
         return LanguageDefinitions._get_identifier_node_base_implementation(node)
 
+    def _get_method_signature_identifier_node(node: Node) -> Node:
+        return DartDefinitions._get_next_named_sibling(node, skip_comments=True) or node
+
+    def _get_first_child(node: Node, skip_comments: bool) -> Optional[Node]:
+        child = node.named_child(0)
+        if skip_comments:
+            while child and child.type == "comment":
+                child = child.next_named_sibling
+
     def get_body_node(node: Node) -> Node:
+        if node.type == "method_signature":
+            node = node.next_named_sibling
+
         return LanguageDefinitions._get_body_node_base_implementation(node)
 
     def get_relationship_type(node: GraphNode, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
