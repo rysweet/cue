@@ -1,7 +1,7 @@
 from typing import Optional
 
 from blarify.vendor.multilspy import SyncLanguageServer
-
+from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 from blarify.utils.path_calculator import PathCalculator
 
 from .types.Reference import Reference
@@ -113,7 +113,7 @@ class LspQueryHelper:
 
                 return references
 
-            except (TimeoutError, ConnectionResetError) as e:
+            except (TimeoutError, ConnectionResetError, Error):
                 timeout = timeout * 2
 
                 logger.warning(f"Error requesting references, attempting to restart LSP server with timeout {timeout}")
