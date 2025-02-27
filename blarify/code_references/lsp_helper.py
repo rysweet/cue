@@ -148,7 +148,7 @@ class LspQueryHelper:
         # So for now, I'm just killing the process manually
 
         # Best line of code I've ever written:
-        self.language_to_lsp_server[language].language_server.server.process.kill()
+        self.language_to_lsp_server[language].language_server.server.process.terminate()
 
         del self.language_to_lsp_server[language]
 
@@ -172,7 +172,7 @@ class LspQueryHelper:
 
         for language in languages:
             self.exit_lsp_server(language)
-            
+
             
         self.entered_lsp_servers = {}
         self.language_to_lsp_server = {}
