@@ -1,5 +1,7 @@
 from typing import Optional
 
+import psutil
+
 from blarify.vendor.multilspy import SyncLanguageServer
 
 from blarify.utils.path_calculator import PathCalculator
@@ -148,7 +150,12 @@ class LspQueryHelper:
         # So for now, I'm just killing the process manually
 
         # Best line of code I've ever written:
-        self.language_to_lsp_server[language].language_server.server.process.terminate()
+        process = self.language_to_lsp_server[language].language_server.server.process
+
+        process.terminate()
+
+        for child in psutil.Process(process.pid).children(recursive=True):
+            child.terminate()
 
         del self.language_to_lsp_server[language]
 

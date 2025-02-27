@@ -26,6 +26,7 @@ falkordb = "^1.0.10"
 requests = "^2.32.3"
 typing-extensions = "^4.12.2"
 jedi-language-server = "^0.43.1"
+psutil = "^7.0.0"
 
 
 
