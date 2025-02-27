@@ -124,8 +124,6 @@ class LspQueryHelper:
         return []
 
     def _restart_lsp_for_extension(self, node):
-        
-
         language_definitions = self._get_language_definition_for_extension(node.extension)
         language_name = language_definitions.get_language_name()
 
@@ -151,7 +149,7 @@ class LspQueryHelper:
 
         # Best line of code I've ever written:
         self.language_to_lsp_server[language].language_server.server.process.kill()
-        
+
         del self.language_to_lsp_server[language]
 
         
@@ -170,11 +168,12 @@ class LspQueryHelper:
         return definitions[0]["uri"]
 
     def shutdown_exit_close(self) -> None:
-        for lsp in self.entered_lsp_servers.values():
-            try:
-                lsp.__exit__(None, None, None)
-            except Exception as e:
-                logger.error(f"Error shutting down LSP: {e}")
+        languages = list(self.language_to_lsp_server.keys())
+
+        for language in languages:
+            self.exit_lsp_server(language)
+            
+            
         self.entered_lsp_servers = {}
         self.language_to_lsp_server = {}
         logger.info("LSP servers have been shut down")
