@@ -114,7 +114,7 @@ class LspQueryHelper:
             except (TimeoutError, ConnectionResetError, Error):
                 timeout = timeout * 2
 
-                logger.warning(f"Error requesting references, attempting to restart LSP server with timeout {timeout}")
+                logger.warning(f"Error requesting references for {self.root_uri}, {node.definition_range}, attempting to restart LSP server with timeout {timeout}")
                 self._restart_lsp_for_extension(node)
                 lsp = self._get_or_create_lsp_server(node.extension, timeout)
 
