@@ -788,7 +788,7 @@ class SyncLanguageServer:
             LanguageServer.create(config, logger, repository_root_path),
             timeout=timeout,
         )
-git
+
     @contextmanager
     def open_file(self, relative_file_path: str) -> Iterator[None]:
         """
