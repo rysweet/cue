@@ -104,9 +104,7 @@ class LspQueryHelper:
     def _request_references_with_exponential_backoff(self, node, lsp):
         timeout = 10
         for _ in range(1, 3):
-
             try:
-                raise TimeoutError
                 references = lsp.request_references(
                     file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=node.path),
                     line=node.definition_range.start_dict["line"],
@@ -144,9 +142,16 @@ class LspQueryHelper:
             logger.error("Connection reset error")
 
     def exit_lsp_server(self, language) -> None:
-        # TODO: This should not be this hacky
+        # TODO: This should not be this hacky!!!
+
         # Since im using the sync language server, I need to manually kill the process
+        # If I try to exit the context, it will hang since it's waiting for the server response
+        # A better way would be to use the async language server, but that would require a lot of changes
+        # So for now, I'm just killing the process manually
+
+        # Best line of code I've ever written:
         self.language_to_lsp_server[language].language_server.server.process.kill()
+        
         del self.language_to_lsp_server[language]
 
         
