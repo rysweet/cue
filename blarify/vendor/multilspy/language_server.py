@@ -422,10 +422,10 @@ class LanguageServer:
                 }
             )
 
-        if not response:
+        if response is None:
             self.logger.log(
-                "Empty response received from Language Server for definitions, defaulting to empty list",
-                logging.INFO,
+                "'None' response received from Language Server for definition, defaulting to empty list",
+                logging.DEBUG,
             )
             response = []
 
@@ -522,10 +522,10 @@ class LanguageServer:
 
         ret: List[multilspy_types.Location] = []
 
-        if not response:
+        if response is None:
             self.logger.log(
-                "Empty response received from Language Server for references, defaulting to empty list",
-                logging.INFO,
+                "'None' response received from Language Server for references, defaulting to empty list",
+                logging.DEBUG,
             )
             response = []
 
