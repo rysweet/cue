@@ -134,8 +134,8 @@ class LspQueryHelper:
         except ConnectionResetError:
             logger.error("Connection reset error")
 
-    def get_definition_path_for_reference(self, reference: Reference) -> str:
-        lsp_caller = self._get_or_create_lsp_server(".py")
+    def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
+        lsp_caller = self._get_or_create_lsp_server(extension)
         definitions = lsp_caller.request_definition(
             file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=reference.uri),
             line=reference.range.start.line,
