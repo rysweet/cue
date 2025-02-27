@@ -243,7 +243,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
         identifiers = helper.get_all_identifiers(file_node)
         filtered_identifiers = self.remove_definitions_from_identifiers(definitions, identifiers)
 
-        return {self.lsp_query_helper.get_definition_path_for_reference(ref) for ref in filtered_identifiers}
+        return {self.lsp_query_helper.get_definition_path_for_reference(ref, file_node.extension) for ref in filtered_identifiers}
 
     def remove_definitions_from_identifiers(self, definitions, identifiers):
         return [identifier for identifier in identifiers if identifier not in definitions]
