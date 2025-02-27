@@ -3,7 +3,7 @@ from .language_definitions import LanguageDefinitions
 from blarify.graph.relationship import RelationshipType
 
 from tree_sitter_language_pack import get_parser
-from tree_sitter import Language, Parser
+from tree_sitter import Parser
 
 from typing import Optional, Set, Dict
 
@@ -22,22 +22,27 @@ class DartDefinitions(LanguageDefinitions):
         }
 
     def should_create_node(node: Node) -> bool:
-        # if node.type == "method_signature":
-        #     return DartDefinitions.is_method_signature_a_definition(node)
+        if node.type == "method_signature":
+            return DartDefinitions.is_method_signature_a_definition(node)
 
         return LanguageDefinitions._should_create_node_base_implementation(
             node,
             [
                 "class_definition",
-                # "lambda_expression",
             ],
         )
 
     def is_method_signature_a_definition(node: Node) -> bool:
         is_method_signature = node.type == "method_signature"
         next_named_sibling = DartDefinitions._get_next_named_sibling(node, skip_comments=True)
+        contains_declaration = len(DartDefinitions._get_children_by_type(node, "function_signature")) > 0
 
-        return is_method_signature and next_named_sibling and next_named_sibling.type == "function_body"
+        return (
+            is_method_signature
+            and next_named_sibling
+            and next_named_sibling.type == "function_body"
+            and contains_declaration
+        )
 
     def _get_next_named_sibling(node: Node, skip_comments: bool) -> Optional[Node]:
         sibling = node.next_named_sibling
@@ -49,9 +54,14 @@ class DartDefinitions(LanguageDefinitions):
 
     def get_identifier_node(node: Node) -> Node:
         if node.type == "method_signature":
-            return DartDefinitions._get_method_signature_identifier_node(node)
+            function_signature_node = DartDefinitions._get_children_by_type(node, "function_signature")
+            print(function_signature_node)
+            node = function_signature_node[0]
 
         return LanguageDefinitions._get_identifier_node_base_implementation(node)
+
+    def _get_children_by_type(node: Node, type: str) -> list[Node]:
+        return [child for child in node.children if child.type == type]
 
     def _get_method_signature_identifier_node(node: Node) -> Node:
         return DartDefinitions._get_next_named_sibling(node, skip_comments=True) or node
@@ -79,7 +89,6 @@ class DartDefinitions(LanguageDefinitions):
         return {
             "class_definition": NodeLabels.CLASS,
             "method_signature": NodeLabels.FUNCTION,
-            "function_declaration": NodeLabels.FUNCTION,
         }[type]
 
     def get_language_file_extensions() -> Set[str]:
