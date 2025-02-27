@@ -425,7 +425,7 @@ class LanguageServer:
         if not response:
             self.logger.log(
                 "Empty response received from Language Server for definitions, defaulting to empty list",
-                logging.INFO,
+                logging.DEBUG,
             )
             response = []
 
@@ -525,7 +525,7 @@ class LanguageServer:
         if not response:
             self.logger.log(
                 "Empty response received from Language Server for references, defaulting to empty list",
-                logging.INFO,
+                logging.DEBUG,
             )
             response = []
 
@@ -788,7 +788,7 @@ class SyncLanguageServer:
             LanguageServer.create(config, logger, repository_root_path),
             timeout=timeout,
         )
-
+git
     @contextmanager
     def open_file(self, relative_file_path: str) -> Iterator[None]:
         """
