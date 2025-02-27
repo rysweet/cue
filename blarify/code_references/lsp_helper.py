@@ -122,6 +122,8 @@ class LspQueryHelper:
         return []
 
     def _restart_lsp_for_extension(self, node):
+        self.exit_lsp_server(node.extension)
+
         language_definitions = self._get_language_definition_for_extension(node.extension)
 
         new_lsp = self._create_lsp_server(language_definitions)
@@ -133,6 +135,17 @@ class LspQueryHelper:
             logger.warning("LSP server restarted")
         except ConnectionResetError:
             logger.error("Connection reset error")
+
+    def exit_lsp_server(self, extension: str) -> None:
+        if extension in self.language_to_lsp_server:
+            try:
+                self.language_to_lsp_server[extension].__exit__(None, None, None)
+            except Exception as e:
+                logger.error(f"Error shutting down LSP: {e}")
+
+            del self.language_to_lsp_server[extension]
+
+        
 
     def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
         lsp_caller = self._get_or_create_lsp_server(extension)
