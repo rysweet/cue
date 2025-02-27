@@ -20,6 +20,8 @@ from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 
+import asyncio
+
 
 import logging
 
@@ -102,7 +104,9 @@ class LspQueryHelper:
     def _request_references_with_exponential_backoff(self, node, lsp):
         timeout = 10
         for _ in range(1, 3):
+
             try:
+                raise TimeoutError
                 references = lsp.request_references(
                     file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=node.path),
                     line=node.definition_range.start_dict["line"],
@@ -122,28 +126,28 @@ class LspQueryHelper:
         return []
 
     def _restart_lsp_for_extension(self, node):
-        self.exit_lsp_server(node.extension)
+        
 
         language_definitions = self._get_language_definition_for_extension(node.extension)
+        language_name = language_definitions.get_language_name()
+
+        self.exit_lsp_server(language_name)
 
         new_lsp = self._create_lsp_server(language_definitions)
 
         logger.warning("Restarting LSP server")
         try:
-            self._initialize_lsp_server(language_definitions.get_language_name(), new_lsp)
-            self.language_to_lsp_server[language_definitions.get_language_name()] = new_lsp
+            self._initialize_lsp_server(language=language_name, lsp=new_lsp)
+            self.language_to_lsp_server[language_name] = new_lsp
             logger.warning("LSP server restarted")
         except ConnectionResetError:
             logger.error("Connection reset error")
 
-    def exit_lsp_server(self, extension: str) -> None:
-        if extension in self.language_to_lsp_server:
-            try:
-                self.language_to_lsp_server[extension].__exit__(None, None, None)
-            except Exception as e:
-                logger.error(f"Error shutting down LSP: {e}")
-
-            del self.language_to_lsp_server[extension]
+    def exit_lsp_server(self, language) -> None:
+        # TODO: This should not be this hacky
+        # Since im using the sync language server, I need to manually kill the process
+        self.language_to_lsp_server[language].language_server.server.process.kill()
+        del self.language_to_lsp_server[language]
 
         
 
