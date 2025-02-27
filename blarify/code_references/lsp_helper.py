@@ -18,6 +18,7 @@ from blarify.code_hierarchy.languages import (
 
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
+from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 
 
 import logging
@@ -110,7 +111,7 @@ class LspQueryHelper:
 
                 return references
 
-            except (TimeoutError, ConnectionResetError) as e:
+            except (TimeoutError, ConnectionResetError, Error):
                 timeout = timeout * 2
 
                 logger.warning(f"Error requesting references, attempting to restart LSP server with timeout {timeout}")
