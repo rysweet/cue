@@ -121,14 +121,14 @@ class LspQueryHelper:
                 logger.warning(
                     f"Error requesting references for {self.root_uri}, {node.definition_range}, attempting to restart LSP server with timeout {timeout}"
                 )
-                self._restart_lsp_for_extension(node)
-                lsp = self._get_or_create_lsp_server(node.extension, timeout)
+                self._restart_lsp_for_extension(extension=node.extension)
+                lsp = self._get_or_create_lsp_server(extension=node.extension, timeout=timeout)
 
         logger.error("Failed to get references, returning empty list")
         return []
 
-    def _restart_lsp_for_extension(self, node):
-        language_definitions = self._get_language_definition_for_extension(node.extension)
+    def _restart_lsp_for_extension(self, extension):
+        language_definitions = self._get_language_definition_for_extension(extension)
         language_name = language_definitions.get_language_name()
 
         self.exit_lsp_server(language_name)
@@ -172,16 +172,36 @@ class LspQueryHelper:
 
     def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
         lsp_caller = self._get_or_create_lsp_server(extension)
-        definitions = lsp_caller.request_definition(
-            file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=reference.uri),
-            line=reference.range.start.line,
-            column=reference.range.start.character,
-        )
+        definitions = self._request_definition_with_exponential_backoff(reference, lsp_caller, extension)
 
         if not definitions:
             return ""
 
         return definitions[0]["uri"]
+
+    def _request_definition_with_exponential_backoff(self, reference: Reference, lsp, extension):
+        timeout = 10
+        for _ in range(1, 3):
+            try:
+                definitions = lsp.request_definition(
+                    file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=reference.uri),
+                    line=reference.range.start.line,
+                    column=reference.range.start.character,
+                )
+
+                return definitions
+
+            except (TimeoutError, ConnectionResetError, Error):
+                timeout = timeout * 2
+
+                logger.warning(
+                    f"Error requesting definitions for {self.root_uri}, {reference.start_dict}, attempting to restart LSP server with timeout {timeout}"
+                )
+                self._restart_lsp_for_extension(extension)
+                lsp = self._get_or_create_lsp_server(extension=extension, timeout=timeout)
+
+        logger.error("Failed to get references, returning empty list")
+        return []
 
     def shutdown_exit_close(self) -> None:
         languages = list(self.language_to_lsp_server.keys())
