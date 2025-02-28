@@ -16,6 +16,5 @@ delete.py
 *.json
 static/
 
-
 !blarify/vendor/**/*.json
 
