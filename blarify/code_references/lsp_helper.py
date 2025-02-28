@@ -107,7 +107,6 @@ class LspQueryHelper:
         timeout = 10
         for _ in range(1, 3):
             try:
-                raise TimeoutError
                 references = lsp.request_references(
                     file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=node.path),
                     line=node.definition_range.start_dict["line"],
