@@ -1,3 +1,4 @@
+from blarify.graph.graph_environment import GraphEnvironment
 from blarify.prebuilt.graph_builder import GraphBuilder
 from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.db_managers.falkordb_manager import FalkorDBManager
@@ -33,8 +34,13 @@ def build():
     company_id = os.getenv("COMPANY_ID")
     repo_id = os.getenv("REPO_ID")
 
+    environment = os.getenv("ENVIRONMENT")
+    diff_identifier = os.getenv("DIFF_IDENTIFIER")
+
+    graph_environment = GraphEnvironment(environment=environment, diff_identifier=diff_identifier, root_path=root_path)
+
     graph_builder = GraphBuilder(
-        root_path=root_path, names_to_skip=NAMES_TO_SKIP, entity_id=company_id, repo_id=repo_id
+        root_path=root_path, names_to_skip=NAMES_TO_SKIP, entity_id=company_id, repo_id=repo_id, graph_environment=graph_environment
     )
 
     graph = graph_builder.build()
@@ -65,4 +71,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     dotenv.load_dotenv()
-    build(root_path=root_path)
+    build()
