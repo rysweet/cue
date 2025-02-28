@@ -12,8 +12,6 @@ class GraphBuilder:
         extensions_to_skip: list[str] = None,
         names_to_skip: list[str] = None,
         only_hierarchy: bool = False,
-        entity_id: str = "BLARIFY",
-        repo_id: str = "REPO",
         graph_environment: GraphEnvironment = None,
     ):
         """
@@ -40,8 +38,6 @@ class GraphBuilder:
         self.extensions_to_skip = extensions_to_skip or []
         self.names_to_skip = names_to_skip or []
 
-        self.repo_id = repo_id
-        self.entity_id = entity_id
         self.only_hierarchy = only_hierarchy
 
     def build(self) -> Graph:
