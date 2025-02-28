@@ -1,5 +1,6 @@
 from blarify.code_references.lsp_helper import LspQueryHelper
 from blarify.graph.graph import Graph
+from blarify.graph.graph_environment import GraphEnvironment
 from blarify.project_file_explorer.project_files_iterator import ProjectFilesIterator
 from blarify.project_graph_creator import ProjectGraphCreator
 
@@ -11,6 +12,7 @@ class GraphBuilder:
         extensions_to_skip: list[str] = None,
         names_to_skip: list[str] = None,
         only_hierarchy: bool = False,
+        graph_environment: GraphEnvironment = None,
     ):
         """
         A class responsible for constructing a graph representation of a project's codebase.
@@ -30,19 +32,20 @@ class GraphBuilder:
 
         """
 
+        self.graph_environment = graph_environment or GraphEnvironment("blarify", "repo", root_path)
+
         self.root_path = root_path
         self.extensions_to_skip = extensions_to_skip or []
         self.names_to_skip = names_to_skip or []
 
-        self.repo_id = "REPO"
-        self.entity_id = "BLARIFY"
         self.only_hierarchy = only_hierarchy
 
     def build(self) -> Graph:
         lsp_query_helper = self._get_started_lsp_query_helper()
         project_files_iterator = self._get_project_files_iterator()
 
-        graph_creator = ProjectGraphCreator(self.root_path, lsp_query_helper, project_files_iterator)
+        graph_creator = ProjectGraphCreator(self.root_path, lsp_query_helper, project_files_iterator, 
+                                            graph_environment=self.graph_environment)
 
         if self.only_hierarchy:
             graph = graph_creator.build_hierarchy_only()
