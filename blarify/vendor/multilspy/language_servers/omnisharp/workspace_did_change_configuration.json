@@ -1,4 +1,4 @@
-{
+p{
     "RoslynExtensionsOptions": {
         "EnableDecompilationSupport": false,
         "EnableAnalyzersSupport": true,
