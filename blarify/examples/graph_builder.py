@@ -15,8 +15,7 @@ def build(root_path: str = None):
     relationships = graph.get_relationships_as_objects()
     nodes = graph.get_nodes_as_objects()
 
-    # save_to_falkordb(relationships, nodes)
-    save_to_neo4j(relationships, nodes)
+    save_to_falkordb(relationships, nodes)
 
 
 def save_to_neo4j(relationships, nodes):
