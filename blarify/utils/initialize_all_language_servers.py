@@ -39,10 +39,11 @@ def initialize_all_language_servers():
         print(f"Starting language server for {language}, current_dir_path: {current_dir_path}")
 
         try:
-            SyncLanguageServer.create(
+            lsp: SyncLanguageServer = SyncLanguageServer.create(
                 config=config, logger=logger, repository_root_path=current_dir_path, timeout=15
             )
-            my_logger.info(f"Started language server for {language}")
+            with lsp.start_server():
+                my_logger.info(f"Started language server for {language}")
         except Exception as e:
             my_logger.warning(f"Failed to start language server for {language}: {e}")
 
