@@ -159,6 +159,15 @@ class LspQueryHelper:
 
         process.terminate()
 
+        loop = self.language_to_lsp_server[language].loop
+        try:
+            tasks = asyncio.all_tasks(loop=loop)
+            for task in tasks:
+                task.cancel()
+            print("Tasks cancelled")
+        except Exception as e:
+            logger.error(f"Error cancelling tasks: {e}")
+
         del self.language_to_lsp_server[language]
 
     def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
