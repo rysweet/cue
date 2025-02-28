@@ -107,6 +107,7 @@ class LspQueryHelper:
         timeout = 10
         for _ in range(1, 3):
             try:
+                raise TimeoutError
                 references = lsp.request_references(
                     file_path=PathCalculator.get_relative_path_from_uri(root_uri=self.root_uri, uri=node.path),
                     line=node.definition_range.start_dict["line"],
@@ -118,7 +119,9 @@ class LspQueryHelper:
             except (TimeoutError, ConnectionResetError, Error):
                 timeout = timeout * 2
 
-                logger.warning(f"Error requesting references for {self.root_uri}, {node.definition_range}, attempting to restart LSP server with timeout {timeout}")
+                logger.warning(
+                    f"Error requesting references for {self.root_uri}, {node.definition_range}, attempting to restart LSP server with timeout {timeout}"
+                )
                 self._restart_lsp_for_extension(node)
                 lsp = self._get_or_create_lsp_server(node.extension, timeout)
 
@@ -152,14 +155,12 @@ class LspQueryHelper:
         # Best line of code I've ever written:
         process = self.language_to_lsp_server[language].language_server.server.process
 
-        process.terminate()
-
         for child in psutil.Process(process.pid).children(recursive=True):
             child.terminate()
 
-        del self.language_to_lsp_server[language]
+        process.terminate()
 
-        
+        del self.language_to_lsp_server[language]
 
     def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
         lsp_caller = self._get_or_create_lsp_server(extension)
@@ -180,7 +181,6 @@ class LspQueryHelper:
         for language in languages:
             self.exit_lsp_server(language)
 
-            
         self.entered_lsp_servers = {}
         self.language_to_lsp_server = {}
         logger.info("LSP servers have been shut down")
