@@ -3,7 +3,7 @@ from typing import Optional
 import psutil
 
 from blarify.vendor.multilspy import SyncLanguageServer
-
+from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 from blarify.utils.path_calculator import PathCalculator
 
 from .types.Reference import Reference
@@ -15,6 +15,7 @@ from blarify.code_hierarchy.languages import (
     TypescriptDefinitions,
     LanguageDefinitions,
     CsharpDefinitions,
+    DartDefinitions,
     GoDefinitions,
 )
 
@@ -58,6 +59,8 @@ class LspQueryHelper:
             return CsharpDefinitions
         elif extension in GoDefinitions.get_language_file_extensions():
             return GoDefinitions
+        elif extension in DartDefinitions.get_language_file_extensions():
+            return DartDefinitions
         else:
             raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
 
