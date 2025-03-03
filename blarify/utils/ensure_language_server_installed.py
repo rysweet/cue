@@ -19,6 +19,13 @@ def ensure_language_server_installed(language: str):
     logger = MultilspyLogger()
     current_dir_path = os.path.join(str(Path(__file__).resolve().parent))
 
+    if language == "csharp":
+        print(f"Starting language server for {language}")
+        from blarify.vendor.multilspy.language_servers.omnisharp.omnisharp import OmniSharp
+        OmniSharp.setupRuntimeDependencies(None, logger, config)
+        print(f"Started language server for {language}")
+        return
+
     print(f"Starting language server for {language}, current_dir_path: {current_dir_path}")
 
     try:
@@ -33,4 +40,4 @@ def ensure_language_server_installed(language: str):
 
 
 if __name__ == "__main__":
-    ensure_language_server_installed("typescript")
+    ensure_language_server_installed("csharp")
