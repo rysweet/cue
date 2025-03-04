@@ -154,6 +154,9 @@ class LspQueryHelper:
         # Best line of code I've ever written:
         process = self.language_to_lsp_server[language].language_server.server.process
 
+        if not psutil.pid_exists(process.pid):
+            return
+
         for child in psutil.Process(process.pid).children(recursive=True):
             child.terminate()
 
