@@ -40,6 +40,15 @@ class ProjectGraphUpdater(ProjectGraphDiffCreator):
             external_relationship_store=self.external_relationship_store,
         )
 
+    def build_hierarchy_only(self) -> GraphUpdate:
+        self.create_code_hierarchy()
+        self.keep_only_files_to_create()
+
+        return GraphUpdate(
+            graph=self.graph,
+            external_relationship_store=self.external_relationship_store,
+        )
+
     def get_file_diffs_from_updated_files(self) -> List[FileDiff]:
         return [
             FileDiff(path=updated_file.path, diff_text="", change_type=ChangeType.ADDED)

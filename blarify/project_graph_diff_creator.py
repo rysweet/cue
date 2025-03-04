@@ -90,6 +90,14 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         return GraphUpdate(self.graph, self.external_relationship_store)
 
+    def build_hierarchy_only(self) -> GraphUpdate:
+        self.create_code_hierarchy()
+        self.mark_updated_and_added_nodes_as_diff()
+        self.keep_only_files_to_create()
+        self.add_deleted_relationships_and_nodes()
+
+        return GraphUpdate(self.graph, self.external_relationship_store)
+
     def build_with_previous_node_states(self, previous_node_states: List[PreviousNodeState]) -> GraphUpdate:
         """
         This method will also create "MODIFIED" relationships between the specific nodes that were modified
@@ -100,6 +108,15 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
         self.mark_updated_and_added_nodes_as_diff()
         self.create_relationships_from_previous_node_states(previous_node_states)
         self.create_relationship_from_references_for_modified_and_added_files()
+        self.keep_only_files_to_create()
+        self.add_deleted_relationships_and_nodes()
+
+        return GraphUpdate(self.graph, self.external_relationship_store)
+
+    def build_hierarchy_only_with_previous_node_states(self, previous_node_states: List[PreviousNodeState]) -> GraphUpdate:
+        self.create_code_hierarchy()
+        self.mark_updated_and_added_nodes_as_diff()
+        self.create_relationships_from_previous_node_states(previous_node_states)
         self.keep_only_files_to_create()
         self.add_deleted_relationships_and_nodes()
 
