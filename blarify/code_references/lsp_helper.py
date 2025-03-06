@@ -154,18 +154,21 @@ class LspQueryHelper:
         # Best line of code I've ever written:
         process = self.language_to_lsp_server[language].language_server.server.process
 
-        if psutil.pid_exists(process.pid):
-            for child in psutil.Process(process.pid).children(recursive=True):
-                child.terminate()
+        try:
+            if psutil.pid_exists(process.pid):
+                for child in psutil.Process(process.pid).children(recursive=True):
+                    child.terminate()
 
-            process.terminate()
+                process.terminate()
+        except Exception as e:
+            logger.error(f"Error killing process: {e}")
 
         loop = self.language_to_lsp_server[language].loop
         try:
             tasks = asyncio.all_tasks(loop=loop)
             for task in tasks:
                 task.cancel()
-            print("Tasks cancelled")
+            logger.info("Tasks cancelled")
         except Exception as e:
             logger.error(f"Error cancelling tasks: {e}")
 
