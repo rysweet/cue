@@ -621,7 +621,7 @@
             "LocationPaths": null
         }
     },
-    "trace": "verbose",
+    "trace": "off",
     "workspaceFolders": [
         {
             "uri": "$uri",
