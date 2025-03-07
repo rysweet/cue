@@ -40,5 +40,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     dotenv.load_dotenv()
-    root_path = os.getenv("ROOT_PATH")
+    root_path = "/home/juan/devel/blar/examples/ts-project"
     build(root_path=root_path)

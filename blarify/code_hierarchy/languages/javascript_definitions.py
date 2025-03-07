@@ -27,7 +27,7 @@ class JavascriptDefinitions(LanguageDefinitions):
             return JavascriptDefinitions._is_variable_declaration_arrow_function(node)
 
         return LanguageDefinitions._should_create_node_base_implementation(
-            node, ["class_declaration", "function_declaration", "method_definition"]
+            node, ["class_declaration", "function_declaration", "method_definition", "interface_declaration"]
         )
 
     @staticmethod
@@ -64,6 +64,7 @@ class JavascriptDefinitions(LanguageDefinitions):
                 "new_expression": RelationshipType.INSTANTIATES,
                 "class_heritage": RelationshipType.INHERITS,
                 "variable_declarator": RelationshipType.ASSIGNS,
+                "type_annotation": RelationshipType.TYPES,
             },
             NodeLabels.FUNCTION: {
                 "import_specifier": RelationshipType.IMPORTS,
@@ -108,4 +109,5 @@ class JavascriptDefinitions(LanguageDefinitions):
             "class_declaration": NodeLabels.CLASS,
             "function_declaration": NodeLabels.FUNCTION,
             "method_definition": NodeLabels.FUNCTION,
+            "interface_declaration": NodeLabels.CLASS,
         }[type]
