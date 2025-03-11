@@ -72,16 +72,6 @@ class ProjectGraphCreator:
         """
         self._create_code_hierarchy()
         return self.graph
-    
-    def build_graph_relationships(self) -> Graph:
-        """
-        Add relationships to an existing hierarchy-only graph.
-        
-        This will modify the graph in place and return it.
-        """
-        
-        self._create_relationships_from_references_for_files()
-        return self.graph
 
     def _create_code_hierarchy(self):
         start_time = time.time()
