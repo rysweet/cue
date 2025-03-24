@@ -42,7 +42,9 @@ class DefinitionNode(Node):
 
     @property
     def stats(self) -> "NestingStats":
-        return CodeComplexityCalculator.calculate_nesting_stats(self.code_text)
+        if self.body_node is None:
+            return NestingStats(0, 0, 0, 0)
+        return CodeComplexityCalculator.calculate_nesting_stats(self.body_node, extension=self.extension)
 
     def relate_node_as_define_relationship(self, node: Union["ClassNode", "FunctionNode"]) -> None:
         self._defines.append(node)
