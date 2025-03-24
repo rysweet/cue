@@ -45,7 +45,8 @@ class LspQueryHelper:
         self.entered_lsp_servers = {}
         self.language_to_lsp_server = {}
 
-    def _get_language_definition_for_extension(self, extension: str) -> LanguageDefinitions:
+    @staticmethod
+    def get_language_definition_for_extension(extension: str) -> LanguageDefinitions:
         if extension in PythonDefinitions.get_language_file_extensions():
             return PythonDefinitions
         elif extension in JavascriptDefinitions.get_language_file_extensions():
@@ -76,7 +77,7 @@ class LspQueryHelper:
         """
 
     def _get_or_create_lsp_server(self, extension, timeout=15) -> SyncLanguageServer:
-        language_definitions = self._get_language_definition_for_extension(extension)
+        language_definitions = self.get_language_definition_for_extension(extension)
         language = language_definitions.get_language_name()
 
         if language in self.language_to_lsp_server:
@@ -128,7 +129,7 @@ class LspQueryHelper:
         return []
 
     def _restart_lsp_for_extension(self, extension):
-        language_definitions = self._get_language_definition_for_extension(extension)
+        language_definitions = self.get_language_definition_for_extension(extension)
         language_name = language_definitions.get_language_name()
 
         self.exit_lsp_server(language_name)

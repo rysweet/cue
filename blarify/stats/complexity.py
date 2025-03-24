@@ -1,6 +1,13 @@
 from dataclasses import dataclass
-import math
 from statistics import stdev, mean
+import blarify.code_references.lsp_helper as lsp_helper
+from tree_sitter import Node
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from blarify.code_hierarchy.languages.language_definitions import LanguageDefinitions
 
 
 @dataclass
@@ -10,44 +17,57 @@ class NestingStats:
     average_indentation: float
     sd: float
 
+
 class CodeComplexityCalculator:
     DEFAULT_INDENTATION = 4
-    
+
     @staticmethod
-    def calculate_nesting_stats(code: str):
-        code.replace("\t", "    ")
-        lines = code.splitlines()
-        
-        
-        spaces_used_for_indentation = CodeComplexityCalculator.__calculate_number_of_spaces_used_as_indentation(code)
-        
-        indentation_per_line = [CodeComplexityCalculator.__count_indentation(line, spaces_used_for_indentation) for line in lines]
-        
+    def calculate_nesting_stats(node: Node, extension: str) -> NestingStats:
+        language_definitions = lsp_helper.LspQueryHelper.get_language_definition_for_extension(extension)
+
+        indentation_per_line = CodeComplexityCalculator.__get_nesting_levels(node, language_definitions)
+
         if indentation_per_line == []:
             return NestingStats(0, 0, 0, 0)
-        
+
         max_indentation = max(indentation_per_line)
         min_indentation = min(indentation_per_line)
         average_indentation = mean(indentation_per_line)
         sd = stdev(indentation_per_line) if len(indentation_per_line) > 1 else 0
-        
+
         return NestingStats(max_indentation, min_indentation, average_indentation, sd)
-        
-    def __count_indentation(line: str, spaces_used_for_indentation: int):
-        return math.ceil((len(line) - len(line.lstrip())) / spaces_used_for_indentation)
-    
-    def __calculate_number_of_spaces_used_as_indentation(code: str):
-        lines = code.splitlines()
-        
-        
-        for line in lines:
-            indentation = len(line) - len(line.lstrip())
-            if indentation > 0:
-                return indentation
-        
-        return CodeComplexityCalculator.DEFAULT_INDENTATION
-        
-    
+
+    @staticmethod
+    def __get_nesting_levels(node: Node, language_definitions: "LanguageDefinitions") -> list[int]:
+        depths = []
+
+        for child in node.named_children:
+            if not language_definitions.should_create_node(child):
+                depths.append(CodeComplexityCalculator.__calculate_max_nesting_depth(child, language_definitions))
+
+        return depths
+
+    @staticmethod
+    def __calculate_max_nesting_depth(node: Node, language_definitions: "LanguageDefinitions") -> int:
+        consequence_statements = language_definitions.CONSEQUENCE_STATEMENTS
+        control_flow_statements = language_definitions.CONTROL_FLOW_STATEMENTS
+
+        depths = []
+        depth = 0
+        for child in node.named_children:
+            if language_definitions.should_create_node(child):
+                continue
+
+            if child.type in control_flow_statements or child.type in consequence_statements:
+                depth += CodeComplexityCalculator.__calculate_max_nesting_depth(child, language_definitions)
+                if child.type in consequence_statements:
+                    depth += 1
+
+            depths.append(depth)
+            depth = 0
+
+        return max(depths) if depths else 0
+
 
 if __name__ == "__main__":
     code = """
