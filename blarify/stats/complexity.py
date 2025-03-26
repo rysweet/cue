@@ -67,6 +67,18 @@ class CodeComplexityCalculator:
             depth = 0
 
         return max(depths) if depths else 0
+    
+    @staticmethod
+    def calculate_parameter_count(node: Node) -> int:
+        """
+        Calculate the number of parameters in a function definition node.
+        """
+        if node is None:
+            return 0
+        
+        if parameters_node := node.child_by_field_name("parameters"):
+            return len(parameters_node.named_children)
+        return 0
 
 
 if __name__ == "__main__":
