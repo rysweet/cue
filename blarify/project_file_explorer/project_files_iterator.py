@@ -46,7 +46,6 @@ class ProjectFilesIterator:
             )
 
             if not self._should_skip(current_path):
-                print(f"Yielding folder: {current_path}")
                 yield Folder(
                     name=name,
                     path=current_path,
