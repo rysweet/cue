@@ -28,6 +28,7 @@ typing-extensions = "^4.12.2"
 jedi-language-server = "^0.43.1"
 psutil = "^7.0.0"
 vendoring = "^1.2.0"
+tree-sitter-php = "^0.23.11"
 
 
 

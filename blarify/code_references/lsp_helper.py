@@ -16,6 +16,7 @@ from blarify.code_hierarchy.languages import (
     LanguageDefinitions,
     CsharpDefinitions,
     GoDefinitions,
+    PhpDefinitions,
 )
 
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
@@ -59,6 +60,8 @@ class LspQueryHelper:
             return CsharpDefinitions
         elif extension in GoDefinitions.get_language_file_extensions():
             return GoDefinitions
+        elif extension in PhpDefinitions.get_language_file_extensions():
+            return PhpDefinitions
         else:
             raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
 
