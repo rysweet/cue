@@ -7,15 +7,6 @@ from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
 
 from .types.Reference import Reference
-from blarify.code_hierarchy.languages import (
-    PythonDefinitions,
-    JavascriptDefinitions,
-    RubyDefinitions,
-    TypescriptDefinitions,
-    LanguageDefinitions,
-    CsharpDefinitions,
-    GoDefinitions,
-)
 
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
@@ -23,6 +14,9 @@ from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 
 if TYPE_CHECKING:
     from blarify.graph.node import DefinitionNode
+    from blarify.code_hierarchy.languages import (
+        LanguageDefinitions,
+    )
 
 
 import asyncio
@@ -48,7 +42,16 @@ class LspQueryHelper:
         self.language_to_lsp_server = {}
 
     @staticmethod
-    def get_language_definition_for_extension(extension: str) -> LanguageDefinitions:
+    def get_language_definition_for_extension(extension: str) -> "LanguageDefinitions":
+        from blarify.code_hierarchy.languages import (
+            PythonDefinitions,
+            JavascriptDefinitions,
+            RubyDefinitions,
+            TypescriptDefinitions,
+            CsharpDefinitions,
+            GoDefinitions,
+        )
+
         if extension in PythonDefinitions.get_language_file_extensions():
             return PythonDefinitions
         elif extension in JavascriptDefinitions.get_language_file_extensions():
@@ -64,7 +67,7 @@ class LspQueryHelper:
         else:
             raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
 
-    def _create_lsp_server(self, language_definitions: LanguageDefinitions, timeout=15) -> SyncLanguageServer:
+    def _create_lsp_server(self, language_definitions: "LanguageDefinitions", timeout=15) -> SyncLanguageServer:
         language = language_definitions.get_language_name()
 
         config = MultilspyConfig.from_dict({"code_language": language})
