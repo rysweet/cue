@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import psutil
 
@@ -7,7 +7,6 @@ from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
 
 from .types.Reference import Reference
-from blarify.graph.node import DefinitionNode
 from blarify.code_hierarchy.languages import (
     PythonDefinitions,
     JavascriptDefinitions,
@@ -22,8 +21,11 @@ from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 
-import asyncio
+if TYPE_CHECKING:
+    from blarify.graph.node import DefinitionNode
 
+
+import asyncio
 
 import logging
 
@@ -98,7 +100,7 @@ class LspQueryHelper:
         DEPRECATED, LSP servers are started on demand
         """
 
-    def get_paths_where_node_is_referenced(self, node: DefinitionNode) -> list[Reference]:
+    def get_paths_where_node_is_referenced(self, node: "DefinitionNode") -> list[Reference]:
         server = self._get_or_create_lsp_server(node.extension)
         references = self._request_references_with_exponential_backoff(node, server)
 
