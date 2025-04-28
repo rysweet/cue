@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import psutil
 
@@ -8,23 +8,19 @@ from blarify.utils.path_calculator import PathCalculator
 
 from .types.Reference import Reference
 from blarify.graph.node import DefinitionNode
-from blarify.code_hierarchy.languages import (
-    PythonDefinitions,
-    JavascriptDefinitions,
-    RubyDefinitions,
-    TypescriptDefinitions,
-    LanguageDefinitions,
-    CsharpDefinitions,
-    GoDefinitions,
-    PhpDefinitions,
-)
 
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
 
-import asyncio
+if TYPE_CHECKING:
+    from blarify.graph.node import DefinitionNode
+    from blarify.code_hierarchy.languages import (
+        LanguageDefinitions,
+    )
 
+
+import asyncio
 
 import logging
 
@@ -47,7 +43,17 @@ class LspQueryHelper:
         self.language_to_lsp_server = {}
 
     @staticmethod
-    def get_language_definition_for_extension(extension: str) -> LanguageDefinitions:
+    def get_language_definition_for_extension(extension: str) -> "LanguageDefinitions":
+        from blarify.code_hierarchy.languages import (
+            PythonDefinitions,
+            JavascriptDefinitions,
+            RubyDefinitions,
+            TypescriptDefinitions,
+            CsharpDefinitions,
+            GoDefinitions,
+            PhpDefinitions,
+        )
+
         if extension in PythonDefinitions.get_language_file_extensions():
             return PythonDefinitions
         elif extension in JavascriptDefinitions.get_language_file_extensions():
@@ -65,7 +71,7 @@ class LspQueryHelper:
         else:
             raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
 
-    def _create_lsp_server(self, language_definitions: LanguageDefinitions, timeout=15) -> SyncLanguageServer:
+    def _create_lsp_server(self, language_definitions: "LanguageDefinitions", timeout=15) -> SyncLanguageServer:
         language = language_definitions.get_language_name()
 
         config = MultilspyConfig.from_dict({"code_language": language})
@@ -101,7 +107,7 @@ class LspQueryHelper:
         DEPRECATED, LSP servers are started on demand
         """
 
-    def get_paths_where_node_is_referenced(self, node: DefinitionNode) -> list[Reference]:
+    def get_paths_where_node_is_referenced(self, node: "DefinitionNode") -> list[Reference]:
         server = self._get_or_create_lsp_server(node.extension)
         references = self._request_references_with_exponential_backoff(node, server)
 
