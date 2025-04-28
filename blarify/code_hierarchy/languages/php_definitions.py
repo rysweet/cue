@@ -1,9 +1,11 @@
-from typing import Dict, Set
+from typing import Dict, Optional, Set
 from tree_sitter import Language, Node, Parser
+from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from blarify.code_hierarchy.languages.language_definitions import LanguageDefinitions
 import tree_sitter_php as tsphp
 
 from blarify.graph.node.types.node_labels import NodeLabels
+from blarify.graph.relationship.relationship_type import RelationshipType
 
 
 class PhpDefinitions(LanguageDefinitions):
@@ -12,7 +14,7 @@ class PhpDefinitions(LanguageDefinitions):
     """
 
     CONTROL_FLOW_STATEMENTS = ["if_statement", "while_statement", "for_statement"]
-    CONSEQUENCE_STATEMENTS = ["block"]
+    CONSEQUENCE_STATEMENTS = ["compound_statement"]
 
     def get_language_name() -> str:
         return "php"
@@ -42,3 +44,34 @@ class PhpDefinitions(LanguageDefinitions):
 
     def get_language_file_extensions() -> Set[str]:
         return {".php"}
+    
+    def get_relationship_type(node, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
+        return PhpDefinitions._find_relationship_type(
+            node_label=node.label,
+            node_in_point_reference=node_in_point_reference,
+        )
+    
+    def _find_relationship_type(node_label: str, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
+        relationship_types = PhpDefinitions._get_relationship_types_by_label()
+        relevant_relationship_types = relationship_types.get(node_label, {})
+
+        return LanguageDefinitions._traverse_and_find_relationships(
+            node_in_point_reference, relevant_relationship_types
+        )
+
+    def _get_relationship_types_by_label() -> dict[str, RelationshipType]:
+        return {
+            NodeLabels.CLASS: {
+                "namespace_use_declaration": RelationshipType.IMPORTS,
+                "base_clause": RelationshipType.INHERITS,
+                "object_creation_expression": RelationshipType.INSTANTIATES,
+                "typing": RelationshipType.TYPES,
+                "simple_parameter": RelationshipType.TYPES,
+            },
+            NodeLabels.FUNCTION: {
+                "function_call_expression": RelationshipType.CALLS,
+                "member_call_expression": RelationshipType.CALLS,
+                "namespace_use_declaration": RelationshipType.IMPORTS,
+                "assignment_expression": RelationshipType.ASSIGNS,
+            },
+        }

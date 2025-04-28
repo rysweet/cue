@@ -151,7 +151,7 @@ class LspQueryHelper:
         # TODO: This should not be this hacky!!!
 
         # Since im using the sync language server, I need to manually kill the process
-        # If I try to exit the context, it will hang since it's waiting for the server response
+        # If I try to exit the context when the server has crahed, it will hang since it's waiting for the server response
         # A better way would be to use the async language server, but that would require a lot of changes
         # So for now, I'm just killing the process manually
 

@@ -41,7 +41,7 @@ def build():
     graph_environment = GraphEnvironment(environment=environment, diff_identifier=diff_identifier, root_path=root_path)
 
     graph_builder = GraphBuilder(
-        root_path=root_path, names_to_skip=NAMES_TO_SKIP, graph_environment=graph_environment, only_hierarchy=True
+        root_path=root_path, names_to_skip=NAMES_TO_SKIP, graph_environment=graph_environment, only_hierarchy=False
     )
 
     graph = graph_builder.build()
