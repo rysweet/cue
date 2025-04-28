@@ -2,7 +2,10 @@ from contextlib import asynccontextmanager
 import logging
 import os
 import pathlib
+import pwd
+import shutil
 import stat
+import subprocess
 from typing import AsyncIterator
 from blarify.vendor.multilspy.language_server import LanguageServer
 from blarify.vendor.multilspy.lsp_protocol_handler.server import ProcessLaunchInfo
@@ -38,29 +41,35 @@ class Intelephense(LanguageServer):
             d = json.load(f)
             del d["_description"]
 
-        runtime_dependencies = d["runtimeDependencies"]
-        runtime_dependencies = [
-            dependency
-            for dependency in runtime_dependencies
-            if dependency["platformId"] == platform_id.value
-        ]
-
-        assert len(runtime_dependencies) == 1
-        dependency = runtime_dependencies[0]
-
+        runtime_dependencies = d.get("runtimeDependencies", [])
         php_ls_dir = os.path.join(os.path.dirname(__file__), "static", "intelephense")
-        intelephense_executable_path = os.path.join(
-            php_ls_dir, dependency["binaryName"]
+
+        is_node_installed = shutil.which("node") is not None
+        assert is_node_installed, (
+            "node is not installed or isn't in PATH. Please install NodeJS and try again."
+        )
+        is_npm_installed = shutil.which("npm") is not None
+        assert is_npm_installed, (
+            "npm is not installed or isn't in PATH. Please install npm and try again."
         )
 
         if not os.path.exists(php_ls_dir):
-            os.makedirs(php_ls_dir)
-            FileUtils.download_file(
-                logger,
-                dependency["url"],
-                intelephense_executable_path,
-            )
-
+            os.makedirs(php_ls_dir, exist_ok=True)
+            for dependency in runtime_dependencies:
+                user = pwd.getpwuid(os.getuid()).pw_name
+                subprocess.run(
+                    dependency["command"],
+                    shell=True,
+                    check=True,
+                    user=user,
+                    cwd=php_ls_dir,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+        intelephense_executable_path = os.path.join(
+            php_ls_dir, 'node_modules', '.bin', 'intelephense'
+        )
+        
         assert os.path.exists(intelephense_executable_path)
         os.chmod(
             intelephense_executable_path,
@@ -70,7 +79,7 @@ class Intelephense(LanguageServer):
             | stat.S_IXOTH,
         )
 
-        return "intelephense --stdio"
+        return f"{intelephense_executable_path} --stdio"
 
     def _get_initialize_params(self, repository_absolute_path: str):
         """
