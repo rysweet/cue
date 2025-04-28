@@ -857,6 +857,27 @@ files = [
 core = ["tree-sitter (>=0.22,<1.0)"]
 
 [[package]]
+name = "tree-sitter-php"
+version = "0.23.11"
+description = "PHP grammar for tree-sitter"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-macosx_10_9_x86_64.whl", hash = "sha256:f46b741fd4843a7287e46505c35b4712cf2bea8481ce5236d2a32add45921c42"},
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:315f5da5ad8f9ed014008da481ed49a88db21e03e9f723f1c631eec36b6b3691"},
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:da1f515e5875efe492b8970962cd70cab7de4dac90f20229c52360815b4e60f2"},
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6076af83f549361390be5875c695fe50c319ce2e0388cb8127e6e6529d98dd48"},
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:29bb2450714d2a6911a939e5c20913f17e497cfc8b1dc5a751b15dc6fe6af2b7"},
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-win_amd64.whl", hash = "sha256:7799d56dfb557414b5172044dbe75bf33f877976dd0193e0775dc7f1f2f7cf8e"},
+    {file = "tree_sitter_php-0.23.11-cp39-abi3-win_arm64.whl", hash = "sha256:c4869a6dd13faec316cea19ed8551416da35ccabd0811b9880ad54dbbc24867b"},
+    {file = "tree_sitter_php-0.23.11.tar.gz", hash = "sha256:8aabb262ad97299c1004f619458091d64187414e54215e152585c097c7a415e5"},
+]
+
+[package.extras]
+core = ["tree-sitter (>=0.23,<1.0)"]
+
+[[package]]
 name = "tree-sitter-python"
 version = "0.23.6"
 description = "Python grammar for tree-sitter"
@@ -1072,4 +1093,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<=3.14"
-content-hash = "1e4a1774b81033f16f28d09d3da75da993b850c131f68479e377b83816bd1a95"
+content-hash = "d33818fffdc3cedd31bf2a9bf16297a17a45f31f5af7e2f51e08fdbf2dab8415"

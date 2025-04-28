@@ -7,6 +7,7 @@ from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
 
 from .types.Reference import Reference
+from blarify.graph.node import DefinitionNode
 
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
@@ -50,6 +51,7 @@ class LspQueryHelper:
             TypescriptDefinitions,
             CsharpDefinitions,
             GoDefinitions,
+            PhpDefinitions,
         )
 
         if extension in PythonDefinitions.get_language_file_extensions():
@@ -64,6 +66,8 @@ class LspQueryHelper:
             return CsharpDefinitions
         elif extension in GoDefinitions.get_language_file_extensions():
             return GoDefinitions
+        elif extension in PhpDefinitions.get_language_file_extensions():
+            return PhpDefinitions
         else:
             raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
 
@@ -153,7 +157,7 @@ class LspQueryHelper:
         # TODO: This should not be this hacky!!!
 
         # Since im using the sync language server, I need to manually kill the process
-        # If I try to exit the context, it will hang since it's waiting for the server response
+        # If I try to exit the context when the server has crahed, it will hang since it's waiting for the server response
         # A better way would be to use the async language server, but that would require a lot of changes
         # So for now, I'm just killing the process manually
 
