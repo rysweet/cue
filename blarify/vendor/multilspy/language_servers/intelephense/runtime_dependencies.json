@@ -1,0 +1,12 @@
+{
+    "_description": "Used to download the runtime dependencies for running Phpactor Language Server, downloaded from https://phpactor.readthedocs.io/",
+    "runtimeDependencies": [
+        {
+            "id": "PhpactorLanguageServer",
+            "description": "Phpactor Language Server for Linux (x64)",
+            "url": "https://github.com/phpactor/phpactor/releases/download/2025.04.17.0/phpactor.phar",
+            "platformId": "linux-x64",
+            "binaryName": "phpactor.phar"
+        }
+    ]
+}
