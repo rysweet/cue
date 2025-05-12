@@ -164,6 +164,7 @@ class LspQueryHelper:
         # Best line of code I've ever written:
         process = self.language_to_lsp_server[language].language_server.server.process
 
+        # Kill running processes
         try:
             if psutil.pid_exists(process.pid):
                 for child in psutil.Process(process.pid).children(recursive=True):
@@ -173,6 +174,7 @@ class LspQueryHelper:
         except Exception as e:
             logger.error(f"Error killing process: {e}")
 
+        # Cancel all tasks in the loop
         loop = self.language_to_lsp_server[language].loop
         try:
             tasks = asyncio.all_tasks(loop=loop)
@@ -181,6 +183,11 @@ class LspQueryHelper:
             logger.info("Tasks cancelled")
         except Exception as e:
             logger.error(f"Error cancelling tasks: {e}")
+
+        # Stop the loop
+
+        # It is important to stop the loop before exiting the context otherwise there will be threads running in definitely
+        loop.call_soon_threadsafe(loop.stop)
 
         del self.language_to_lsp_server[language]
 
