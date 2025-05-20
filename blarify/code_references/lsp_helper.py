@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 import asyncio
 
 import logging
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +188,8 @@ class LspQueryHelper:
         # Stop the loop
 
         # It is important to stop the loop before exiting the context otherwise there will be threads running in definitely
-        loop.call_soon_threadsafe(loop.stop)
+        if loop.is_running():
+            loop.call_soon_threadsafe(loop.stop)
 
         del self.language_to_lsp_server[language]
 
