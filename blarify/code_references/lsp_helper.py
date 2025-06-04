@@ -146,7 +146,17 @@ class LspQueryHelper:
         if language in self.entered_lsp_servers:
             context = self.entered_lsp_servers[language]
             try:
-                context.__exit__(None, None, None)
+                # Try to exit context manager with timeout
+                def exit_context():
+                    context.__exit__(None, None, None)
+                
+                thread = threading.Thread(target=exit_context)
+                thread.start()
+                thread.join(timeout=5)  # Wait up to 5 seconds
+                
+                if thread.is_alive():
+                    logger.warning(f"Context manager exit timed out for {language}")
+                    raise TimeoutError("Context manager exit timed out")
                 logger.info(f"Properly exited context manager for {language}")
             except Exception as e:
                 logger.warning(f"Error exiting context manager for {language}: {e}")
