@@ -146,7 +146,8 @@ class LspQueryHelper:
         if language in self.entered_lsp_servers:
             context = self.entered_lsp_servers[language]
             try:
-                # Try to exit context manager with timeout
+                # Try to exit context manager with timeout, this is to ensure that we don't hang indefinitely
+                # It happens sometimes especially with c#
                 def exit_context():
                     context.__exit__(None, None, None)
                 
