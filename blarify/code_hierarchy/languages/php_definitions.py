@@ -26,7 +26,7 @@ class PhpDefinitions(LanguageDefinitions):
 
     def should_create_node(node: Node) -> bool:
         return LanguageDefinitions._should_create_node_base_implementation(
-            node, ["class_delaration", "function_definition", "method_declaration"]
+            node, ["class_declaration", "function_definition", "method_declaration"]
         )
 
     def get_identifier_node(node: Node) -> Node:
