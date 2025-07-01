@@ -8,15 +8,16 @@ import os
 
 def build(root_path: str = None):
     graph_builder = GraphBuilder(
-        root_path=root_path, extensions_to_skip=[".json"], names_to_skip=["__pycache__", ".venv", ".git"]
+        root_path=root_path,
+        extensions_to_skip=[".json"],
+        names_to_skip=["__pycache__", ".venv", ".git", ".env", "node_modules"],
     )
     graph = graph_builder.build()
 
     relationships = graph.get_relationships_as_objects()
     nodes = graph.get_nodes_as_objects()
 
-    save_to_falkordb(relationships, nodes)
-
+    save_to_neo4j(relationships, nodes)
 
 def save_to_neo4j(relationships, nodes):
     graph_manager = Neo4jManager(repo_id="repo", entity_id="organization")

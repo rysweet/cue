@@ -15,6 +15,7 @@ from blarify.graph.node import Node as GraphNode
 class JavaDefinitions(LanguageDefinitions):
     CONTROL_FLOW_STATEMENTS = []
     CONSEQUENCE_STATEMENTS = []
+
     def get_language_name() -> str:
         return "java"
 
@@ -51,15 +52,9 @@ class JavaDefinitions(LanguageDefinitions):
         return {
             "class_declaration": NodeLabels.CLASS,
             "method_declaration": NodeLabels.FUNCTION,
-            "interface_declaration": NodeLabels.INTERFACE,
-            "constructor_declaration": NodeLabels.CONSTRUCTOR,
+            "interface_declaration": NodeLabels.CLASS,
+            "constructor_declaration": NodeLabels.FUNCTION,
             "record_declaration": NodeLabels.CLASS,
-            "import_specifier": RelationshipType.IMPORTS,
-            "import_clause": RelationshipType.IMPORTS,
-            "new_expression": RelationshipType.INSTANTIATES,
-            "class_heritage": RelationshipType.INHERITS,
-            "variable_declarator": RelationshipType.ASSIGNS,
-            "type_annotation": RelationshipType.TYPES,
         }[type]
 
     def get_language_file_extensions() -> Set[str]:
@@ -81,8 +76,19 @@ class JavaDefinitions(LanguageDefinitions):
                 "variable_declaration": RelationshipType.TYPES,
                 "parameter": RelationshipType.TYPES,
                 "base_list": RelationshipType.INHERITS,
+                "import_specifier": RelationshipType.IMPORTS,
+                "import_declaration": RelationshipType.IMPORTS,
+                "import_clause": RelationshipType.IMPORTS,
+                "new_expression": RelationshipType.INSTANTIATES,
+                "class_heritage": RelationshipType.INHERITS,
+                "variable_declarator": RelationshipType.ASSIGNS,
+                "type_annotation": RelationshipType.TYPES,
+                "annotation_argument_list": RelationshipType.TYPES,
+                "formal_parameter": RelationshipType.TYPES,
+                "field_declaration": RelationshipType.TYPES,
             },
             NodeLabels.FUNCTION: {
                 "invocation_expression": RelationshipType.CALLS,
+                "method_invocation": RelationshipType.CALLS,
             },
         }
