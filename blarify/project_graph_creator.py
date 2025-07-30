@@ -16,9 +16,11 @@ from blarify.code_hierarchy.languages import (
     CsharpDefinitions,
     JavaDefinitions
 )
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 from blarify.logger import Logger
 from blarify.graph.graph_environment import GraphEnvironment
+from blarify.llm_descriptions import LLMService
+from blarify.llm_descriptions.description_generator import DescriptionGenerator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -55,17 +57,40 @@ class ProjectGraphCreator:
         lsp_query_helper: LspQueryHelper,
         project_files_iterator: ProjectFilesIterator,
         graph_environment: "GraphEnvironment" = None,
+        enable_llm_descriptions: bool = None,
     ):
         self.root_path = root_path
         self.lsp_query_helper = lsp_query_helper
         self.project_files_iterator = project_files_iterator
         self.graph_environment = graph_environment or GraphEnvironment("blarify", "repo", self.root_path)
+        
+        # Initialize LLM components
+        self.enable_llm_descriptions = enable_llm_descriptions
+        if enable_llm_descriptions is None:
+            import os
+            self.enable_llm_descriptions = os.getenv("ENABLE_LLM_DESCRIPTIONS", "false").lower() == "true"
+        
+        self.llm_service = None
+        self.description_generator = None
+        if self.enable_llm_descriptions:
+            try:
+                self.llm_service = LLMService()
+                self.description_generator = DescriptionGenerator(self.llm_service, self.graph_environment)
+                logger.info("LLM description generation enabled")
+            except Exception as e:
+                logger.error(f"Failed to initialize LLM service: {e}")
+                self.enable_llm_descriptions = False
 
         self.graph = Graph()
 
     def build(self) -> Graph:
         self._create_code_hierarchy()
         self._create_relationships_from_references_for_files()
+        
+        # Generate LLM descriptions if enabled
+        if self.enable_llm_descriptions and self.description_generator:
+            self._generate_llm_descriptions()
+        
         return self.graph
 
     def build_hierarchy_only(self) -> Graph:
@@ -215,3 +240,18 @@ class ProjectGraphCreator:
         )
 
         return relationships
+    
+    def _generate_llm_descriptions(self) -> None:
+        """Generate LLM descriptions for nodes in the graph."""
+        start_time = time.time()
+        logger.info("Starting LLM description generation")
+        
+        try:
+            description_nodes = self.description_generator.generate_descriptions_for_graph(self.graph)
+            logger.info(f"Generated {len(description_nodes)} description nodes")
+        except Exception as e:
+            logger.error(f"Error generating LLM descriptions: {e}")
+        
+        end_time = time.time()
+        execution_time = end_time - start_time
+        logger.info(f"LLM description generation completed in {execution_time:.2f} seconds")
