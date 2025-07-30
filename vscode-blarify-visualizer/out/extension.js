@@ -36,20 +36,31 @@ let blarifyIntegration;
 let graphDataProvider;
 let statusBarManager;
 let configManager;
+let outputChannel;
 async function activate(context) {
     console.log('Blarify Visualizer is now active!');
+    // Create output channel for debugging
+    outputChannel = vscode.window.createOutputChannel('Blarify Visualizer');
+    context.subscriptions.push(outputChannel);
+    outputChannel.appendLine('Blarify Visualizer extension activated');
+    outputChannel.show();
     // Initialize configuration manager
     configManager = new configurationManager_1.ConfigurationManager();
+    outputChannel.appendLine('Configuration manager initialized');
     // Initialize status bar
     statusBarManager = new statusBarManager_1.StatusBarManager();
     context.subscriptions.push(statusBarManager);
+    outputChannel.appendLine('Status bar manager initialized');
     // Initialize Neo4j manager
     neo4jManager = new neo4jManager_1.Neo4jManager(configManager);
     context.subscriptions.push(neo4jManager);
+    outputChannel.appendLine('Neo4j manager initialized');
     // Initialize Blarify integration
     blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager);
+    outputChannel.appendLine('Blarify integration initialized');
     // Initialize graph data provider
     graphDataProvider = new graphDataProvider_1.GraphDataProvider(neo4jManager, configManager);
+    outputChannel.appendLine('Graph data provider initialized');
     // Skip Docker startup in test environment
     const isTestMode = context.extensionMode === vscode.ExtensionMode.Test;
     if (!isTestMode) {
@@ -78,7 +89,13 @@ async function activate(context) {
     context.subscriptions.push(showVisualizationCommand, ingestWorkspaceCommand, updateGraphCommand, searchGraphCommand, restartNeo4jCommand);
     // Register status view provider
     const statusProvider = new StatusViewProvider(neo4jManager, blarifyIntegration);
-    vscode.window.registerTreeDataProvider('blarifyStatus', statusProvider);
+    const treeView = vscode.window.createTreeView('blarifyStatus', {
+        treeDataProvider: statusProvider,
+        showCollapseAll: false
+    });
+    context.subscriptions.push(treeView);
+    // Refresh the view to ensure it's populated
+    statusProvider.refresh();
     // Watch for file changes if auto-update is enabled
     if (configManager.getAutoUpdate()) {
         const watcher = vscode.workspace.createFileSystemWatcher('**/*');

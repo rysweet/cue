@@ -11,26 +11,38 @@ let blarifyIntegration: BlarifyIntegration;
 let graphDataProvider: GraphDataProvider;
 let statusBarManager: StatusBarManager;
 let configManager: ConfigurationManager;
+let outputChannel: vscode.OutputChannel;
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log('Blarify Visualizer is now active!');
+    
+    // Create output channel for debugging
+    outputChannel = vscode.window.createOutputChannel('Blarify Visualizer');
+    context.subscriptions.push(outputChannel);
+    outputChannel.appendLine('Blarify Visualizer extension activated');
+    outputChannel.show();
 
     // Initialize configuration manager
     configManager = new ConfigurationManager();
+    outputChannel.appendLine('Configuration manager initialized');
     
     // Initialize status bar
     statusBarManager = new StatusBarManager();
     context.subscriptions.push(statusBarManager);
+    outputChannel.appendLine('Status bar manager initialized');
     
     // Initialize Neo4j manager
     neo4jManager = new Neo4jManager(configManager);
     context.subscriptions.push(neo4jManager);
+    outputChannel.appendLine('Neo4j manager initialized');
     
     // Initialize Blarify integration
     blarifyIntegration = new BlarifyIntegration(configManager);
+    outputChannel.appendLine('Blarify integration initialized');
     
     // Initialize graph data provider
     graphDataProvider = new GraphDataProvider(neo4jManager, configManager);
+    outputChannel.appendLine('Graph data provider initialized');
     
     // Skip Docker startup in test environment
     const isTestMode = context.extensionMode === vscode.ExtensionMode.Test;
@@ -92,7 +104,14 @@ export async function activate(context: vscode.ExtensionContext) {
     
     // Register status view provider
     const statusProvider = new StatusViewProvider(neo4jManager, blarifyIntegration);
-    vscode.window.registerTreeDataProvider('blarifyStatus', statusProvider);
+    const treeView = vscode.window.createTreeView('blarifyStatus', {
+        treeDataProvider: statusProvider,
+        showCollapseAll: false
+    });
+    context.subscriptions.push(treeView);
+    
+    // Refresh the view to ensure it's populated
+    statusProvider.refresh();
     
     // Watch for file changes if auto-update is enabled
     if (configManager.getAutoUpdate()) {
