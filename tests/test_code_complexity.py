@@ -7,8 +7,6 @@ import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
 
 from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
-from blarify.graph.node.class_node import ClassNode
-from blarify.graph.node.function_node import FunctionNode
 
 
 class TestCodeComplexityCalculator(unittest.TestCase):
@@ -25,25 +23,6 @@ class TestCodeComplexityCalculator(unittest.TestCase):
         """Parse Python code and return tree."""
         return self.parser.parse(bytes(code, "utf8")).root_node
         
-    def test_calculate_cyclomatic_complexity_simple(self):
-        """Test cyclomatic complexity for simple function."""
-        self.skipTest("CodeComplexityCalculator doesn't have calculate_cyclomatic_complexity method")
-        
-    def test_calculate_cyclomatic_complexity_with_conditions(self):
-        """Test cyclomatic complexity with if statements."""
-        self.skipTest("CodeComplexityCalculator doesn't have calculate_cyclomatic_complexity method")
-        
-    def test_calculate_cyclomatic_complexity_with_loops(self):
-        """Test cyclomatic complexity with loops."""
-        self.skipTest("CodeComplexityCalculator doesn't have calculate_cyclomatic_complexity method")
-        
-    def test_calculate_cyclomatic_complexity_with_try_except(self):
-        """Test cyclomatic complexity with exception handling."""
-        self.skipTest("CodeComplexityCalculator doesn't have calculate_cyclomatic_complexity method")
-        
-    def test_calculate_cyclomatic_complexity_with_boolean_operators(self):
-        """Test cyclomatic complexity with boolean operators."""
-        self.skipTest("CodeComplexityCalculator doesn't have calculate_cyclomatic_complexity method")
         
     def test_calculate_nesting_stats(self):
         """Test nesting depth calculation."""
@@ -128,17 +107,6 @@ def no_params():
         
         self.assertEqual(param_count, 0)
         
-    def test_calculate_lines_of_code(self):
-        """Test counting lines of code."""
-        self.skipTest("CodeComplexityCalculator doesn't have calculate_lines_of_code method")
-        
-    def test_analyze_function_node(self):
-        """Test complete function analysis."""
-        self.skipTest("CodeComplexityCalculator doesn't have analyze_function method")
-        
-    def test_analyze_class_node(self):
-        """Test analyzing complexity of a class."""
-        self.skipTest("CodeComplexityCalculator doesn't have analyze_class method")
         
     def find_node_by_type(self, node, node_type):
         """Helper to find first node of given type."""
