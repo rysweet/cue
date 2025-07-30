@@ -198,6 +198,44 @@ If the user expressed frustration or provided feedback:
 5. Ensure CI/CD passes before merging
 6. Keep feature branches (don't delete) for workshop instruction purposes
 
+### Git Safety Instructions (CRITICAL)
+**ALWAYS follow these steps to prevent accidental file deletion:**
+
+1. **Check git status before ANY branch operations**:
+   ```bash
+   git status  # ALWAYS run this first
+   ```
+
+2. **Preserve uncommitted files when switching branches**:
+   ```bash
+   # If uncommitted files exist:
+   git stash push -m "Preserving work before branch switch"
+   git checkout -b new-branch
+   git stash pop
+   ```
+
+3. **Verify repository context**:
+   ```bash
+   git remote -v  # Ensure working with correct fork (rysweet/cue)
+   ```
+
+4. **Check for project-specific files**:
+   - Always verify existence of: `claude.md`, `prompts/`, `.github/agents/`
+   - These files may contain critical project configuration
+
+5. **Before creating new branches**:
+   - Run `git status` to check for uncommitted changes
+   - Commit or stash any important files
+   - Verify the base branch contains all expected files
+
+6. **If files go missing**:
+   ```bash
+   # Find when files existed
+   git log --all --full-history -- <missing-file-path>
+   # Restore from specific commit
+   git checkout <commit-hash> -- <file-path>
+   ```
+
 ### Testing Strategy
 - Write tests for all new features
 - Maintain test coverage above 80%
