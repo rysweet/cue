@@ -25,6 +25,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlarifyIntegration = void 0;
 const vscode = __importStar(require("vscode"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 const child_process_1 = require("child_process");
 class BlarifyIntegration {
     constructor(configManager) {
@@ -46,10 +48,23 @@ class BlarifyIntegration {
             }
             // Always enable documentation nodes
             args.push('--enable-documentation-nodes');
-            // Spawn Blarify process
-            const blarify = (0, child_process_1.spawn)('blarify', args, {
+            // Use the local Blarify installation from the current repo
+            const extensionPath = path.resolve(__dirname, '..');
+            const blarifyPath = path.resolve(extensionPath, '..', 'blarify');
+            const blarifyScript = path.join(blarifyPath, '__main__.py');
+            // Check if local Blarify exists
+            if (!fs.existsSync(blarifyScript)) {
+                reject(new Error(`Blarify not found at ${blarifyScript}. Make sure the extension is in the same repository as Blarify.`));
+                return;
+            }
+            // Spawn Blarify process using Python
+            const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
+            const blarify = (0, child_process_1.spawn)(pythonExecutable, ['-m', 'blarify', ...args], {
                 cwd: workspacePath,
-                env: { ...process.env }
+                env: {
+                    ...process.env,
+                    PYTHONPATH: path.resolve(extensionPath, '..')
+                }
             });
             let output = '';
             let errorOutput = '';
@@ -87,7 +102,7 @@ class BlarifyIntegration {
             });
             blarify.on('error', (error) => {
                 if (error.message.includes('ENOENT')) {
-                    reject(new Error('Blarify not found. Please install it: pip install blarify'));
+                    reject(new Error('Python not found. Please ensure Python 3 is installed and in your PATH'));
                 }
                 else {
                     reject(error);
@@ -100,6 +115,23 @@ class BlarifyIntegration {
         });
     }
     async checkBlarifyInstalled() {
+        // Check if local Blarify exists in the repo
+        const extensionPath = path.resolve(__dirname, '..');
+        const blarifyPath = path.resolve(extensionPath, '..', 'blarify', '__main__.py');
+        if (fs.existsSync(blarifyPath)) {
+            // Also check if Python is available
+            return new Promise((resolve) => {
+                const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
+                const check = (0, child_process_1.spawn)(pythonExecutable, ['--version']);
+                check.on('close', (code) => {
+                    resolve(code === 0);
+                });
+                check.on('error', () => {
+                    resolve(false);
+                });
+            });
+        }
+        // Fallback to checking if blarify is installed globally
         return new Promise((resolve) => {
             const check = (0, child_process_1.spawn)('blarify', ['--version']);
             check.on('close', (code) => {
