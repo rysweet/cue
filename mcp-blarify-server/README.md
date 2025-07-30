@@ -159,9 +159,49 @@ mcp-blarify-server/
 
 ### Running Tests
 
+#### Unit Tests
+
+Run unit tests without Neo4j:
 ```bash
-pytest tests/
+pytest tests/test_query_builder.py tests/test_context_builder.py tests/test_llm_processor.py tests/test_server.py -v
 ```
+
+#### Integration Tests
+
+Run integration tests with real Neo4j:
+
+1. Start Neo4j:
+```bash
+docker-compose up -d
+```
+
+2. Set up test data:
+```bash
+python tests/setup_test_graph.py
+```
+
+3. Run integration tests:
+```bash
+pytest tests/test_integration.py -v
+```
+
+Or use the convenience script:
+```bash
+./run_integration_tests.sh
+```
+
+#### Manual Testing
+
+Test the server interactively:
+```bash
+python manual_test.py
+```
+
+This will:
+- Connect to Neo4j
+- List available tools
+- Test each tool with sample data
+- Show example responses
 
 ### Adding New Tools
 
