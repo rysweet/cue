@@ -31,6 +31,7 @@ vendoring = "^1.2.0"
 tree-sitter-php = "^0.23.11"
 tree-sitter-java = "^0.23.5"
 openai = "^1.35.0"
+pathspec = "^0.12.1"
 
 
 
