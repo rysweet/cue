@@ -8,3 +8,5 @@ from .file_node import FileNode
 from .function_node import FunctionNode
 from .deleted_node import DeletedNode
 from .description_node import DescriptionNode
+from .filesystem_file_node import FilesystemFileNode
+from .filesystem_directory_node import FilesystemDirectoryNode

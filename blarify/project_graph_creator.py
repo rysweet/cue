@@ -21,6 +21,7 @@ from blarify.logger import Logger
 from blarify.graph.graph_environment import GraphEnvironment
 from blarify.llm_descriptions import LLMService
 from blarify.llm_descriptions.description_generator import DescriptionGenerator
+from blarify.filesystem import FilesystemGraphGenerator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ class ProjectGraphCreator:
         project_files_iterator: ProjectFilesIterator,
         graph_environment: "GraphEnvironment" = None,
         enable_llm_descriptions: bool = None,
+        enable_filesystem_nodes: bool = None,
     ):
         self.root_path = root_path
         self.lsp_query_helper = lsp_query_helper
@@ -80,6 +82,26 @@ class ProjectGraphCreator:
             except Exception as e:
                 logger.error(f"Failed to initialize LLM service: {e}")
                 self.enable_llm_descriptions = False
+        
+        # Initialize filesystem components
+        self.enable_filesystem_nodes = enable_filesystem_nodes
+        if enable_filesystem_nodes is None:
+            import os
+            self.enable_filesystem_nodes = os.getenv("ENABLE_FILESYSTEM_NODES", "false").lower() == "true"
+        
+        self.filesystem_generator = None
+        if self.enable_filesystem_nodes:
+            # Get extensions and names to skip from project_files_iterator
+            extensions_to_skip = getattr(project_files_iterator, 'extensions_to_skip', [])
+            names_to_skip = getattr(project_files_iterator, 'names_to_skip', [])
+            
+            self.filesystem_generator = FilesystemGraphGenerator(
+                root_path=root_path,
+                graph_environment=self.graph_environment,
+                extensions_to_skip=extensions_to_skip,
+                names_to_skip=names_to_skip
+            )
+            logger.info("Filesystem node generation enabled")
 
         self.graph = Graph()
 
@@ -90,6 +112,10 @@ class ProjectGraphCreator:
         # Generate LLM descriptions if enabled
         if self.enable_llm_descriptions and self.description_generator:
             self._generate_llm_descriptions()
+        
+        # Generate filesystem nodes if enabled
+        if self.enable_filesystem_nodes and self.filesystem_generator:
+            self._generate_filesystem_nodes()
         
         return self.graph
 
@@ -255,3 +281,28 @@ class ProjectGraphCreator:
         end_time = time.time()
         execution_time = end_time - start_time
         logger.info(f"LLM description generation completed in {execution_time:.2f} seconds")
+    
+    def _generate_filesystem_nodes(self) -> None:
+        """Generate filesystem nodes and relationships."""
+        start_time = time.time()
+        logger.info("Starting filesystem node generation")
+        
+        try:
+            # Generate filesystem nodes
+            self.filesystem_generator.generate_filesystem_nodes(self.graph)
+            
+            # Create IMPLEMENTS relationships
+            implements_rels = self.filesystem_generator.create_implements_relationships(self.graph)
+            self.graph.add_references_relationships(implements_rels)
+            
+            # Create description references if LLM descriptions are enabled
+            if self.enable_llm_descriptions:
+                desc_refs = self.filesystem_generator.create_description_references(self.graph)
+                self.graph.add_references_relationships(desc_refs)
+            
+        except Exception as e:
+            logger.error(f"Error generating filesystem nodes: {e}")
+        
+        end_time = time.time()
+        execution_time = end_time - start_time
+        logger.info(f"Filesystem node generation completed in {execution_time:.2f} seconds")
