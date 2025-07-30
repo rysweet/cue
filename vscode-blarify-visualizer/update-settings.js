@@ -27,18 +27,24 @@ const settings = {
     "blarifyVisualizer.azureOpenAI.apiKey": envVars.AZURE_OPENAI_KEY || "",
     "blarifyVisualizer.azureOpenAI.endpoint": azureEndpoint,
     "blarifyVisualizer.azureOpenAI.deploymentName": envVars.AZURE_OPENAI_MODEL_CHAT || "gpt-4",
-    "blarifyVisualizer.neo4j.uri": envVars.NEO4J_URI || "bolt://localhost:7687",
+    "blarifyVisualizer.neo4j.uri": "bolt://localhost:7687", // Use blarify-neo4j container port
     "blarifyVisualizer.neo4j.username": envVars.NEO4J_USER || "neo4j",
     "blarifyVisualizer.neo4j.password": envVars.NEO4J_PASSWORD || ""
 };
 
 // VS Code settings paths
 const settingsPaths = [
-    // macOS
+    // macOS - VS Code Insiders
+    path.join(os.homedir(), 'Library', 'Application Support', 'Code - Insiders', 'User', 'settings.json'),
+    // macOS - VS Code
     path.join(os.homedir(), 'Library', 'Application Support', 'Code', 'User', 'settings.json'),
-    // Linux
+    // Linux - VS Code Insiders
+    path.join(os.homedir(), '.config', 'Code - Insiders', 'User', 'settings.json'),
+    // Linux - VS Code
     path.join(os.homedir(), '.config', 'Code', 'User', 'settings.json'),
-    // Windows
+    // Windows - VS Code Insiders
+    path.join(os.homedir(), 'AppData', 'Roaming', 'Code - Insiders', 'User', 'settings.json'),
+    // Windows - VS Code
     path.join(os.homedir(), 'AppData', 'Roaming', 'Code', 'User', 'settings.json')
 ];
 
