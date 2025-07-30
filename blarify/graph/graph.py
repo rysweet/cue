@@ -73,12 +73,21 @@ class Graph:
             relationships.extend(node.get_relationships())
 
         return relationships
+    
+    def get_all_relationships(self) -> List["Relationship"]:
+        """Get all relationships in the graph (from nodes and references)."""
+        node_relationships = self.get_relationships_from_nodes()
+        return node_relationships + self.__references_relationships
 
     def add_references_relationships(self, references_relationships: List["Relationship"]) -> None:
         self.__references_relationships.extend(references_relationships)
 
     def get_nodes_as_objects(self) -> List[dict]:
         return [node.as_object() for node in self.__nodes.values()]
+    
+    def get_all_nodes(self) -> List[Node]:
+        """Get all nodes in the graph."""
+        return list(self.__nodes.values())
 
     def filtered_graph_by_paths(self, paths_to_keep: List[str]) -> "Graph":
         graph = Graph()
