@@ -33,6 +33,7 @@ Read our article on Medium to learn more about the motivation behind this projec
 - **Code Graph Generation**: Automatically creates a graph representation of your codebase with nodes for files, classes, functions, and their relationships
 - **Multi-Language Support**: Supports Python, JavaScript, TypeScript, Ruby, Go, C#, PHP, and Java
 - **LLM-Generated Descriptions** (New!): Optionally generate natural language descriptions for code elements using Azure OpenAI
+- **Gitignore Integration** (New!): Automatically excludes files matching `.gitignore` patterns, with `.blarignore` for additional exclusions
 - **Graph Database Integration**: Export to Neo4j or FalkorDB for visualization and querying
 - **Incremental Updates**: Efficiently update the graph when code changes
 
@@ -57,6 +58,55 @@ graph_builder = GraphBuilder(
     enable_llm_descriptions=True
 )
 graph = graph_builder.build()
+```
+
+# File Exclusion and Gitignore Support
+
+Blarify now automatically respects your `.gitignore` patterns, ensuring that version control ignored files (like `node_modules`, `.env`, build artifacts) are excluded from the graph analysis.
+
+## How it works
+
+- **Automatic `.gitignore` support**: All patterns in `.gitignore` files are automatically applied
+- **`.blarignore` for additional exclusions**: Create a `.blarignore` file for Blarify-specific exclusions
+- **Nested `.gitignore` files**: Supports `.gitignore` files in subdirectories
+- **Full pattern syntax**: Supports all gitignore patterns including globs, directory markers, and comments
+
+## Configuration
+
+```python
+# Enable gitignore support (enabled by default)
+graph_builder = GraphBuilder(
+    root_path="/path/to/project",
+    use_gitignore=True  # Default is True
+)
+
+# Disable gitignore support if needed
+graph_builder = GraphBuilder(
+    root_path="/path/to/project",
+    use_gitignore=False
+)
+
+# Specify custom .blarignore path
+graph_builder = GraphBuilder(
+    root_path="/path/to/project",
+    blarignore_path="/path/to/.blarignore"
+)
+```
+
+## .blarignore Example
+
+Create a `.blarignore` file in your project root:
+
+```
+# Exclude test files
+test_*.py
+*_test.py
+
+# Exclude documentation
+docs/
+
+# Exclude specific large files
+data/*.csv
 ```
 
 # Future Work
