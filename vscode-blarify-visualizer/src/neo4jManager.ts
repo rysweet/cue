@@ -28,6 +28,21 @@ export class Neo4jManager implements vscode.Disposable {
     }
     
     async ensureRunning(): Promise<void> {
+        // First try to connect to Neo4j at the configured URI
+        try {
+            await this.connectDriver();
+            await this.driver!.verifyConnectivity();
+            console.log('Successfully connected to existing Neo4j instance');
+            return;
+        } catch (e) {
+            console.log('Could not connect to Neo4j, checking Docker containers...');
+            if (this.driver) {
+                await this.driver.close();
+                this.driver = undefined;
+            }
+        }
+        
+        // Check container status
         const status = await this.getStatus();
         if (!status.running) {
             await this.startContainer();
@@ -79,23 +94,34 @@ export class Neo4jManager implements vscode.Disposable {
             // Pull image if needed
             await this.pullImageIfNeeded();
             
-            // Try to remove any existing container with the same name
-            try {
-                const containers = await this.docker.listContainers({ all: true });
-                const existingContainer = containers.find(c => 
-                    c.Names.some(name => name === `/${this.containerName}`)
-                );
-                if (existingContainer) {
-                    const container = this.docker.getContainer(existingContainer.Id);
+            // Check if container already exists
+            const containers = await this.docker.listContainers({ all: true });
+            const existingContainer = containers.find(c => 
+                c.Names.some(name => name === `/${this.containerName}`)
+            );
+            
+            if (existingContainer) {
+                // Container exists, try to start it if stopped
+                const container = this.docker.getContainer(existingContainer.Id);
+                if (existingContainer.State !== 'running') {
                     try {
-                        await container.stop();
+                        await container.start();
+                        this.containerId = existingContainer.Id;
+                        await this.waitForNeo4j();
+                        return;
                     } catch (e) {
-                        // Container might already be stopped
+                        // If we can't start it, remove and recreate
+                        try {
+                            await container.remove();
+                        } catch (removeError) {
+                            // Ignore removal errors
+                        }
                     }
-                    await container.remove();
+                } else {
+                    // Container is already running
+                    this.containerId = existingContainer.Id;
+                    return;
                 }
-            } catch (e) {
-                // Ignore errors when trying to remove old container
             }
             
             // Get configuration
