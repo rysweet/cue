@@ -32,24 +32,28 @@ export async function activate(context: vscode.ExtensionContext) {
     // Initialize graph data provider
     graphDataProvider = new GraphDataProvider(neo4jManager, configManager);
     
-    // Start Neo4j container
-    statusBarManager.setStatus('Starting Neo4j...', 'sync~spin');
-    try {
-        await neo4jManager.ensureRunning();
-        statusBarManager.setStatus('Neo4j ready', 'database');
-        
-        // Prompt user to ingest workspace on startup
-        const shouldIngest = await vscode.window.showInformationMessage(
-            'Would you like to analyze your workspace with Blarify?',
-            'Yes', 'Not now'
-        );
-        
-        if (shouldIngest === 'Yes') {
-            await ingestWorkspace();
+    // Skip Docker startup in test environment
+    const isTestMode = context.extensionMode === vscode.ExtensionMode.Test;
+    if (!isTestMode) {
+        // Start Neo4j container
+        statusBarManager.setStatus('Starting Neo4j...', 'sync~spin');
+        try {
+            await neo4jManager.ensureRunning();
+            statusBarManager.setStatus('Neo4j ready', 'database');
+            
+            // Prompt user to ingest workspace on startup
+            const shouldIngest = await vscode.window.showInformationMessage(
+                'Would you like to analyze your workspace with Blarify?',
+                'Yes', 'Not now'
+            );
+            
+            if (shouldIngest === 'Yes') {
+                await ingestWorkspace();
+            }
+        } catch (error) {
+            statusBarManager.setStatus('Neo4j failed', 'error');
+            vscode.window.showErrorMessage(`Failed to start Neo4j: ${error}`);
         }
-    } catch (error) {
-        statusBarManager.setStatus('Neo4j failed', 'error');
-        vscode.window.showErrorMessage(`Failed to start Neo4j: ${error}`);
     }
     
     // Register commands
