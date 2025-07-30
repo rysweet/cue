@@ -20,3 +20,7 @@ class RelationshipType(Enum):
     MODIFIED = "MODIFIED"
     DELETED = "DELETED"
     ADDED = "ADDED"
+    
+    # LLM descriptions
+    HAS_DESCRIPTION = "HAS_DESCRIPTION"
+    REFERENCES_IN_DESCRIPTION = "REFERENCES_IN_DESCRIPTION"
