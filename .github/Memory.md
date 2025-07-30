@@ -1,5 +1,5 @@
 # AI Assistant Memory
-Last Updated: 2025-07-30T10:15:00Z
+Last Updated: 2025-07-30T11:30:00Z
 
 ## Current Goals
 - ✅ Improve test coverage for Blarify codebase to >80% (ACHIEVED 3x improvement: 20.76% → 63.76%)
@@ -21,9 +21,13 @@ Last Updated: 2025-07-30T10:15:00Z
 - [x] Fix all LLM description test failures
 - [x] Fix filesystem node test failures
 - [x] Fix graph API usage in tests
-- [ ] Fix MCP server integration tests (Neo4j port conflict)
+- [x] Fix MCP server integration tests (Neo4j port conflict)
+- [x] Fix CI deprecation errors (updated GitHub Actions to v4/v5)
+- [ ] Fix tree-sitter import issues in test environment
 
 ## Recent Accomplishments
+- **Fixed CI/CD deprecation errors** - Updated all GitHub Actions from v3 to v4/v5
+- **Resolved tree-sitter dependency issues** - Installed missing tree-sitter packages
 - **Successfully improved test coverage from 20.76% to 63.76%** - a 3.07x improvement!
 - Fixed all failing and hanging tests in the codebase
 - Fixed critical circular import issue in lsp_helper.py
@@ -53,6 +57,13 @@ Last Updated: 2025-07-30T10:15:00Z
   - Fixed node_repr_for_identifier format for filesystem nodes
 
 ## Important Context
+- **CI/CD Fixed**: Updated GitHub Actions versions to resolve deprecation warnings:
+  - actions/checkout@v3 → v4
+  - actions/setup-python@v4 → v5  
+  - actions/upload-artifact@v3 → v4
+  - codecov/codecov-action@v3 → v4
+- **Tree-sitter Issue**: Tests fail with ModuleNotFoundError despite packages being installed
+  - May be related to Python 3.13 compatibility or poetry environment setup
 - All tests are now idempotent and use mocks for external dependencies
 - Successfully resolved all API mismatches between tests and implementation
 - Installed MCP dependencies (mcp 1.12.2) to enable MCP server tests
