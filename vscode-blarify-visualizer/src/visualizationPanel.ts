@@ -142,7 +142,7 @@ export class VisualizationPanel {
     }
     
     private async _handleNodeSelection(nodeId: string) {
-        if (!this._dataProvider) return;
+        if (!this._dataProvider) {return;}
         
         const details = await this._dataProvider.getNodeDetails(nodeId);
         if (details) {
@@ -154,7 +154,7 @@ export class VisualizationPanel {
     }
     
     private async _handleNodeExpansion(nodeId: string) {
-        if (!this._dataProvider) return;
+        if (!this._dataProvider) {return;}
         
         const neighbors = await this._dataProvider.getNodeNeighbors(nodeId);
         this._panel.webview.postMessage({
@@ -166,7 +166,7 @@ export class VisualizationPanel {
     
     private async _handleOpenFile(filePath: string) {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder) return;
+        if (!workspaceFolder) {return;}
         
         const uri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, filePath));
         try {
@@ -190,7 +190,7 @@ export class VisualizationPanel {
     }
     
     private async _handleFilterByType(types: string[]) {
-        if (!this._dataProvider) return;
+        if (!this._dataProvider) {return;}
         
         const data = await this._dataProvider.getGraphData({ nodeTypes: types });
         this._currentData = data;

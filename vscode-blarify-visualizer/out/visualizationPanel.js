@@ -127,8 +127,9 @@ class VisualizationPanel {
         }
     }
     async _handleNodeSelection(nodeId) {
-        if (!this._dataProvider)
+        if (!this._dataProvider) {
             return;
+        }
         const details = await this._dataProvider.getNodeDetails(nodeId);
         if (details) {
             this._panel.webview.postMessage({
@@ -138,8 +139,9 @@ class VisualizationPanel {
         }
     }
     async _handleNodeExpansion(nodeId) {
-        if (!this._dataProvider)
+        if (!this._dataProvider) {
             return;
+        }
         const neighbors = await this._dataProvider.getNodeNeighbors(nodeId);
         this._panel.webview.postMessage({
             command: 'expandNode',
@@ -149,8 +151,9 @@ class VisualizationPanel {
     }
     async _handleOpenFile(filePath) {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder)
+        if (!workspaceFolder) {
             return;
+        }
         const uri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, filePath));
         try {
             await vscode.window.showTextDocument(uri);
@@ -172,8 +175,9 @@ class VisualizationPanel {
         }
     }
     async _handleFilterByType(types) {
-        if (!this._dataProvider)
+        if (!this._dataProvider) {
             return;
+        }
         const data = await this._dataProvider.getGraphData({ nodeTypes: types });
         this._currentData = data;
         this._panel.webview.postMessage({
