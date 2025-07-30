@@ -60,17 +60,43 @@ export class Neo4jManager implements vscode.Disposable {
     
     private async startContainer(): Promise<void> {
         try {
-            // Check if container exists but is stopped
+            // Check if container exists
             const status = await this.getStatus();
-            if (status.containerId && !status.running) {
+            if (status.containerId) {
                 const container = this.docker.getContainer(status.containerId);
-                await container.start();
-                await this.waitForNeo4j();
-                return;
+                if (!status.running) {
+                    // Container exists but is stopped, start it
+                    await container.start();
+                    await this.waitForNeo4j();
+                    return;
+                } else {
+                    // Container is already running
+                    await this.waitForNeo4j();
+                    return;
+                }
             }
             
             // Pull image if needed
             await this.pullImageIfNeeded();
+            
+            // Try to remove any existing container with the same name
+            try {
+                const containers = await this.docker.listContainers({ all: true });
+                const existingContainer = containers.find(c => 
+                    c.Names.some(name => name === `/${this.containerName}`)
+                );
+                if (existingContainer) {
+                    const container = this.docker.getContainer(existingContainer.Id);
+                    try {
+                        await container.stop();
+                    } catch (e) {
+                        // Container might already be stopped
+                    }
+                    await container.remove();
+                }
+            } catch (e) {
+                // Ignore errors when trying to remove old container
+            }
             
             // Create and start new container
             const container = await this.docker.createContainer({
