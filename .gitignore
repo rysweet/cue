@@ -19,4 +19,5 @@ easy/
 
 
 !blarify/vendor/**/*.json
+!vscode-blarify-visualizer/**/*.json
 
