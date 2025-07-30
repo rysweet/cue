@@ -19,9 +19,8 @@ class TestFile(unittest.TestCase):
     def test_file_creation(self):
         """Test creating a File instance."""
         file = File(
-            path="/test/main.py",
             name="main.py",
-            extension=".py",
+            root_path="/test",
             level=2
         )
         
