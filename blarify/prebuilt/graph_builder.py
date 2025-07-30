@@ -15,6 +15,8 @@ class GraphBuilder:
         graph_environment: GraphEnvironment = None,
         enable_llm_descriptions: bool = None,
         enable_filesystem_nodes: bool = None,
+        use_gitignore: bool = True,
+        blarignore_path: str = None,
     ):
         """
         A class responsible for constructing a graph representation of a project's codebase.
@@ -27,6 +29,8 @@ class GraphBuilder:
             graph_environment: Custom graph environment configuration
             enable_llm_descriptions: If True, generate LLM descriptions for code nodes
             enable_filesystem_nodes: If True, generate filesystem nodes and relationships
+            use_gitignore: If True, automatically exclude files matching .gitignore patterns (default: True)
+            blarignore_path: Path to .blarignore file (if not provided, looks for .blarignore in root)
 
         Example:
             builder = GraphBuilder(
@@ -47,6 +51,8 @@ class GraphBuilder:
         self.only_hierarchy = only_hierarchy
         self.enable_llm_descriptions = enable_llm_descriptions
         self.enable_filesystem_nodes = enable_filesystem_nodes
+        self.use_gitignore = use_gitignore
+        self.blarignore_path = blarignore_path
 
     def build(self) -> Graph:
         lsp_query_helper = self._get_started_lsp_query_helper()
@@ -68,7 +74,11 @@ class GraphBuilder:
 
     def _get_project_files_iterator(self):
         return ProjectFilesIterator(
-            root_path=self.root_path, extensions_to_skip=self.extensions_to_skip, names_to_skip=self.names_to_skip
+            root_path=self.root_path, 
+            extensions_to_skip=self.extensions_to_skip, 
+            names_to_skip=self.names_to_skip,
+            use_gitignore=self.use_gitignore,
+            blarignore_path=self.blarignore_path
         )
 
     def _get_started_lsp_query_helper(self):
