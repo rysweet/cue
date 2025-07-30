@@ -14,6 +14,7 @@ class GraphBuilder:
         only_hierarchy: bool = False,
         graph_environment: GraphEnvironment = None,
         enable_llm_descriptions: bool = None,
+        enable_filesystem_nodes: bool = None,
     ):
         """
         A class responsible for constructing a graph representation of a project's codebase.
@@ -25,6 +26,7 @@ class GraphBuilder:
             only_hierarchy: If True, only build the code hierarchy without references
             graph_environment: Custom graph environment configuration
             enable_llm_descriptions: If True, generate LLM descriptions for code nodes
+            enable_filesystem_nodes: If True, generate filesystem nodes and relationships
 
         Example:
             builder = GraphBuilder(
@@ -44,6 +46,7 @@ class GraphBuilder:
 
         self.only_hierarchy = only_hierarchy
         self.enable_llm_descriptions = enable_llm_descriptions
+        self.enable_filesystem_nodes = enable_filesystem_nodes
 
     def build(self) -> Graph:
         lsp_query_helper = self._get_started_lsp_query_helper()
@@ -51,7 +54,8 @@ class GraphBuilder:
 
         graph_creator = ProjectGraphCreator(self.root_path, lsp_query_helper, project_files_iterator, 
                                             graph_environment=self.graph_environment,
-                                            enable_llm_descriptions=self.enable_llm_descriptions)
+                                            enable_llm_descriptions=self.enable_llm_descriptions,
+                                            enable_filesystem_nodes=self.enable_filesystem_nodes)
 
         if self.only_hierarchy:
             graph = graph_creator.build_hierarchy_only()
