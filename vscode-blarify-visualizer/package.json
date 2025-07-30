@@ -24,7 +24,12 @@
     "architecture"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:blarifyVisualizer.showVisualization",
+    "onCommand:blarifyVisualizer.ingestWorkspace",
+    "onCommand:blarifyVisualizer.updateGraph",
+    "onCommand:blarifyVisualizer.searchGraph",
+    "onCommand:blarifyVisualizer.restartNeo4j"
   ],
   "main": "./out/extension.js",
   "contributes": {
