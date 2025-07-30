@@ -17,6 +17,9 @@ class GraphBuilder:
         enable_filesystem_nodes: bool = None,
         use_gitignore: bool = True,
         blarignore_path: str = None,
+        enable_documentation_nodes: bool = None,
+        documentation_patterns: list[str] = None,
+        max_llm_calls_per_doc: int = 5,
     ):
         """
         A class responsible for constructing a graph representation of a project's codebase.
@@ -31,6 +34,9 @@ class GraphBuilder:
             enable_filesystem_nodes: If True, generate filesystem nodes and relationships
             use_gitignore: If True, automatically exclude files matching .gitignore patterns (default: True)
             blarignore_path: Path to .blarignore file (if not provided, looks for .blarignore in root)
+            enable_documentation_nodes: If True, parse documentation and create knowledge graph
+            documentation_patterns: Custom patterns for documentation files (e.g., ['*.md', '*.rst'])
+            max_llm_calls_per_doc: Maximum LLM calls per documentation file (default: 5)
 
         Example:
             builder = GraphBuilder(
@@ -53,6 +59,9 @@ class GraphBuilder:
         self.enable_filesystem_nodes = enable_filesystem_nodes
         self.use_gitignore = use_gitignore
         self.blarignore_path = blarignore_path
+        self.enable_documentation_nodes = enable_documentation_nodes
+        self.documentation_patterns = documentation_patterns
+        self.max_llm_calls_per_doc = max_llm_calls_per_doc
 
     def build(self) -> Graph:
         lsp_query_helper = self._get_started_lsp_query_helper()
@@ -61,7 +70,10 @@ class GraphBuilder:
         graph_creator = ProjectGraphCreator(self.root_path, lsp_query_helper, project_files_iterator, 
                                             graph_environment=self.graph_environment,
                                             enable_llm_descriptions=self.enable_llm_descriptions,
-                                            enable_filesystem_nodes=self.enable_filesystem_nodes)
+                                            enable_filesystem_nodes=self.enable_filesystem_nodes,
+                                            enable_documentation_nodes=self.enable_documentation_nodes,
+                                            documentation_patterns=self.documentation_patterns,
+                                            max_llm_calls_per_doc=self.max_llm_calls_per_doc)
 
         if self.only_hierarchy:
             graph = graph_creator.build_hierarchy_only()
