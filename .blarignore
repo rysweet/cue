@@ -1,4 +1,5 @@
 .env
+.github
 __pycache__
 poetry.lock
 .git
