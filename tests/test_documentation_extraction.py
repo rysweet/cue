@@ -8,8 +8,6 @@ import os
 from pathlib import Path
 
 from blarify.documentation.documentation_parser import DocumentationParser
-from blarify.documentation.concept_extractor import ConceptExtractor
-from blarify.documentation.documentation_linker import DocumentationLinker
 from blarify.documentation.documentation_graph_generator import DocumentationGraphGenerator
 from blarify.graph.graph import Graph
 from blarify.graph.node.types.node_labels import NodeLabels
@@ -85,42 +83,6 @@ class TestDocumentationParser(unittest.TestCase):
         self.assertEqual(doc_file["content"], readme_content)
 
 
-class TestConceptExtractor(unittest.TestCase):
-    """Test concept extraction from documentation."""
-    
-    def setUp(self):
-        """Set up test fixtures."""
-        self.mock_llm = Mock()
-        self.extractor = ConceptExtractor(llm_service=self.mock_llm)
-        
-    def test_extract_concepts_success(self):
-        """Test successful concept extraction."""
-        # Skip this test as extract_concepts_from_content method doesn't exist
-        self.skipTest("ConceptExtractor doesn't have extract_concepts_from_content method")
-        
-    def test_extract_concepts_empty_content(self):
-        """Test extraction with empty content."""
-        # Skip this test as extract_concepts_from_content method doesn't exist
-        self.skipTest("ConceptExtractor doesn't have extract_concepts_from_content method")
-
-
-class TestDocumentationLinker(unittest.TestCase):
-    """Test linking documentation to code nodes."""
-    
-    def setUp(self):
-        """Set up test fixtures."""
-        self.graph = Graph()
-        self.linker = DocumentationLinker()  # No parameters
-        
-    def test_find_code_node_by_name(self):
-        """Test finding code nodes by name."""
-        # Skip this test as find_code_node method doesn't exist
-        self.skipTest("DocumentationLinker doesn't have find_code_node method")
-        
-    def test_find_code_node_not_found(self):
-        """Test when code node is not found."""
-        # Skip this test as find_code_node method doesn't exist
-        self.skipTest("DocumentationLinker doesn't have find_code_node method")
 
 
 class TestDocumentationGraphGenerator(unittest.TestCase):
