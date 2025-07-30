@@ -43,102 +43,149 @@ export class BlarifyIntegration {
             // Always enable documentation nodes
             args.push('--enable-documentation-nodes');
             
-            // Use the local Blarify installation from the current repo
-            const extensionPath = path.resolve(__dirname, '..');
-            const blarifyPath = path.resolve(extensionPath, '..', 'blarify');
-            const blarifyScript = path.join(blarifyPath, '__main__.py');
+            // Try to find Blarify in different locations
+            const possiblePaths = [
+                // Development: extension in repo
+                path.resolve(__dirname, '..', '..', 'blarify', '__main__.py'),
+                // Installed: look for blarify in the workspace
+                path.resolve(workspacePath, 'blarify', '__main__.py'),
+                // Installed: look for blarify in parent of workspace
+                path.resolve(workspacePath, '..', 'blarify', '__main__.py'),
+            ];
             
-            // Check if local Blarify exists
-            if (!fs.existsSync(blarifyScript)) {
-                reject(new Error(`Blarify not found at ${blarifyScript}. Make sure the extension is in the same repository as Blarify.`));
+            let blarifyScript: string | null = null;
+            let pythonPath: string | null = null;
+            
+            for (const testPath of possiblePaths) {
+                if (fs.existsSync(testPath)) {
+                    blarifyScript = testPath;
+                    pythonPath = path.dirname(path.dirname(testPath));
+                    break;
+                }
+            }
+            
+            if (!blarifyScript) {
+                // Try using global blarify command
+                this.checkBlarifyInstalled().then(hasBlarifyCommand => {
+                    if (!hasBlarifyCommand) {
+                        reject(new Error('Blarify not found. Please ensure Blarify is installed or available in your workspace.'));
+                        return;
+                    }
+                    // Continue with global blarify
+                    this.runBlarifyProcess(null, null, args, workspacePath, progress, token, resolve, reject);
+                }).catch(err => {
+                    reject(new Error('Failed to check Blarify installation: ' + err));
+                });
                 return;
             }
             
-            // Spawn Blarify process using Python
+            // Run with local blarify
+            this.runBlarifyProcess(blarifyScript, pythonPath, args, workspacePath, progress, token, resolve, reject);
+        });
+    }
+    
+    private runBlarifyProcess(
+        blarifyScript: string | null,
+        pythonPath: string | null,
+        args: string[],
+        workspacePath: string,
+        progress: vscode.Progress<{ message?: string; increment?: number }>,
+        token: vscode.CancellationToken,
+        resolve: (value: any) => void,
+        reject: (reason?: any) => void
+    ): void {
+        // Spawn Blarify process
+        let blarify: any;
+        if (blarifyScript) {
+            // Use local blarify with PYTHONPATH
             const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
-            const blarify = spawn(pythonExecutable, ['-m', 'blarify', ...args], {
+            blarify = spawn(pythonExecutable, ['-m', 'blarify', ...args], {
                 cwd: workspacePath,
                 env: { 
                     ...process.env,
-                    PYTHONPATH: path.resolve(extensionPath, '..')
+                    PYTHONPATH: pythonPath!
                 }
             });
-            
-            let output = '';
-            let errorOutput = '';
-            
-            blarify.stdout.on('data', (data) => {
-                output += data.toString();
-                
-                // Try to parse progress messages
-                const lines = data.toString().split('\n');
-                for (const line of lines) {
-                    if (line.includes('Processing')) {
-                        progress.report({ message: line.trim() });
-                    }
-                }
+        } else {
+            // Use global blarify command
+            blarify = spawn('blarify', args, {
+                cwd: workspacePath,
+                env: process.env
             });
+        }
+        
+        let output = '';
+        let errorOutput = '';
+        
+        blarify.stdout.on('data', (data: Buffer) => {
+            output += data.toString();
             
-            blarify.stderr.on('data', (data) => {
-                errorOutput += data.toString();
-            });
+            // Try to parse progress messages
+            const lines = data.toString().split('\n');
+            for (const line of lines) {
+                if (line.includes('Processing')) {
+                    progress.report({ message: line.trim() });
+                }
+            }
+        });
+        
+        blarify.stderr.on('data', (data: Buffer) => {
+            errorOutput += data.toString();
+        });
+        
+        blarify.on('close', (code: number | null) => {
+            if (token.isCancellationRequested) {
+                reject(new Error('Analysis cancelled'));
+                return;
+            }
             
-            blarify.on('close', (code) => {
-                if (token.isCancellationRequested) {
-                    reject(new Error('Analysis cancelled'));
-                    return;
-                }
-                
-                if (code !== 0) {
-                    reject(new Error(`Blarify exited with code ${code}: ${errorOutput}`));
-                    return;
-                }
-                
-                try {
-                    // Parse JSON output
-                    const result = JSON.parse(output);
-                    this.lastAnalysis = Date.now();
-                    resolve(result);
-                } catch (error) {
-                    reject(new Error(`Failed to parse Blarify output: ${error}`));
-                }
-            });
+            if (code !== 0) {
+                reject(new Error(`Blarify exited with code ${code}: ${errorOutput}`));
+                return;
+            }
             
-            blarify.on('error', (error) => {
-                if (error.message.includes('ENOENT')) {
-                    reject(new Error('Python not found. Please ensure Python 3 is installed and in your PATH'));
-                } else {
-                    reject(error);
-                }
-            });
-            
-            // Handle cancellation
-            token.onCancellationRequested(() => {
-                blarify.kill();
-            });
+            try {
+                // Parse JSON output
+                const result = JSON.parse(output);
+                this.lastAnalysis = Date.now();
+                resolve(result);
+            } catch (error) {
+                reject(new Error(`Failed to parse Blarify output: ${error}`));
+            }
+        });
+        
+        blarify.on('error', (error: Error) => {
+            if (error.message.includes('ENOENT')) {
+                reject(new Error('Python not found. Please ensure Python 3 is installed and in your PATH'));
+            } else {
+                reject(error);
+            }
+        });
+        
+        // Handle cancellation
+        token.onCancellationRequested(() => {
+            blarify.kill();
         });
     }
     
     async checkBlarifyInstalled(): Promise<boolean> {
-        // Check if local Blarify exists in the repo
-        const extensionPath = path.resolve(__dirname, '..');
-        const blarifyPath = path.resolve(extensionPath, '..', 'blarify', '__main__.py');
-        
-        if (fs.existsSync(blarifyPath)) {
-            // Also check if Python is available
-            return new Promise((resolve) => {
-                const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
-                const check = spawn(pythonExecutable, ['--version']);
-                check.on('close', (code) => {
-                    resolve(code === 0);
-                });
-                check.on('error', () => {
-                    resolve(false);
-                });
+        // First check if Python is available
+        const pythonAvailable = await new Promise<boolean>((resolve) => {
+            const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
+            const check = spawn(pythonExecutable, ['--version']);
+            check.on('close', (code) => {
+                resolve(code === 0);
             });
+            check.on('error', () => {
+                resolve(false);
+            });
+        });
+        
+        if (!pythonAvailable) {
+            return false;
         }
         
-        // Fallback to checking if blarify is installed globally
+        // Check if blarify is installed globally
         return new Promise((resolve) => {
             const check = spawn('blarify', ['--version']);
             check.on('close', (code) => {

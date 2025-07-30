@@ -35,19 +35,15 @@ export class Neo4jManager implements vscode.Disposable {
             console.log('Successfully connected to existing Neo4j instance');
             return;
         } catch (e) {
-            console.log('Could not connect to Neo4j, checking Docker containers...');
+            console.log('Could not connect to Neo4j:', e);
             if (this.driver) {
                 await this.driver.close();
                 this.driver = undefined;
             }
+            
+            // For now, don't try to start containers automatically
+            throw new Error('Neo4j is not running. Please ensure the blarify-neo4j container is running on port 7687.');
         }
-        
-        // Check container status
-        const status = await this.getStatus();
-        if (!status.running) {
-            await this.startContainer();
-        }
-        await this.connectDriver();
     }
     
     async getStatus(): Promise<Neo4jStatus> {
