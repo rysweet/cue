@@ -48,6 +48,7 @@ export async function activate(context: vscode.ExtensionContext) {
     
     // Skip Docker startup in test environment
     const isTestMode = context.extensionMode === vscode.ExtensionMode.Test;
+    outputChannel.appendLine(`Extension mode: ${context.extensionMode} (Test mode: ${isTestMode})`);
     if (!isTestMode) {
         // Start Neo4j container
         statusBarManager.setStatus('Starting Neo4j...', 'sync~spin');
