@@ -42,7 +42,9 @@ async function activate(context) {
     // Create output channel for debugging
     outputChannel = vscode.window.createOutputChannel('Blarify Visualizer');
     context.subscriptions.push(outputChannel);
-    outputChannel.appendLine('Blarify Visualizer extension activated');
+    outputChannel.appendLine('=== Blarify Visualizer extension activation started ===');
+    outputChannel.appendLine(`Extension path: ${context.extensionPath}`);
+    outputChannel.appendLine(`Extension mode: ${context.extensionMode}`);
     outputChannel.show();
     // Initialize configuration manager
     configManager = new configurationManager_1.ConfigurationManager();
@@ -81,21 +83,43 @@ async function activate(context) {
         }
     }
     // Register commands
-    const showVisualizationCommand = vscode.commands.registerCommand('blarifyVisualizer.showVisualization', () => showVisualization(context));
-    const ingestWorkspaceCommand = vscode.commands.registerCommand('blarifyVisualizer.ingestWorkspace', ingestWorkspace);
-    const updateGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.updateGraph', updateGraph);
-    const searchGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.searchGraph', searchGraph);
-    const restartNeo4jCommand = vscode.commands.registerCommand('blarifyVisualizer.restartNeo4j', restartNeo4j);
-    context.subscriptions.push(showVisualizationCommand, ingestWorkspaceCommand, updateGraphCommand, searchGraphCommand, restartNeo4jCommand);
+    outputChannel.appendLine('Registering commands...');
+    try {
+        const showVisualizationCommand = vscode.commands.registerCommand('blarifyVisualizer.showVisualization', () => showVisualization(context));
+        outputChannel.appendLine('  - showVisualization registered');
+        const ingestWorkspaceCommand = vscode.commands.registerCommand('blarifyVisualizer.ingestWorkspace', ingestWorkspace);
+        outputChannel.appendLine('  - ingestWorkspace registered');
+        const updateGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.updateGraph', updateGraph);
+        outputChannel.appendLine('  - updateGraph registered');
+        const searchGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.searchGraph', searchGraph);
+        outputChannel.appendLine('  - searchGraph registered');
+        const restartNeo4jCommand = vscode.commands.registerCommand('blarifyVisualizer.restartNeo4j', restartNeo4j);
+        outputChannel.appendLine('  - restartNeo4j registered');
+        context.subscriptions.push(showVisualizationCommand, ingestWorkspaceCommand, updateGraphCommand, searchGraphCommand, restartNeo4jCommand);
+        outputChannel.appendLine('All commands registered successfully');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR registering commands: ${error}`);
+        throw error;
+    }
     // Register status view provider
-    const statusProvider = new StatusViewProvider(neo4jManager, blarifyIntegration);
-    const treeView = vscode.window.createTreeView('blarifyStatus', {
-        treeDataProvider: statusProvider,
-        showCollapseAll: false
-    });
-    context.subscriptions.push(treeView);
-    // Refresh the view to ensure it's populated
-    statusProvider.refresh();
+    outputChannel.appendLine('Registering tree view...');
+    try {
+        const statusProvider = new StatusViewProvider(neo4jManager, blarifyIntegration);
+        const treeView = vscode.window.createTreeView('blarifyStatus', {
+            treeDataProvider: statusProvider,
+            showCollapseAll: false
+        });
+        context.subscriptions.push(treeView);
+        outputChannel.appendLine('Tree view registered successfully');
+        // Refresh the view to ensure it's populated
+        statusProvider.refresh();
+        outputChannel.appendLine('Tree view refreshed');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR registering tree view: ${error}`);
+        throw error;
+    }
     // Watch for file changes if auto-update is enabled
     if (configManager.getAutoUpdate()) {
         const watcher = vscode.workspace.createFileSystemWatcher('**/*');
@@ -106,6 +130,12 @@ async function activate(context) {
         });
         context.subscriptions.push(watcher);
     }
+    outputChannel.appendLine('=== Extension activation completed successfully ===');
+    // List all registered commands for debugging
+    vscode.commands.getCommands().then(commands => {
+        const blarifyCommands = commands.filter(cmd => cmd.startsWith('blarifyVisualizer.'));
+        outputChannel.appendLine(`Registered Blarify commands: ${blarifyCommands.join(', ')}`);
+    });
 }
 exports.activate = activate;
 function deactivate() {
