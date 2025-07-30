@@ -7,7 +7,7 @@ vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
-.gitignore
-node_modules
 *.vsix
 **/*.ts
+test-extension.js
+debug-extension.js
