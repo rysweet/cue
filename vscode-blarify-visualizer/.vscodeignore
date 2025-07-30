@@ -1,0 +1,16 @@
+.vscode/**
+.vscode-test/**
+src/**
+.gitignore
+tsconfig.json
+vsc-extension-quickstart.md
+**/tsconfig.json
+**/*.map
+**/*.ts
+node_modules/**
+!node_modules/three/**
+!node_modules/neo4j-driver/**
+!node_modules/dockerode/**
+**/.eslintrc.json
+**/test/**
+**/*.test.js
