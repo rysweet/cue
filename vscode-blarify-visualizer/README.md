@@ -87,7 +87,7 @@ Interactive 3D visualization of codebase structure and relationships powered by 
 ### Neo4j
 - `blarifyVisualizer.neo4j.uri`: Connection URI (default: bolt://localhost:7687)
 - `blarifyVisualizer.neo4j.username`: Username (default: neo4j)
-- `blarifyVisualizer.neo4j.password`: Password
+- `blarifyVisualizer.neo4j.password`: Password (REQUIRED - no default)
 
 ### Visualization
 - `blarifyVisualizer.visualization.nodeLimit`: Maximum nodes to render (default: 500)

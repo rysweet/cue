@@ -101,12 +101,18 @@ class Neo4jManager {
             catch (e) {
                 // Ignore errors when trying to remove old container
             }
+            // Get configuration
+            const config = this.configManager.getNeo4jConfig();
+            // Validate password is configured
+            if (!config.password) {
+                throw new Error('Neo4j password not configured. Please set it in VS Code settings.');
+            }
             // Create and start new container
             const container = await this.docker.createContainer({
                 Image: this.imageName,
                 name: this.containerName,
                 Env: [
-                    'NEO4J_AUTH=neo4j/blarify123',
+                    `NEO4J_AUTH=${config.username}/${config.password}`,
                     'NEO4J_PLUGINS=["apoc"]',
                     'NEO4J_apoc_export_file_enabled=true',
                     'NEO4J_apoc_import_file_enabled=true',
@@ -119,7 +125,7 @@ class Neo4jManager {
                 HostConfig: {
                     PortBindings: {
                         '7474/tcp': [{ HostPort: '7474' }],
-                        '7687/tcp': [{ HostPort: '7687' }]
+                        '7687/tcp': [{ HostPort: this.configManager.getNeo4jConfig().uri.includes('7688') ? '7688' : '7687' }]
                     },
                     AutoRemove: false
                 }
@@ -160,9 +166,10 @@ class Neo4jManager {
         }
     }
     async waitForNeo4j(maxRetries = 30) {
+        const config = this.configManager.getNeo4jConfig();
         for (let i = 0; i < maxRetries; i++) {
             try {
-                const driver = neo4j_driver_1.default.driver('bolt://localhost:7687', neo4j_driver_1.default.auth.basic('neo4j', 'blarify123'));
+                const driver = neo4j_driver_1.default.driver(config.uri, neo4j_driver_1.default.auth.basic(config.username, config.password));
                 const session = driver.session();
                 await session.run('RETURN 1');
                 await session.close();
@@ -179,7 +186,10 @@ class Neo4jManager {
     }
     async connectDriver() {
         const config = this.configManager.getNeo4jConfig();
-        this.driver = neo4j_driver_1.default.driver(config.uri, neo4j_driver_1.default.auth.basic(config.username, config.password || 'blarify123'));
+        if (!config.password) {
+            throw new Error('Neo4j password not configured. Please set it in VS Code settings.');
+        }
+        this.driver = neo4j_driver_1.default.driver(config.uri, neo4j_driver_1.default.auth.basic(config.username, config.password));
         // Verify connection
         const session = this.driver.session();
         try {
