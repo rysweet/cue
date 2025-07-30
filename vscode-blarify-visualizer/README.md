@@ -16,8 +16,10 @@ Interactive 3D visualization of codebase structure and relationships powered by 
 ## Requirements
 
 - Docker Desktop installed and running
-- Python 3.8+ with Blarify installed (`pip install blarify`)
+- Python 3.8+ installed and in PATH
 - VS Code 1.74.0 or higher
+
+**Note**: This extension uses the local Blarify installation from the same repository. Make sure the extension is located at `vscode-blarify-visualizer/` within the Blarify repository structure.
 
 ## Getting Started
 

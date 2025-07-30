@@ -74,7 +74,8 @@ async function activate(context) {
     const ingestWorkspaceCommand = vscode.commands.registerCommand('blarifyVisualizer.ingestWorkspace', ingestWorkspace);
     const updateGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.updateGraph', updateGraph);
     const searchGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.searchGraph', searchGraph);
-    context.subscriptions.push(showVisualizationCommand, ingestWorkspaceCommand, updateGraphCommand, searchGraphCommand);
+    const restartNeo4jCommand = vscode.commands.registerCommand('blarifyVisualizer.restartNeo4j', restartNeo4j);
+    context.subscriptions.push(showVisualizationCommand, ingestWorkspaceCommand, updateGraphCommand, searchGraphCommand, restartNeo4jCommand);
     // Register status view provider
     const statusProvider = new StatusViewProvider(neo4jManager, blarifyIntegration);
     vscode.window.registerTreeDataProvider('blarifyStatus', statusProvider);
@@ -156,6 +157,31 @@ async function searchGraph() {
                 visualizationPanel_1.VisualizationPanel.currentPanel?.search(query);
             }, 500);
         }
+    }
+}
+async function restartNeo4j() {
+    statusBarManager.setStatus('Restarting Neo4j...', 'sync~spin');
+    try {
+        // Stop any existing container
+        const status = await neo4jManager.getStatus();
+        if (status.containerId) {
+            const container = neo4jManager.docker.getContainer(status.containerId);
+            try {
+                await container.stop();
+                await container.remove();
+            }
+            catch (e) {
+                // Ignore errors
+            }
+        }
+        // Start fresh
+        await neo4jManager.ensureRunning();
+        statusBarManager.setStatus('Neo4j ready', 'database');
+        vscode.window.showInformationMessage('Neo4j restarted successfully');
+    }
+    catch (error) {
+        statusBarManager.setStatus('Neo4j failed', 'error');
+        vscode.window.showErrorMessage(`Failed to restart Neo4j: ${error}`);
     }
 }
 class StatusViewProvider {
