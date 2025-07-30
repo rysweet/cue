@@ -22,6 +22,7 @@ from blarify.graph.graph_environment import GraphEnvironment
 from blarify.llm_descriptions import LLMService
 from blarify.llm_descriptions.description_generator import DescriptionGenerator
 from blarify.filesystem import FilesystemGraphGenerator
+from blarify.documentation import DocumentationGraphGenerator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,9 @@ class ProjectGraphCreator:
         graph_environment: "GraphEnvironment" = None,
         enable_llm_descriptions: bool = None,
         enable_filesystem_nodes: bool = None,
+        enable_documentation_nodes: bool = None,
+        documentation_patterns: Optional[List[str]] = None,
+        max_llm_calls_per_doc: int = 5,
     ):
         self.root_path = root_path
         self.lsp_query_helper = lsp_query_helper
@@ -70,7 +74,7 @@ class ProjectGraphCreator:
         self.enable_llm_descriptions = enable_llm_descriptions
         if enable_llm_descriptions is None:
             import os
-            self.enable_llm_descriptions = os.getenv("ENABLE_LLM_DESCRIPTIONS", "false").lower() == "true"
+            self.enable_llm_descriptions = os.getenv("ENABLE_LLM_DESCRIPTIONS", "true").lower() == "true"
         
         self.llm_service = None
         self.description_generator = None
@@ -87,7 +91,7 @@ class ProjectGraphCreator:
         self.enable_filesystem_nodes = enable_filesystem_nodes
         if enable_filesystem_nodes is None:
             import os
-            self.enable_filesystem_nodes = os.getenv("ENABLE_FILESYSTEM_NODES", "false").lower() == "true"
+            self.enable_filesystem_nodes = os.getenv("ENABLE_FILESYSTEM_NODES", "true").lower() == "true"
         
         self.filesystem_generator = None
         if self.enable_filesystem_nodes:
@@ -102,6 +106,26 @@ class ProjectGraphCreator:
                 names_to_skip=names_to_skip
             )
             logger.info("Filesystem node generation enabled")
+        
+        # Initialize documentation components
+        self.enable_documentation_nodes = enable_documentation_nodes
+        if enable_documentation_nodes is None:
+            import os
+            self.enable_documentation_nodes = os.getenv("ENABLE_DOCUMENTATION_NODES", "true").lower() == "true"
+        
+        self.documentation_generator = None
+        if self.enable_documentation_nodes:
+            # Reuse LLM service if available
+            llm_service = self.llm_service if self.enable_llm_descriptions else None
+            
+            self.documentation_generator = DocumentationGraphGenerator(
+                root_path=root_path,
+                graph_environment=self.graph_environment,
+                llm_service=llm_service,
+                documentation_patterns=documentation_patterns,
+                max_llm_calls_per_doc=max_llm_calls_per_doc
+            )
+            logger.info("Documentation node generation enabled")
 
         self.graph = Graph()
 
@@ -116,6 +140,10 @@ class ProjectGraphCreator:
         # Generate filesystem nodes if enabled
         if self.enable_filesystem_nodes and self.filesystem_generator:
             self._generate_filesystem_nodes()
+        
+        # Generate documentation nodes if enabled
+        if self.enable_documentation_nodes and self.documentation_generator:
+            self._generate_documentation_nodes()
         
         return self.graph
 
@@ -306,3 +334,19 @@ class ProjectGraphCreator:
         end_time = time.time()
         execution_time = end_time - start_time
         logger.info(f"Filesystem node generation completed in {execution_time:.2f} seconds")
+    
+    def _generate_documentation_nodes(self) -> None:
+        """Generate documentation nodes and relationships."""
+        start_time = time.time()
+        logger.info("Starting documentation node generation")
+        
+        try:
+            # Generate documentation nodes
+            self.documentation_generator.generate_documentation_nodes(self.graph)
+            
+        except Exception as e:
+            logger.error(f"Error generating documentation nodes: {e}")
+        
+        end_time = time.time()
+        execution_time = end_time - start_time
+        logger.info(f"Documentation node generation completed in {execution_time:.2f} seconds")
