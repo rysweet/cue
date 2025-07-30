@@ -24,12 +24,7 @@
     "architecture"
   ],
   "activationEvents": [
-    "onStartupFinished",
-    "onCommand:blarifyVisualizer.showVisualization",
-    "onCommand:blarifyVisualizer.ingestWorkspace",
-    "onCommand:blarifyVisualizer.updateGraph",
-    "onCommand:blarifyVisualizer.searchGraph",
-    "onCommand:blarifyVisualizer.restartNeo4j"
+    "*"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -147,7 +142,7 @@
         {
           "id": "blarify-visualizer",
           "title": "Blarify Visualizer",
-          "icon": "resources/icons/activity-bar-icon.svg"
+          "icon": "$(graph)"
         }
       ]
     },
