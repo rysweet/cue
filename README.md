@@ -33,13 +33,14 @@ Read our article on Medium to learn more about the motivation behind this projec
 - **Code Graph Generation**: Automatically creates a graph representation of your codebase with nodes for files, classes, functions, and their relationships
 - **Multi-Language Support**: Supports Python, JavaScript, TypeScript, Ruby, Go, C#, PHP, and Java
 - **LLM-Generated Descriptions** (New!): Optionally generate natural language descriptions for code elements using Azure OpenAI
+- **Documentation Knowledge Graph** (New!): Parse documentation files to extract concepts, entities, and automatically link them to relevant code
 - **Gitignore Integration** (New!): Automatically excludes files matching `.gitignore` patterns, with `.blarignore` for additional exclusions
 - **Graph Database Integration**: Export to Neo4j or FalkorDB for visualization and querying
 - **Incremental Updates**: Efficiently update the graph when code changes
 
 # LLM Description Generation
 
-Blarify can now generate natural language descriptions for your code elements using Azure OpenAI's GPT-4. This feature helps developers quickly understand the purpose and functionality of code components.
+Blarify can generate natural language descriptions for your code elements using Azure OpenAI's GPT-4. This feature helps developers quickly understand the purpose and functionality of code components. **This feature is enabled by default.**
 
 ## Setup
 
@@ -48,14 +49,14 @@ Blarify can now generate natural language descriptions for your code elements us
 AZURE_OPENAI_API_KEY=your-api-key
 AZURE_OPENAI_ENDPOINT=https://your-instance.openai.azure.com/
 AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4
-ENABLE_LLM_DESCRIPTIONS=true
+ENABLE_LLM_DESCRIPTIONS=true  # Default is true
 ```
 
 2. Use the feature when building your graph:
 ```python
 graph_builder = GraphBuilder(
     root_path="/path/to/project",
-    enable_llm_descriptions=True
+    enable_llm_descriptions=True  # Default is True
 )
 graph = graph_builder.build()
 ```
@@ -109,11 +110,46 @@ docs/
 data/*.csv
 ```
 
+# Documentation Knowledge Graph
+
+Blarify can parse your documentation files to create a knowledge graph of concepts, entities, and their relationships. This feature uses LLM to intelligently extract information from your docs and automatically links them to relevant code elements. **This feature is enabled by default.**
+
+## Features
+
+- **Automatic Documentation Detection**: Finds README, API docs, architecture docs, and other documentation files
+- **Intelligent Extraction**: Uses LLM to extract concepts, entities, relationships, and code references
+- **Smart Linking**: Automatically creates relationships between documentation and code nodes
+- **Customizable Patterns**: Configure which documentation files to include
+
+## Setup
+
+1. Enable the feature when building your graph:
+```python
+graph_builder = GraphBuilder(
+    root_path="/path/to/project",
+    enable_documentation_nodes=True,  # Default is True
+    documentation_patterns=["*.md", "*.rst", "*.adoc"]  # Optional custom patterns
+)
+graph = graph_builder.build()
+```
+
+2. The feature will create these node types:
+- `DOCUMENTATION_FILE`: Represents documentation files
+- `CONCEPT`: Key ideas, patterns, or methodologies mentioned in docs
+- `DOCUMENTED_ENTITY`: Classes, services, or modules described in documentation
+
+3. And these relationships:
+- `CONTAINS_CONCEPT`: Links documentation files to concepts they describe
+- `DESCRIBES_ENTITY`: Links documentation to entities they document
+- `DOCUMENTS`: Links documentation/entities to code nodes
+- `IMPLEMENTS_CONCEPT`: Links code nodes that implement documented concepts
+
 # Future Work
 
 - [x] Gracefully update the graph when new files are added, deleted, or modified
 - [x] Add more language servers
 - [x] LLM-generated descriptions for code understanding
+- [x] Documentation knowledge graph with automatic code linking
 - [ ] Experiment with parallelizing the language server requests
 - [ ] Vector embeddings for semantic code search
 

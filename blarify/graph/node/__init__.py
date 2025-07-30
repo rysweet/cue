@@ -10,3 +10,6 @@ from .deleted_node import DeletedNode
 from .description_node import DescriptionNode
 from .filesystem_file_node import FilesystemFileNode
 from .filesystem_directory_node import FilesystemDirectoryNode
+from .documentation_file_node import DocumentationFileNode
+from .concept_node import ConceptNode
+from .documented_entity_node import DocumentedEntityNode
