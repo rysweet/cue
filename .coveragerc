@@ -1,0 +1,22 @@
+[run]
+source = blarify
+omit = 
+    */tests/*
+    */test_*
+    */vendor/*
+    */venv/*
+    */site-packages/*
+    */__pycache__/*
+    */migrations/*
+
+[report]
+precision = 2
+skip_covered = False
+show_missing = True
+sort = Cover
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

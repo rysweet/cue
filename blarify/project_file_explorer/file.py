@@ -24,4 +24,9 @@ class File:
         return "file://" + self.path
 
     def __str__(self) -> str:
-        return self.get_path()
+        return self.path
+    
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, File):
+            return False
+        return self.path == other.path
