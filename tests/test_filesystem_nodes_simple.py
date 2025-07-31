@@ -8,30 +8,18 @@ class TestFilesystemNodeTypes(unittest.TestCase):
     
     def test_filesystem_node_types_exist(self):
         """Test that FILESYSTEM node types exist in NodeLabels."""
-        # These tests should fail initially since these types don't exist yet
-        with self.assertRaises(AttributeError):
-            _ = NodeLabels.FILESYSTEM
-        
-        with self.assertRaises(AttributeError):
-            _ = NodeLabels.FILESYSTEM_FILE
-            
-        with self.assertRaises(AttributeError):
-            _ = NodeLabels.FILESYSTEM_DIRECTORY
+        # These types should exist
+        self.assertEqual(NodeLabels.FILESYSTEM.value, "FILESYSTEM")
+        self.assertEqual(NodeLabels.FILESYSTEM_FILE.value, "FILESYSTEM_FILE")
+        self.assertEqual(NodeLabels.FILESYSTEM_DIRECTORY.value, "FILESYSTEM_DIRECTORY")
     
     def test_filesystem_relationship_types_exist(self):
         """Test that filesystem relationship types exist."""
-        # These tests should fail initially since these types don't exist yet
-        with self.assertRaises(AttributeError):
-            _ = RelationshipType.IMPLEMENTS
-            
-        with self.assertRaises(AttributeError):
-            _ = RelationshipType.DEPENDS_ON
-            
-        with self.assertRaises(AttributeError):
-            _ = RelationshipType.FILESYSTEM_CONTAINS
-            
-        with self.assertRaises(AttributeError):
-            _ = RelationshipType.REFERENCED_BY_DESCRIPTION
+        # These types should exist
+        self.assertEqual(RelationshipType.IMPLEMENTS.value, "IMPLEMENTS")
+        self.assertEqual(RelationshipType.DEPENDS_ON.value, "DEPENDS_ON")
+        self.assertEqual(RelationshipType.FILESYSTEM_CONTAINS.value, "FILESYSTEM_CONTAINS")
+        self.assertEqual(RelationshipType.REFERENCED_BY_DESCRIPTION.value, "REFERENCED_BY_DESCRIPTION")
 
 
 if __name__ == '__main__':
