@@ -26,9 +26,33 @@ def get_test_graph_environment():
 
 def create_file_node(name="test.py", path=None, level=1):
     """Create a file node with default values."""
+    from unittest.mock import Mock
+    
     if path is None:
         path = f"file:///test/{name}"
-    return FileNode(path=path, name=name, level=level)
+    
+    # Create mock tree-sitter objects
+    mock_definition_range = Mock()
+    mock_node_range = Mock()
+    mock_node_range.range = Mock()
+    mock_node_range.range.start = Mock(line=1)
+    mock_node_range.range.end = Mock(line=100)
+    mock_body_node = Mock()
+    mock_tree_sitter_node = Mock()
+    mock_tree_sitter_node.text = b"# File content"
+    mock_tree_sitter_node.start_byte = 0
+    
+    return FileNode(
+        definition_range=mock_definition_range,
+        node_range=mock_node_range,
+        code_text="# File content",
+        body_node=mock_body_node,
+        tree_sitter_node=mock_tree_sitter_node,
+        path=path,
+        name=name,
+        level=level,
+        graph_environment=get_test_graph_environment()
+    )
 
 
 def create_folder_node(name="src", path=None, level=0):
@@ -41,26 +65,58 @@ def create_folder_node(name="src", path=None, level=0):
 def create_class_node(name="TestClass", path="file:///test/main.py", 
                      start_line=10, end_line=50):
     """Create a class node with default values."""
+    from unittest.mock import Mock
+    
+    # Create mock tree-sitter objects
+    mock_definition_range = Mock()
+    mock_node_range = Mock()
+    mock_node_range.range = Mock()
+    mock_node_range.range.start = Mock(line=start_line)
+    mock_node_range.range.end = Mock(line=end_line)
+    mock_body_node = Mock()
+    mock_tree_sitter_node = Mock()
+    mock_tree_sitter_node.text = f"class {name}: pass".encode()
+    mock_tree_sitter_node.start_byte = 0
+    
     return ClassNode(
-        id=f"class_{name.lower()}_{start_line}",
+        definition_range=mock_definition_range,
+        node_range=mock_node_range,
+        code_text=f"class {name}: pass",
+        body_node=mock_body_node,
+        tree_sitter_node=mock_tree_sitter_node,
         name=name,
         path=path,
         level=2,
-        start_line=start_line,
-        end_line=end_line
+        graph_environment=get_test_graph_environment()
     )
 
 
 def create_function_node(name="test_function", path="file:///test/main.py",
                         start_line=5, end_line=8):
     """Create a function node with default values."""
+    from unittest.mock import Mock
+    
+    # Create mock tree-sitter objects
+    mock_definition_range = Mock()
+    mock_node_range = Mock()
+    mock_node_range.range = Mock()
+    mock_node_range.range.start = Mock(line=start_line)
+    mock_node_range.range.end = Mock(line=end_line)
+    mock_body_node = Mock()
+    mock_tree_sitter_node = Mock()
+    mock_tree_sitter_node.text = f"def {name}(): pass".encode()
+    mock_tree_sitter_node.start_byte = 0
+    
     return FunctionNode(
-        id=f"func_{name.lower()}_{start_line}",
+        definition_range=mock_definition_range,
+        node_range=mock_node_range,
+        code_text=f"def {name}(): pass",
+        body_node=mock_body_node,
+        tree_sitter_node=mock_tree_sitter_node,
         name=name,
         path=path,
         level=2,
-        start_line=start_line,
-        end_line=end_line
+        graph_environment=get_test_graph_environment()
     )
 
 
