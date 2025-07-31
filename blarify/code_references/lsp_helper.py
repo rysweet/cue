@@ -3,7 +3,6 @@ import psutil
 from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
 from .types.Reference import Reference
-from blarify.graph.node import DefinitionNode
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 from blarify.vendor.multilspy.lsp_protocol_handler.server import Error

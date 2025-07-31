@@ -1,6 +1,7 @@
 """Integration tests for MCP server with real Neo4j."""
 
 import pytest
+import pytest_asyncio
 import asyncio
 import os
 from neo4j import GraphDatabase
@@ -42,7 +43,7 @@ class TestIntegration:
         subprocess.run([sys.executable, "tests/setup_test_graph.py"],
                       cwd=os.path.dirname(os.path.dirname(__file__)))
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     def neo4j_driver(self):
         """Create Neo4j driver."""
         driver = GraphDatabase.driver(
@@ -52,7 +53,7 @@ class TestIntegration:
         yield driver
         driver.close()
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mcp_server(self):
         """Create MCP server instance."""
         os.environ.update({

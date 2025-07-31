@@ -35,6 +35,11 @@ pathspec = "^0.12.1"
 
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+pytest-cov = "^6.2.1"
+pytest-asyncio = "^1.1.0"
+
 [tool.vendoring]
 destination = "blarify/vendor"
 namespace = "blarify.vendor"
