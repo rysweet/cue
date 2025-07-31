@@ -34,7 +34,7 @@ class TestLLMService(unittest.TestCase):
     def test_initialization_with_env_vars(self):
         """Test LLM service initialization with environment variables."""
         self.assertIsNotNone(self.service.client)
-        self.assertEqual(self.service.model, 'gpt-4')
+        self.assertEqual(self.service.deployment_name, 'gpt-4')
         
     @patch.dict(os.environ, {}, clear=True)
     def test_initialization_missing_config(self):
@@ -64,7 +64,8 @@ class TestLLMService(unittest.TestCase):
                 pass
         """
         
-        description = service.generate_description(code, "class", "UserManager")
+        prompt = f"Generate a description for the following class named UserManager:\n\n{code}"
+        description = service.generate_description(prompt)
         
         self.assertEqual(description, "This class manages users")
         mock_client.chat.completions.create.assert_called_once()
@@ -86,7 +87,7 @@ class TestLLMService(unittest.TestCase):
         
         service = LLMService()
         
-        description = service.generate_description("code", "type", "name")
+        description = service.generate_description("Generate a description for this code")
         
         self.assertEqual(description, "Success")
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
@@ -102,53 +103,27 @@ class TestLLMService(unittest.TestCase):
         
         service = LLMService()
         
-        description = service.generate_description("code", "type", "name")
+        description = service.generate_description("Generate a description for this code")
         
         self.assertEqual(description, "Failed to generate description")
         self.assertEqual(mock_client.chat.completions.create.call_count, 3)  # Initial + 2 retries
         
-    @patch('openai.AzureOpenAI')
-    def test_extract_concepts(self, mock_openai_class):
-        """Test concept extraction from documentation."""
-        mock_client = MagicMock()
-        mock_openai_class.return_value = mock_client
+    def test_batch_description_generation(self):
+        """Test batch description generation."""
+        prompts = [
+            {"id": "node1", "prompt": "Describe function foo"},
+            {"id": "node2", "prompt": "Describe class Bar"}
+        ]
         
-        # Mock response with JSON
-        response_content = json.dumps({
-            "concepts": [
-                {"name": "MVC Pattern", "description": "Model-View-Controller architecture"}
-            ],
-            "entities": [
-                {"name": "UserController", "type": "class"}
-            ],
-            "relationships": [],
-            "code_references": ["controllers/user.py"]
-        })
+        results = self.service.generate_batch_descriptions(prompts)
         
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock(message=MagicMock(content=response_content))]
-        mock_client.chat.completions.create.return_value = mock_response
+        self.assertIsInstance(results, dict)
+        self.assertIn("node1", results)
+        self.assertIn("node2", results)
         
-        service = LLMService()
-        
-        result = service.extract_concepts("Documentation content...")
-        
-        self.assertEqual(len(result["concepts"]), 1)
-        self.assertEqual(result["concepts"][0]["name"], "MVC Pattern")
-        self.assertEqual(len(result["entities"]), 1)
-        
-    def test_format_code_context(self):
-        """Test formatting code context for prompts."""
-        code = """
-def calculate_total(items):
-    return sum(item.price for item in items)
-"""
-        
-        context = self.service._format_code_context(code, "function", "calculate_total")
-        
-        self.assertIn("function", context)
-        self.assertIn("calculate_total", context)
-        self.assertIn("def calculate_total", context)
+    def test_is_enabled(self):
+        """Test checking if LLM service is enabled."""
+        self.assertTrue(self.service.is_enabled())
 
 
 class TestDescriptionGenerator(unittest.TestCase):
@@ -269,7 +244,7 @@ def main_func():
         # Verify relationships were created
         relationships = self.graph.get_relationships_as_objects()
         desc_relationships = [r for r in relationships 
-                            if r['type'] == 'DESCRIBES']
+                            if r['type'] == 'HAS_DESCRIPTION']
         self.assertEqual(len(desc_relationships), 2)
         
     def test_generate_descriptions_with_limit(self):

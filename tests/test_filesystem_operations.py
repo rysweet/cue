@@ -256,13 +256,27 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         """Test connecting filesystem nodes to existing code nodes."""
         from blarify.graph.node.file_node import FileNode
         from blarify.graph.node.class_node import ClassNode
+        from unittest.mock import Mock
         
         # Create code nodes first
         file_path = "file:///test/src/main.py"
         code_file = FileNode(path=file_path, name="main.py", level=2)
         self.graph.add_node(code_file)
         
+        # Create mock tree-sitter objects for ClassNode
+        mock_definition_range = Mock()
+        mock_node_range = Mock()
+        mock_body_node = Mock()
+        mock_tree_sitter_node = Mock()
+        mock_tree_sitter_node.text = b"class MainClass: pass"
+        mock_tree_sitter_node.start_byte = 0
+        
         code_class = ClassNode(
+            definition_range=mock_definition_range,
+            node_range=mock_node_range,
+            code_text="class MainClass: pass",
+            body_node=mock_body_node,
+            tree_sitter_node=mock_tree_sitter_node,
             id="class_main",
             name="MainClass",
             path=file_path,
@@ -324,7 +338,9 @@ docs/**/*.tmp
         gitignore_path = Path(self.temp_dir) / ".gitignore"
         gitignore_path.write_text(gitignore_content)
         
-        patterns = self.manager.parse_gitignore()
+        # Reinitialize manager to load the new gitignore file
+        self.manager = GitignoreManager(self.temp_dir)
+        patterns = self.manager.get_all_patterns()
         
         # Check patterns were parsed
         self.assertIn("*.pyc", patterns)
@@ -349,6 +365,9 @@ test_*.py
         gitignore_path = Path(self.temp_dir) / ".gitignore"
         gitignore_path.write_text(gitignore_content)
         
+        # Reinitialize manager to load the new gitignore file
+        self.manager = GitignoreManager(self.temp_dir)
+        
         # Test various paths
         self.assertTrue(self.manager.should_ignore("module.pyc"))
         self.assertTrue(self.manager.should_ignore("__pycache__/data.py"))
@@ -365,7 +384,7 @@ test_*.py
     def test_no_gitignore_file(self):
         """Test behavior when no gitignore file exists."""
         # No gitignore file created
-        patterns = self.manager.parse_gitignore()
+        patterns = self.manager.get_all_patterns()
         
         # Should return empty list
         self.assertEqual(patterns, [])
@@ -386,6 +405,9 @@ test_*.py
         # Nested gitignore
         src_gitignore = Path(self.temp_dir) / "src" / ".gitignore"
         src_gitignore.write_text("*.tmp")
+        
+        # Reinitialize manager to load the new gitignore files
+        self.manager = GitignoreManager(self.temp_dir)
         
         # Test with root manager
         self.assertTrue(self.manager.should_ignore("error.log"))
