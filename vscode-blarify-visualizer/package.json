@@ -184,7 +184,7 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "dockerode": "^4.0.0",
+    "@blarify/neo4j-container-manager": "file:../neo4j-container-manager",
     "neo4j-driver": "^5.14.0",
     "three": "^0.159.0"
   }

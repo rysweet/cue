@@ -16,6 +16,12 @@ class Config:
     NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
     NEO4J_DATABASE: str = os.getenv("NEO4J_DATABASE", "neo4j")
     
+    # Container management settings
+    MANAGE_NEO4J_CONTAINER: bool = os.getenv("MANAGE_NEO4J_CONTAINER", "true").lower() == "true"
+    NEO4J_DATA_DIR: str = os.getenv("NEO4J_DATA_DIR", os.path.join(os.getcwd(), ".blarify", "neo4j"))
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
+    
     # Azure OpenAI settings
     AZURE_OPENAI_API_KEY: Optional[str] = os.getenv("AZURE_OPENAI_API_KEY")
     AZURE_OPENAI_ENDPOINT: Optional[str] = os.getenv("AZURE_OPENAI_ENDPOINT")
@@ -37,8 +43,11 @@ class Config:
     @classmethod
     def validate(cls) -> None:
         """Validate required configuration."""
-        if not cls.NEO4J_URI:
-            raise ValueError("NEO4J_URI is required")
+        if not cls.MANAGE_NEO4J_CONTAINER and not cls.NEO4J_URI:
+            raise ValueError("NEO4J_URI is required when MANAGE_NEO4J_CONTAINER is disabled")
+        
+        if not cls.NEO4J_PASSWORD:
+            raise ValueError("NEO4J_PASSWORD is required")
         
         if cls.INCLUDE_LLM_SUMMARIES and not cls.AZURE_OPENAI_API_KEY:
             raise ValueError("AZURE_OPENAI_API_KEY is required when INCLUDE_LLM_SUMMARIES is enabled")

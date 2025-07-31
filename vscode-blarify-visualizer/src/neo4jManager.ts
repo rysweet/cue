@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import Docker from 'dockerode';
-import neo4j, { Driver, Session } from 'neo4j-driver';
+import { Neo4jContainerManager, Neo4jContainerInstance } from '@blarify/neo4j-container-manager';
 import { ConfigurationManager } from './configurationManager';
 
 export interface Neo4jStatus {
@@ -17,230 +16,135 @@ export interface GraphStats {
 }
 
 export class Neo4jManager implements vscode.Disposable {
-    private docker: Docker;
-    private driver?: Driver;
-    private containerId?: string;
-    private readonly containerName = 'blarify-neo4j';
-    private readonly imageName = 'neo4j:5-community';
+    private containerManager: Neo4jContainerManager;
+    private containerInstance?: Neo4jContainerInstance;
     
     constructor(private configManager: ConfigurationManager) {
-        this.docker = new Docker();
+        // Create container manager with VS Code specific settings
+        this.containerManager = new Neo4jContainerManager({
+            dataDir: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath 
+                ? `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.blarify`
+                : undefined,
+            debug: vscode.workspace.getConfiguration().get('blarifyVisualizer.debug', false)
+        });
     }
     
     async ensureRunning(): Promise<void> {
-        // First try to connect to Neo4j at the configured URI
-        try {
-            await this.connectDriver();
-            await this.driver!.verifyConnectivity();
-            console.log('Successfully connected to existing Neo4j instance');
-            return;
-        } catch (e) {
-            console.log('Could not connect to Neo4j:', e);
-            if (this.driver) {
-                await this.driver.close();
-                this.driver = undefined;
-            }
-            
-            // For now, don't try to start containers automatically
-            throw new Error('Neo4j is not running. Please ensure the blarify-neo4j container is running on port 7687.');
-        }
-    }
-    
-    async getStatus(): Promise<Neo4jStatus> {
-        try {
-            const containers = await this.docker.listContainers({ all: true });
-            const container = containers.find(c => 
-                c.Names.some(name => name.includes(this.containerName))
-            );
-            
-            if (container) {
-                this.containerId = container.Id;
-                return {
-                    running: container.State === 'running',
-                    containerId: container.Id,
-                    details: `${container.State} - ${container.Status}`
-                };
-            }
-            
-            return { running: false };
-        } catch (error) {
-            console.error('Failed to check Neo4j status:', error);
-            return { running: false, details: `Error: ${error}` };
-        }
-    }
-    
-    private async startContainer(): Promise<void> {
-        try {
-            // Check if container exists
-            const status = await this.getStatus();
-            if (status.containerId) {
-                const container = this.docker.getContainer(status.containerId);
-                if (!status.running) {
-                    // Container exists but is stopped, start it
-                    await container.start();
-                    await this.waitForNeo4j();
-                    return;
-                } else {
-                    // Container is already running
-                    await this.waitForNeo4j();
-                    return;
-                }
-            }
-            
-            // Pull image if needed
-            await this.pullImageIfNeeded();
-            
-            // Check if container already exists
-            const containers = await this.docker.listContainers({ all: true });
-            const existingContainer = containers.find(c => 
-                c.Names.some(name => name === `/${this.containerName}`)
-            );
-            
-            if (existingContainer) {
-                // Container exists, try to start it if stopped
-                const container = this.docker.getContainer(existingContainer.Id);
-                if (existingContainer.State !== 'running') {
-                    try {
-                        await container.start();
-                        this.containerId = existingContainer.Id;
-                        await this.waitForNeo4j();
-                        return;
-                    } catch (e) {
-                        // If we can't start it, remove and recreate
-                        try {
-                            await container.remove();
-                        } catch (removeError) {
-                            // Ignore removal errors
-                        }
-                    }
-                } else {
-                    // Container is already running
-                    this.containerId = existingContainer.Id;
-                    return;
-                }
-            }
-            
-            // Get configuration
-            const config = this.configManager.getNeo4jConfig();
-            
-            // Validate password is configured
-            if (!config.password) {
-                throw new Error('Neo4j password not configured. Please set it in VS Code settings.');
-            }
-            
-            // Create and start new container
-            const container = await this.docker.createContainer({
-                Image: this.imageName,
-                name: this.containerName,
-                Env: [
-                    `NEO4J_AUTH=${config.username}/${config.password}`,
-                    'NEO4J_PLUGINS=["apoc"]',
-                    'NEO4J_apoc_export_file_enabled=true',
-                    'NEO4J_apoc_import_file_enabled=true',
-                    'NEO4J_apoc_import_file_use__neo4j__config=true'
-                ],
-                ExposedPorts: {
-                    '7474/tcp': {},
-                    '7687/tcp': {}
-                },
-                HostConfig: {
-                    PortBindings: {
-                        '7474/tcp': [{ HostPort: '7474' }],
-                        '7687/tcp': [{ HostPort: this.configManager.getNeo4jConfig().uri.includes('7688') ? '7688' : '7687' }]
-                    },
-                    AutoRemove: false
-                }
-            });
-            
-            await container.start();
-            this.containerId = container.id;
-            
-            // Wait for Neo4j to be ready
-            await this.waitForNeo4j();
-            
-        } catch (error) {
-            throw new Error(`Failed to start Neo4j container: ${error}`);
-        }
-    }
-    
-    private async pullImageIfNeeded(): Promise<void> {
-        try {
-            await this.docker.getImage(this.imageName).inspect();
-        } catch (error) {
-            // Image doesn't exist, pull it
-            vscode.window.showInformationMessage(`Pulling Neo4j image ${this.imageName}...`);
-            
-            await new Promise<void>((resolve, reject) => {
-                this.docker.pull(this.imageName, (err: any, stream: any) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    
-                    // Follow pull progress
-                    this.docker.modem.followProgress(stream, (err: any, output: any) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve();
-                        }
-                    });
-                });
-            });
-        }
-    }
-    
-    private async waitForNeo4j(maxRetries = 30): Promise<void> {
-        const config = this.configManager.getNeo4jConfig();
-        for (let i = 0; i < maxRetries; i++) {
-            try {
-                const driver = neo4j.driver(
-                    config.uri,
-                    neo4j.auth.basic(config.username, config.password)
-                );
-                
-                const session = driver.session();
-                await session.run('RETURN 1');
-                await session.close();
-                await driver.close();
-                
+        // If already have an instance, check if it's still running
+        if (this.containerInstance) {
+            if (await this.containerInstance.isRunning()) {
                 return;
-            } catch (error) {
-                if (i === maxRetries - 1) {
-                    throw new Error('Neo4j failed to start within timeout');
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
             }
+            this.containerInstance = undefined;
         }
-    }
-    
-    private async connectDriver(): Promise<void> {
+        
+        // Get configuration
         const config = this.configManager.getNeo4jConfig();
         
+        // Validate password is configured
         if (!config.password) {
             throw new Error('Neo4j password not configured. Please set it in VS Code settings.');
         }
         
-        this.driver = neo4j.driver(
-            config.uri,
-            neo4j.auth.basic(config.username, config.password)
-        );
-        
-        // Verify connection
-        const session = this.driver.session();
+        // Start container using the new manager
         try {
-            await session.run('RETURN 1');
+            this.containerInstance = await this.containerManager.start({
+                environment: 'development',
+                password: config.password,
+                username: config.username || 'neo4j',
+                plugins: ['apoc'],
+                memory: '2G'
+            });
+            
+            console.log(`Neo4j started at ${this.containerInstance.uri}`);
+        } catch (error: any) {
+            if (error.message.includes('Docker')) {
+                throw new Error('Docker is not running. Please start Docker Desktop and try again.');
+            }
+            throw error;
+        }
+    }
+    
+    async getStatus(): Promise<Neo4jStatus> {
+        if (!this.containerInstance) {
+            return { running: false };
+        }
+        
+        const running = await this.containerInstance.isRunning();
+        if (!running) {
+            this.containerInstance = undefined;
+            return { running: false };
+        }
+        
+        return {
+            running: true,
+            containerId: this.containerInstance.containerId,
+            details: `Connected to ${this.containerInstance.uri}`
+        };
+    }
+    
+    async getStats(): Promise<GraphStats | null> {
+        if (!this.containerInstance?.driver) {
+            return null;
+        }
+        
+        const session = this.containerInstance.driver.session();
+        try {
+            // Get node statistics
+            const nodeResult = await session.run(`
+                MATCH (n)
+                RETURN labels(n) as labels, count(n) as count
+            `);
+            
+            const nodeTypes: { [key: string]: number } = {};
+            let totalNodes = 0;
+            
+            nodeResult.records.forEach(record => {
+                const labels = record.get('labels');
+                const count = record.get('count').toNumber();
+                totalNodes += count;
+                
+                if (labels.length > 0) {
+                    nodeTypes[labels[0]] = count;
+                }
+            });
+            
+            // Get relationship statistics
+            const relResult = await session.run(`
+                MATCH ()-[r]->()
+                RETURN type(r) as type, count(r) as count
+            `);
+            
+            const relationshipTypes: { [key: string]: number } = {};
+            let totalRelationships = 0;
+            
+            relResult.records.forEach(record => {
+                const type = record.get('type');
+                const count = record.get('count').toNumber();
+                totalRelationships += count;
+                relationshipTypes[type] = count;
+            });
+            
+            return {
+                nodeCount: totalNodes,
+                relationshipCount: totalRelationships,
+                nodeTypes,
+                relationshipTypes
+            };
+        } catch (error) {
+            console.error('Failed to get graph stats:', error);
+            return null;
         } finally {
             await session.close();
         }
     }
     
     async saveGraph(nodes: any[], edges: any[]): Promise<void> {
-        if (!this.driver) {
+        if (!this.containerInstance?.driver) {
             throw new Error('Neo4j driver not connected');
         }
         
-        const session = this.driver.session();
+        const session = this.containerInstance.driver.session();
         try {
             // Clear existing data
             await session.run('MATCH (n) DETACH DELETE n');
@@ -284,7 +188,7 @@ export class Neo4jManager implements vscode.Disposable {
     }
     
     async getGraphStats(): Promise<GraphStats> {
-        if (!this.driver) {
+        if (!this.containerInstance?.driver) {
             return {
                 nodeCount: 0,
                 relationshipCount: 0,
@@ -293,7 +197,7 @@ export class Neo4jManager implements vscode.Disposable {
             };
         }
         
-        const session = this.driver.session();
+        const session = this.containerInstance.driver.session();
         try {
             // Get node count and types
             const nodeResult = await session.run(
@@ -346,31 +250,47 @@ export class Neo4jManager implements vscode.Disposable {
         }
     }
     
-    getDriver(): Driver | undefined {
-        return this.driver;
+    getDriver() {
+        return this.containerInstance?.driver;
     }
     
-    async dispose(): Promise<void> {
-        if (this.driver) {
-            await this.driver.close();
-        }
-        
-        // Optionally stop container
-        const shouldStop = await vscode.window.showQuickPick(
-            ['Keep running', 'Stop container'],
-            {
-                placeHolder: 'Neo4j container is running. What would you like to do?'
+    async dispose() {
+        if (this.containerInstance) {
+            // Ask user if they want to keep the container running
+            const shouldStop = await vscode.window.showQuickPick(
+                ['Keep running', 'Stop container'],
+                {
+                    placeHolder: 'Neo4j container is running. What would you like to do?'
+                }
+            );
+            
+            if (shouldStop === 'Stop container') {
+                try {
+                    await this.containerInstance.stop();
+                } catch (error) {
+                    console.error('Error stopping Neo4j container:', error);
+                }
+            } else {
+                // Just close the driver connection but keep container running
+                if (this.containerInstance.driver) {
+                    await this.containerInstance.driver.close();
+                }
             }
-        );
-        
-        if (shouldStop === 'Stop container' && this.containerId) {
-            try {
-                const container = this.docker.getContainer(this.containerId);
-                await container.stop();
-                await container.remove();
-            } catch (error) {
-                console.error('Failed to stop container:', error);
-            }
         }
+    }
+    
+    // Data management methods
+    async exportData(path: string): Promise<void> {
+        if (!this.containerInstance) {
+            throw new Error('Neo4j is not running');
+        }
+        await this.containerInstance.exportData(path);
+    }
+    
+    async importData(path: string): Promise<void> {
+        if (!this.containerInstance) {
+            throw new Error('Neo4j is not running');
+        }
+        await this.containerInstance.importData(path);
     }
 }
