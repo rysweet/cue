@@ -1,7 +1,6 @@
 version: 2
 
 paths-ignore:
-  - mcp-blarify-server/src/neo4j_container.py:67  # Docstring parameter description, not a real password
   - '**/*.example'  # Example configuration files
   - '**/test*/**'   # Test files often contain test credentials
   
