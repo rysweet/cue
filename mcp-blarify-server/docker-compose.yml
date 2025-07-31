@@ -1,3 +1,7 @@
+# NOTE: This docker-compose.yml is now OPTIONAL!
+# The MCP server can automatically manage Neo4j containers when MANAGE_NEO4J_CONTAINER=true
+# Use this file only for manual testing or when MANAGE_NEO4J_CONTAINER=false
+
 version: '3.8'
 
 services:

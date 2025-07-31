@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 from src.config import Config
 from src.tools.context_tools import ContextTools
 from src.tools.planning_tools import PlanningTools
+from src.neo4j_container import Neo4jContainerManager
 
 # Configure logging
 logging.basicConfig(
@@ -61,6 +62,8 @@ class BlarifyMCPServer:
         self.driver = None
         self.context_tools = None
         self.planning_tools = None
+        self.container_manager = None
+        self.container_info = None
         
         # Validate configuration
         try:
@@ -132,9 +135,32 @@ class BlarifyMCPServer:
     async def _connect_to_neo4j(self):
         """Establish connection to Neo4j."""
         try:
-            logger.info(f"Connecting to Neo4j at {Config.NEO4J_URI}")
+            # Check if we should manage the container
+            if Config.MANAGE_NEO4J_CONTAINER:
+                logger.info("Starting managed Neo4j container")
+                self.container_manager = Neo4jContainerManager(
+                    data_dir=Config.NEO4J_DATA_DIR,
+                    debug=Config.DEBUG
+                )
+                
+                # Start container
+                self.container_info = self.container_manager.start({
+                    "environment": Config.ENVIRONMENT,
+                    "password": Config.NEO4J_PASSWORD,
+                    "username": Config.NEO4J_USERNAME,
+                    "plugins": ["apoc"],
+                    "memory": "2G"
+                })
+                
+                # Use the dynamically allocated URI
+                neo4j_uri = self.container_info["uri"]
+            else:
+                # Use configured URI
+                neo4j_uri = Config.NEO4J_URI
+            
+            logger.info(f"Connecting to Neo4j at {neo4j_uri}")
             self.driver = GraphDatabase.driver(
-                Config.NEO4J_URI,
+                neo4j_uri,
                 auth=(Config.NEO4J_USERNAME, Config.NEO4J_PASSWORD)
             )
             
@@ -175,6 +201,14 @@ class BlarifyMCPServer:
             if self.driver:
                 self.driver.close()
                 logger.info("Closed Neo4j connection")
+            
+            # Stop container if managed
+            if self.container_manager and Config.MANAGE_NEO4J_CONTAINER:
+                try:
+                    self.container_manager.stop()
+                    logger.info("Stopped managed Neo4j container")
+                except Exception as e:
+                    logger.error(f"Error stopping container: {e}")
 
 
 async def main():

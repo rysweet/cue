@@ -279,3 +279,7 @@ New specialized agents can be added to `.github/agents/` following the existing 
 - Command sequence for uninstalling and reinstalling the extension: 
   - Uninstall: `code --uninstall-extension <extension-id>`
   - Reinstall: `code --install-extension <extension-id>`
+
+## CI Management
+
+- Use `scripts/check_ci_status.sh` to efficiently check the ci status of a PR

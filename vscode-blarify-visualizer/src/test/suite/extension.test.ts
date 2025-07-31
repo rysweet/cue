@@ -57,10 +57,14 @@ suite('Neo4jManager Test Suite', () => {
     
     test('Should check Neo4j status', async () => {
         neo4jManager = new Neo4jManager(configManager);
-        const dockerStub = {
-            listContainers: sandbox.stub().resolves([])
+        
+        // Mock the container instance
+        const mockInstance = {
+            isRunning: sandbox.stub().resolves(false),
+            containerId: 'test-container',
+            uri: 'bolt://localhost:7687'
         };
-        (neo4jManager as any).docker = dockerStub;
+        (neo4jManager as any).containerInstance = mockInstance;
         
         const status = await neo4jManager.getStatus();
         assert.strictEqual(status.running, false);
@@ -68,28 +72,30 @@ suite('Neo4jManager Test Suite', () => {
     
     test('Should handle container start', async () => {
         neo4jManager = new Neo4jManager(configManager);
-        const containerStub = {
-            start: sandbox.stub().resolves(),
-            id: 'test-container-id'
+        
+        // Mock the container manager
+        const mockInstance = {
+            isRunning: sandbox.stub().resolves(true),
+            containerId: 'test-container-id',
+            uri: 'bolt://localhost:7687',
+            driver: {
+                session: sandbox.stub().returns({
+                    run: sandbox.stub().resolves({ records: [] }),
+                    close: sandbox.stub().resolves()
+                })
+            }
         };
         
-        const dockerStub = {
-            listContainers: sandbox.stub().resolves([]),
-            getImage: sandbox.stub().returns({
-                inspect: sandbox.stub().resolves({})
-            }),
-            createContainer: sandbox.stub().resolves(containerStub),
-            getContainer: sandbox.stub().returns(containerStub)
+        const containerManagerStub = {
+            start: sandbox.stub().resolves(mockInstance)
         };
         
-        (neo4jManager as any).docker = dockerStub;
-        sandbox.stub(neo4jManager as any, 'waitForNeo4j').resolves();
-        sandbox.stub(neo4jManager as any, 'connectDriver').resolves();
+        (neo4jManager as any).containerManager = containerManagerStub;
         
         await neo4jManager.ensureRunning();
         
-        assert.ok(dockerStub.createContainer.called);
-        assert.ok(containerStub.start.called);
+        assert.ok(containerManagerStub.start.called);
+        assert.deepStrictEqual((neo4jManager as any).containerInstance, mockInstance);
     });
 });
 
