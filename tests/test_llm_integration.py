@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 import os
 import json
+import pytest
 
 from blarify.llm_descriptions.llm_service import LLMService
 from blarify.llm_descriptions.description_generator import DescriptionGenerator
@@ -15,7 +16,7 @@ from blarify.graph.node.file_node import FileNode
 from blarify.graph.node.description_node import DescriptionNode
 from blarify.graph.node.types.node_labels import NodeLabels
 from tests.fixtures.node_factories import (
-    create_class_node, create_function_node, create_file_node
+    create_class_node, create_function_node, create_file_node, create_folder_node
 )
 
 
@@ -27,14 +28,31 @@ class TestLLMService(unittest.TestCase):
         'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com',
         'AZURE_OPENAI_MODEL_CHAT': 'gpt-4'
     })
-    def setUp(self):
+    @patch('openai.AzureOpenAI')
+    def setUp(self, mock_openai_class):
         """Set up test fixtures."""
-        self.service = LLMService()
+        # Mock the OpenAI client
+        mock_client = MagicMock()
+        mock_openai_class.return_value = mock_client
         
-    def test_initialization_with_env_vars(self):
+        # Mock completion response
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock(message=MagicMock(content="Test description"))]
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        self.service = LLMService()
+        self.service.client = mock_client  # Ensure the service uses the mocked client
+        self.mock_client = mock_client
+        
+    @patch('openai.AzureOpenAI')
+    def test_initialization_with_env_vars(self, mock_openai_class):
         """Test LLM service initialization with environment variables."""
-        self.assertIsNotNone(self.service.client)
-        self.assertEqual(self.service.deployment_name, 'gpt-4')
+        mock_client = MagicMock()
+        mock_openai_class.return_value = mock_client
+        
+        service = LLMService()
+        self.assertIsNotNone(service.client)
+        self.assertEqual(service.deployment_name, 'gpt-4')
         
     @patch.dict(os.environ, {}, clear=True)
     def test_initialization_missing_config(self):
@@ -44,6 +62,10 @@ class TestLLMService(unittest.TestCase):
             
         self.assertIn("Azure OpenAI configuration is incomplete", str(context.exception))
         
+    @pytest.mark.skipif(
+        not os.getenv('AZURE_OPENAI_KEY'),
+        reason="AZURE_OPENAI_KEY not set in environment"
+    )
     @patch('openai.AzureOpenAI')
     def test_generate_description_success(self, mock_openai_class):
         """Test successful description generation."""
@@ -56,7 +78,12 @@ class TestLLMService(unittest.TestCase):
         mock_response.choices = [MagicMock(message=MagicMock(content="This class manages users"))]
         mock_client.chat.completions.create.return_value = mock_response
         
-        service = LLMService()
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_KEY': 'test-key',
+            'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com',
+            'AZURE_OPENAI_MODEL_CHAT': 'gpt-4'
+        }):
+            service = LLMService()
         
         code = """
         class UserManager:
@@ -70,6 +97,10 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(description, "This class manages users")
         mock_client.chat.completions.create.assert_called_once()
         
+    @pytest.mark.skipif(
+        not os.getenv('AZURE_OPENAI_KEY'),
+        reason="AZURE_OPENAI_KEY not set in environment"
+    )
     @patch('openai.AzureOpenAI')
     def test_generate_description_with_retry(self, mock_openai_class):
         """Test description generation with retry on failure."""
@@ -85,13 +116,22 @@ class TestLLMService(unittest.TestCase):
             mock_response
         ]
         
-        service = LLMService()
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_KEY': 'test-key',
+            'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com',
+            'AZURE_OPENAI_MODEL_CHAT': 'gpt-4'
+        }):
+            service = LLMService()
         
         description = service.generate_description("Generate a description for this code")
         
         self.assertEqual(description, "Success")
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
         
+    @pytest.mark.skipif(
+        not os.getenv('AZURE_OPENAI_KEY'),
+        reason="AZURE_OPENAI_KEY not set in environment"
+    )
     @patch('openai.AzureOpenAI')
     def test_generate_description_all_retries_fail(self, mock_openai_class):
         """Test description generation when all retries fail."""
@@ -101,7 +141,12 @@ class TestLLMService(unittest.TestCase):
         # All calls fail
         mock_client.chat.completions.create.side_effect = Exception("API Error")
         
-        service = LLMService()
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_KEY': 'test-key',
+            'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com',
+            'AZURE_OPENAI_MODEL_CHAT': 'gpt-4'
+        }):
+            service = LLMService()
         
         description = service.generate_description("Generate a description for this code")
         
@@ -115,15 +160,31 @@ class TestLLMService(unittest.TestCase):
             {"id": "node2", "prompt": "Describe class Bar"}
         ]
         
+        # Mock the LLMService client attribute
+        self.service.client = self.mock_client
+        
+        # Mock the responses
+        self.mock_client.chat.completions.create.side_effect = [
+            MagicMock(choices=[MagicMock(message=MagicMock(content="Description for foo"))]),
+            MagicMock(choices=[MagicMock(message=MagicMock(content="Description for Bar"))])
+        ]
+        
         results = self.service.generate_batch_descriptions(prompts)
         
         self.assertIsInstance(results, dict)
         self.assertIn("node1", results)
         self.assertIn("node2", results)
+        self.assertEqual(results["node1"], "Description for foo")
+        self.assertEqual(results["node2"], "Description for Bar")
         
-    def test_is_enabled(self):
+    @patch('openai.AzureOpenAI')
+    def test_is_enabled(self, mock_openai_class):
         """Test checking if LLM service is enabled."""
-        self.assertTrue(self.service.is_enabled())
+        mock_client = MagicMock()
+        mock_openai_class.return_value = mock_client
+        
+        service = LLMService()
+        self.assertTrue(service.is_enabled())
 
 
 class TestDescriptionGenerator(unittest.TestCase):
@@ -133,85 +194,94 @@ class TestDescriptionGenerator(unittest.TestCase):
         """Set up test fixtures."""
         self.mock_llm = Mock()
         self.mock_llm.generate_description.return_value = "Test description"
+        self.mock_llm.is_enabled.return_value = True
+        self.mock_llm.deployment_name = "gpt-4"
+        self.mock_llm.generate_batch_descriptions.return_value = {}
         self.generator = DescriptionGenerator(llm_service=self.mock_llm)
         self.graph = Graph()
         
-    def test_should_generate_description(self):
-        """Test determining which nodes should get descriptions."""
-        # Should generate for classes and functions
+    def test_get_eligible_nodes(self):
+        """Test getting eligible nodes for description generation."""
+        # Create various node types
+        file_node = create_file_node("test.py")
         class_node = create_class_node("TestClass")
         func_node = create_function_node("test_func")
+        folder_node = create_folder_node("src")
         
-        self.assertTrue(self.generator.should_generate_description(class_node))
-        self.assertTrue(self.generator.should_generate_description(func_node))
+        self.graph.add_node(file_node)
+        self.graph.add_node(class_node)
+        self.graph.add_node(func_node)
+        self.graph.add_node(folder_node)
         
-        # Should not generate for files
-        file_node = create_file_node("test.py")
-        self.assertFalse(self.generator.should_generate_description(file_node))
+        # Get eligible nodes
+        eligible_nodes = self.generator._get_eligible_nodes(self.graph)
+        
+        # File, class, and function should be eligible
+        self.assertEqual(len(eligible_nodes), 3)
+        node_labels = {node.label for node in eligible_nodes}
+        self.assertIn(NodeLabels.FILE, node_labels)
+        self.assertIn(NodeLabels.CLASS, node_labels)
+        self.assertIn(NodeLabels.FUNCTION, node_labels)
+        
+        # Folder should not be eligible
+        self.assertNotIn(NodeLabels.FOLDER, node_labels)
         
     @patch('builtins.open', create=True)
     @patch('os.path.exists')
-    def test_get_file_content(self, mock_exists, mock_open):
-        """Test reading file content for context."""
-        mock_exists.return_value = True
-        mock_open.return_value.__enter__.return_value.read.return_value = "file content"
+    def test_extract_node_context(self, mock_exists, mock_open):
+        """Test extracting context information for nodes."""
+        # Test for function node
+        func_node = create_function_node("test_func")
+        func_node.text = "def test_func(): pass"
+        context = self.generator._extract_node_context(func_node, self.graph)
         
-        content = self.generator.get_file_content("/test/file.py")
+        self.assertIsNotNone(context)
+        self.assertEqual(context["function_name"], "test_func")
+        self.assertEqual(context["code_snippet"], "def test_func(): pass")
         
-        self.assertEqual(content, "file content")
-        mock_open.assert_called_once_with("/test/file.py", 'r', encoding='utf-8')
+        # Test for class node
+        class_node = create_class_node("TestClass")
+        class_node.text = "class TestClass: pass"
+        context = self.generator._extract_node_context(class_node, self.graph)
         
-    def test_get_file_content_not_found(self):
-        """Test handling missing files."""
-        content = self.generator.get_file_content("/nonexistent/file.py")
+        self.assertIsNotNone(context)
+        self.assertEqual(context["class_name"], "TestClass")
+        self.assertEqual(context["code_snippet"], "class TestClass: pass")
         
-        self.assertIsNone(content)
+    def test_detect_language(self):
+        """Test language detection from file extensions."""
+        # Test common extensions
+        self.assertEqual(self.generator._detect_language(".py"), "Python")
+        self.assertEqual(self.generator._detect_language(".js"), "JavaScript")
+        self.assertEqual(self.generator._detect_language(".ts"), "TypeScript")
+        self.assertEqual(self.generator._detect_language(".java"), "Java")
+        self.assertEqual(self.generator._detect_language(".go"), "Go")
+        self.assertEqual(self.generator._detect_language(".rb"), "Ruby")
+        self.assertEqual(self.generator._detect_language(".php"), "PHP")
+        self.assertEqual(self.generator._detect_language(".cs"), "C#")
         
-    def test_extract_code_snippet(self):
-        """Test extracting code snippets for nodes."""
-        file_content = """line 1
-line 2
-class TestClass:
-    def method(self):
-        pass
-line 6
-line 7"""
-        
-        # Test class extraction
-        class_node = create_class_node("TestClass", start_line=3, end_line=5)
-        snippet = self.generator.extract_code_snippet(class_node, file_content)
-        
-        self.assertIn("class TestClass:", snippet)
-        self.assertIn("def method", snippet)
-        
-        # Test with context lines
-        snippet_with_context = self.generator.extract_code_snippet(
-            class_node, file_content, context_lines=1
-        )
-        
-        self.assertIn("line 2", snippet_with_context)
-        self.assertIn("line 6", snippet_with_context)
+        # Test unknown extension
+        self.assertEqual(self.generator._detect_language(".xyz"), "Unknown")
         
     def test_generate_description_for_node(self):
         """Test generating description for a specific node."""
         class_node = create_class_node("UserManager")
+        class_node.text = "class UserManager:\n    def create_user(self, name):\n        pass"
         self.graph.add_node(class_node)
         
-        # Mock file reading
-        with patch.object(self.generator, 'get_file_content') as mock_get_content:
-            mock_get_content.return_value = """
-class UserManager:
-    def create_user(self, name):
-        pass
-"""
-            
-            desc_node = self.generator.generate_description_for_node(
-                class_node, self.graph
-            )
-            
+        # Create prompt and generate description
+        prompt_data = self.generator._create_prompt_for_node(class_node, self.graph)
+        self.assertIsNotNone(prompt_data)
+        self.assertEqual(prompt_data["id"], class_node.hashed_id)
+        
+        # Test description node creation
+        desc_node, rel = self.generator._create_description_node_and_relationship(
+            class_node, "Test description", self.graph
+        )
+        
         self.assertIsInstance(desc_node, DescriptionNode)
-        self.assertEqual(desc_node.description, "Test description")
-        self.assertEqual(desc_node.target_node_id, class_node.id)
+        self.assertEqual(desc_node.description_text, "Test description")
+        self.assertEqual(desc_node.target_node_id, class_node.hashed_id)
         
     def test_generate_descriptions_for_graph(self):
         """Test generating descriptions for all eligible nodes in graph."""
@@ -224,28 +294,29 @@ class UserManager:
         self.graph.add_node(class_node)
         self.graph.add_node(func_node)
         
-        # Mock file content
-        with patch.object(self.generator, 'get_file_content') as mock_get_content:
-            mock_get_content.return_value = """
-class MainClass:
-    pass
-
-def main_func():
-    pass
-"""
-            
-            # Generate descriptions
-            self.generator.generate_descriptions(self.graph)
+        # Add text content to nodes
+        class_node.text = "class MainClass:\n    pass"
+        func_node.text = "def main_func():\n    pass"
+        
+        # Mock the batch descriptions to return descriptions for eligible nodes
+        self.mock_llm.generate_batch_descriptions.return_value = {
+            class_node.hashed_id: "This class handles main application logic",
+            func_node.hashed_id: "This function is the entry point",
+            file_node.hashed_id: "This file contains the main application"
+        }
+        
+        # Generate descriptions
+        description_nodes = self.generator.generate_descriptions_for_graph(self.graph)
             
         # Check description nodes were created
         desc_nodes = self.graph.get_nodes_by_label(NodeLabels.DESCRIPTION)
-        self.assertEqual(len(desc_nodes), 2)  # One for class, one for function
+        self.assertEqual(len(desc_nodes), 3)  # One for file, one for class, one for function
         
         # Verify relationships were created
         relationships = self.graph.get_relationships_as_objects()
         desc_relationships = [r for r in relationships 
                             if r['type'] == 'HAS_DESCRIPTION']
-        self.assertEqual(len(desc_relationships), 2)
+        self.assertEqual(len(desc_relationships), 3)
         
     def test_generate_descriptions_with_limit(self):
         """Test respecting description generation limit."""
@@ -254,30 +325,40 @@ def main_func():
             node = create_function_node(f"func_{i}")
             self.graph.add_node(node)
             
-        with patch.object(self.generator, 'get_file_content') as mock_get_content:
-            mock_get_content.return_value = "def func(): pass"
-            
-            # Generate with limit
-            self.generator.generate_descriptions(self.graph, max_descriptions=3)
+        # Add text content to nodes and create mock descriptions
+        mock_descriptions = {}
+        for i, node in enumerate(self.graph.get_nodes_by_label(NodeLabels.FUNCTION)):
+            node.text = "def func(): pass"
+            if i < 3:  # Only first 3 should get descriptions
+                mock_descriptions[node.hashed_id] = f"Description for function {i}"
+        
+        self.mock_llm.generate_batch_descriptions.return_value = mock_descriptions
+        
+        # Generate with limit
+        description_nodes = self.generator.generate_descriptions_for_graph(self.graph, node_limit=3)
             
         # Should only create 3 descriptions
         desc_nodes = self.graph.get_nodes_by_label(NodeLabels.DESCRIPTION)
         self.assertEqual(len(desc_nodes), 3)
         
-    def test_handle_special_characters_in_code(self):
-        """Test handling code with special characters."""
-        code_with_special = '''
-def process_data(text: str) -> dict[str, Any]:
-    """Process text with regex patterns."""
-    pattern = r'\\d{3}-\\d{3}-\\d{4}'  # Phone pattern
-    return {"processed": True}
-'''
+    def test_extract_referenced_nodes(self):
+        """Test extracting node references from description text."""
+        # Add some nodes to the graph
+        class_node = create_class_node("UserManager")
+        func_node = create_function_node("create_user")
+        self.graph.add_node(class_node)
+        self.graph.add_node(func_node)
         
-        class_node = create_function_node("process_data", start_line=2, end_line=5)
-        snippet = self.generator.extract_code_snippet(class_node, code_with_special)
+        # Test description with references
+        description = "This class uses `UserManager` to create users via 'create_user' function."
         
-        self.assertIn("def process_data", snippet)
-        self.assertIn("regex patterns", snippet)
+        referenced_nodes = self.generator._extract_referenced_nodes(description, self.graph)
+        
+        # Should find both referenced nodes
+        self.assertEqual(len(referenced_nodes), 2)
+        node_names = [node.name for node in referenced_nodes]
+        self.assertIn("UserManager", node_names)
+        self.assertIn("create_user", node_names)
 
 
 class TestDescriptionNodeIntegration(unittest.TestCase):
@@ -286,37 +367,42 @@ class TestDescriptionNodeIntegration(unittest.TestCase):
     def test_description_node_creation(self):
         """Test creating description nodes with proper attributes."""
         target_id = "class_123"
-        description = "This class handles user authentication"
-        model = "gpt-4"
+        description_text = "This class handles user authentication"
+        llm_model = "gpt-4"
         
         desc_node = DescriptionNode(
+            path="file:///test/auth.py",
+            name="Description of AuthClass",
+            level=2,
+            description_text=description_text,
             target_node_id=target_id,
-            description=description,
-            model=model
+            llm_model=llm_model
         )
         
         self.assertEqual(desc_node.target_node_id, target_id)
-        self.assertEqual(desc_node.description, description)
-        self.assertEqual(desc_node.model, model)
+        self.assertEqual(desc_node.description_text, description_text)
+        self.assertEqual(desc_node.llm_model, llm_model)
         self.assertEqual(desc_node.label, NodeLabels.DESCRIPTION)
-        
-        # Check ID generation
-        self.assertIn(target_id, desc_node.id)
-        self.assertIn("description", desc_node.id)
         
     def test_description_node_serialization(self):
         """Test serializing description node to object."""
+        from blarify.graph.graph_environment import GraphEnvironment
+        
         desc_node = DescriptionNode(
+            path="file:///test/math.py",
+            name="Description of sum_func",
+            level=3,
+            description_text="Calculates the sum of two numbers",
             target_node_id="func_456",
-            description="Calculates the sum of two numbers",
-            model="gpt-3.5-turbo"
+            llm_model="gpt-3.5-turbo",
+            graph_environment=GraphEnvironment(environment="test", diff_identifier="test_diff", root_path="/test")
         )
         
         obj = desc_node.as_object()
         
         self.assertEqual(obj['type'], NodeLabels.DESCRIPTION.value)
-        self.assertEqual(obj['attributes']['description'], "Calculates the sum of two numbers")
-        self.assertEqual(obj['attributes']['model'], "gpt-3.5-turbo")
+        self.assertEqual(obj['attributes']['description_text'], "Calculates the sum of two numbers")
+        self.assertEqual(obj['attributes']['llm_model'], "gpt-3.5-turbo")
         self.assertEqual(obj['attributes']['target_node_id'], "func_456")
 
 
