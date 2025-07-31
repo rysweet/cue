@@ -1,5 +1,5 @@
 # AI Assistant Memory
-Last Updated: 2025-07-31T19:30:00Z
+Last Updated: 2025-07-31T20:45:00Z
 
 ## Current Goals
 - ✅ Improve test coverage for Blarify codebase to >80% (ACHIEVED 3x improvement: 20.76% → 63.76%)
@@ -28,6 +28,11 @@ Last Updated: 2025-07-31T19:30:00Z
 - [x] Fix remaining 29 failing tests (filesystem and LLM integration tests)
 
 ## Recent Accomplishments
+- **Added comprehensive tests for core modules** (2025-07-31):
+  - Created tests for lsp_helper.py (previously 21.39% coverage)
+  - Created tests for tree_sitter_helper.py (previously 31.01% coverage)
+  - Improved tests for llm_service.py (previously 26.25% coverage)
+  - Added comprehensive tests for graph.py (previously 62.20% coverage)
 - **All CI checks passing on PR #14** - https://github.com/rysweet/cue/pull/14
 - **Fixed CI configuration issues**:
   - Removed Python 3.10 and 3.11 from CI matrix (now only Python 3.12)
