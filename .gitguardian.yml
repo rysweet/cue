@@ -1,0 +1,11 @@
+version: 2
+
+paths-ignore:
+  - mcp-blarify-server/src/neo4j_container.py:67  # Docstring parameter description, not a real password
+  - '**/*.example'  # Example configuration files
+  - '**/test*/**'   # Test files often contain test credentials
+  
+# Additional patterns to ignore
+secret-patterns-ignored:
+  - name: docstring_parameters
+    regex: '^\s*-\s*password:\s*\w+\s*(password|credential)'
