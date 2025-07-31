@@ -62,9 +62,9 @@ class Neo4jContainerManager:
         """Start a Neo4j container.
         
         Args:
-            config: Container configuration
+            config: Container configuration dict with keys:
                 - environment: 'development', 'test', or 'production'
-                - password: Neo4j password  # ggignore
+                - password: Authentication credential for Neo4j
                 - username: Neo4j username (default: 'neo4j')
                 - plugins: List of plugins to install (e.g., ['apoc'])
                 - memory: Memory limit (e.g., '2G')
