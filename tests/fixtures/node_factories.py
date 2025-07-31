@@ -12,6 +12,16 @@ from blarify.graph.node.documentation_file_node import DocumentationFileNode
 from blarify.graph.node.concept_node import ConceptNode
 from blarify.graph.node.documented_entity_node import DocumentedEntityNode
 from blarify.graph.node.description_node import DescriptionNode
+from blarify.graph.graph_environment import GraphEnvironment
+
+
+def get_test_graph_environment():
+    """Get a default graph environment for testing."""
+    return GraphEnvironment(
+        environment="test",
+        diff_identifier="test_diff",
+        root_path="/test"
+    )
 
 
 def create_file_node(name="test.py", path=None, level=1):
@@ -66,7 +76,8 @@ def create_filesystem_file_node(name="test.py", relative_path=None,
         relative_path=relative_path,
         size=size,
         extension=extension,
-        last_modified=time.time()
+        last_modified=time.time(),
+        graph_environment=get_test_graph_environment()
     )
 
 
@@ -78,7 +89,8 @@ def create_filesystem_directory_node(name="src", relative_path=None):
         path=f"file:///test/{relative_path}",
         name=name,
         level=relative_path.count('/'),
-        relative_path=relative_path
+        relative_path=relative_path,
+        graph_environment=get_test_graph_environment()
     )
 
 
@@ -92,7 +104,8 @@ def create_documentation_file_node(name="README.md", relative_path=None,
         name=name,
         level=relative_path.count('/'),
         relative_path=relative_path,
-        format=format
+        format=format,
+        graph_environment=get_test_graph_environment()
     )
 
 
@@ -104,7 +117,8 @@ def create_concept_node(name="Design Pattern", description=None,
     return ConceptNode(
         name=name,
         description=description,
-        source_file=source_file
+        source_file=source_file,
+        graph_environment=get_test_graph_environment()
     )
 
 
@@ -117,17 +131,24 @@ def create_documented_entity_node(name="UserService", entity_type="class",
         name=name,
         entity_type=entity_type,
         description=description,
-        source_file=source_file
+        source_file=source_file,
+        graph_environment=get_test_graph_environment()
     )
 
 
 def create_description_node(target_node_id, description="Test description",
-                           model="gpt-4"):
+                           model="gpt-4", path=None):
     """Create a description node with default values."""
+    if path is None:
+        path = f"file:///test/description_{target_node_id}"
     return DescriptionNode(
+        path=path,
+        name=f"description_for_{target_node_id}",
+        level=1,
+        description_text=description,
         target_node_id=target_node_id,
-        description=description,
-        model=model
+        llm_model=model,
+        graph_environment=get_test_graph_environment()
     )
 
 

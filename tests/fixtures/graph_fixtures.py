@@ -15,80 +15,90 @@ def create_test_graph():
     """Create a test graph with sample nodes and relationships."""
     graph = Graph()
     
-    # Add file nodes
-    main_file = FileNode(
+    # Add filesystem file nodes instead of code nodes
+    main_file = FilesystemFileNode(
         path="file:///test/src/main.py",
         name="main.py",
-        level=2
+        level=2,
+        relative_path="src/main.py",
+        size=1500,
+        extension=".py",
+        last_modified=1234567890.0
     )
-    utils_file = FileNode(
+    utils_file = FilesystemFileNode(
         path="file:///test/src/utils.py",
         name="utils.py",
-        level=2
+        level=2,
+        relative_path="src/utils.py",
+        size=1000,
+        extension=".py",
+        last_modified=1234567890.0
     )
-    test_file = FileNode(
+    test_file = FilesystemFileNode(
         path="file:///test/tests/test_main.py",
         name="test_main.py",
-        level=2
+        level=2,
+        relative_path="tests/test_main.py",
+        size=2000,
+        extension=".py",
+        last_modified=1234567890.0
     )
     
     graph.add_node(main_file)
     graph.add_node(utils_file)
     graph.add_node(test_file)
     
-    # Add class nodes
-    app_class = ClassNode(
-        id="class_app_123",
-        name="Application",
-        path="file:///test/src/main.py",
-        level=3,
-        start_line=5,
-        end_line=8
-    )
-    graph.add_node(app_class)
+    # Add documentation nodes
+    from blarify.graph.node.concept_node import ConceptNode
+    from blarify.graph.node.documented_entity_node import DocumentedEntityNode
     
-    # Add function nodes
-    main_func = FunctionNode(
-        id="func_main_456",
+    app_concept = ConceptNode(
+        name="Application Architecture",
+        description="Main application structure and design",
+        source_file="src/main.py"
+    )
+    graph.add_node(app_concept)
+    
+    # Add documented entities
+    main_entity = DocumentedEntityNode(
         name="main",
-        path="file:///test/src/main.py",
-        level=3,
-        start_line=1,
-        end_line=3
+        entity_type="function",
+        description="Entry point of the application",
+        source_file="src/main.py"
     )
-    format_func = FunctionNode(
-        id="func_format_789",
+    format_entity = DocumentedEntityNode(
         name="format_string",
-        path="file:///test/src/utils.py",
-        level=3,
-        start_line=1,
-        end_line=3
+        entity_type="function",
+        description="Utility function for string formatting",
+        source_file="src/utils.py"
     )
     
-    graph.add_node(main_func)
-    graph.add_node(format_func)
+    graph.add_node(main_entity)
+    graph.add_node(format_entity)
     
     # Add relationships
-    graph.add_relationship(Relationship(
-        source_id=main_file.id,
-        target_id=app_class.id,
-        type=RelationshipType.CONTAINS
-    ))
-    graph.add_relationship(Relationship(
-        source_id=main_file.id,
-        target_id=main_func.id,
-        type=RelationshipType.CONTAINS
-    ))
-    graph.add_relationship(Relationship(
-        source_id=utils_file.id,
-        target_id=format_func.id,
-        type=RelationshipType.CONTAINS
-    ))
-    graph.add_relationship(Relationship(
-        source_id=test_file.id,
-        target_id=main_file.id,
-        type=RelationshipType.IMPORTS
-    ))
+    graph.add_references_relationships([
+        Relationship(
+            start_node=main_file,
+            end_node=app_concept,
+            rel_type=RelationshipType.CONTAINS_CONCEPT
+        ),
+        Relationship(
+            start_node=main_file,
+            end_node=main_entity,
+            rel_type=RelationshipType.DESCRIBES_ENTITY
+        ),
+        Relationship(
+            start_node=utils_file,
+            end_node=format_entity,
+            rel_type=RelationshipType.DESCRIBES_ENTITY
+        ),
+        Relationship(
+            start_node=test_file,
+            end_node=main_file,
+            rel_type=RelationshipType.DEPENDS_ON
+        )
+    ])
     
     return graph
 
@@ -145,26 +155,28 @@ def create_filesystem_graph():
     graph.add_node(utils_fs_file)
     
     # Add filesystem relationships
-    graph.add_relationship(Relationship(
-        source_id=root_dir.id,
-        target_id=src_dir.id,
-        type=RelationshipType.FILESYSTEM_CONTAINS
-    ))
-    graph.add_relationship(Relationship(
-        source_id=root_dir.id,
-        target_id=tests_dir.id,
-        type=RelationshipType.FILESYSTEM_CONTAINS
-    ))
-    graph.add_relationship(Relationship(
-        source_id=src_dir.id,
-        target_id=main_fs_file.id,
-        type=RelationshipType.FILESYSTEM_CONTAINS
-    ))
-    graph.add_relationship(Relationship(
-        source_id=src_dir.id,
-        target_id=utils_fs_file.id,
-        type=RelationshipType.FILESYSTEM_CONTAINS
-    ))
+    graph.add_references_relationships([
+        Relationship(
+            start_node=root_dir,
+            end_node=src_dir,
+            rel_type=RelationshipType.FILESYSTEM_CONTAINS
+        ),
+        Relationship(
+            start_node=root_dir,
+            end_node=tests_dir,
+            rel_type=RelationshipType.FILESYSTEM_CONTAINS
+        ),
+        Relationship(
+            start_node=src_dir,
+            end_node=main_fs_file,
+            rel_type=RelationshipType.FILESYSTEM_CONTAINS
+        ),
+        Relationship(
+            start_node=src_dir,
+            end_node=utils_fs_file,
+            rel_type=RelationshipType.FILESYSTEM_CONTAINS
+        )
+    ])
     
     return graph
 
@@ -212,16 +224,18 @@ def create_documentation_graph():
     graph.add_node(user_service)
     
     # Add relationships
-    graph.add_relationship(Relationship(
-        source_id=readme.id,
-        target_id=architecture_concept.id,
-        type=RelationshipType.CONTAINS_CONCEPT
-    ))
-    graph.add_relationship(Relationship(
-        source_id=readme.id,
-        target_id=user_service.id,
-        type=RelationshipType.DESCRIBES_ENTITY
-    ))
+    graph.add_references_relationships([
+        Relationship(
+            start_node=readme,
+            end_node=architecture_concept,
+            rel_type=RelationshipType.CONTAINS_CONCEPT
+        ),
+        Relationship(
+            start_node=readme,
+            end_node=user_service,
+            rel_type=RelationshipType.DESCRIBES_ENTITY
+        )
+    ])
     
     return graph
 
@@ -233,13 +247,19 @@ def create_complex_graph():
     
     # Add filesystem nodes
     fs_graph = create_filesystem_graph()
-    for node in fs_graph.get_nodes_as_objects():
-        graph.add_node_from_dict(node)
+    for node in fs_graph.get_all_nodes():
+        graph.add_node(node)
     
     # Add documentation nodes
     doc_graph = create_documentation_graph()
-    for node in doc_graph.get_nodes_as_objects():
-        graph.add_node_from_dict(node)
+    for node in doc_graph.get_all_nodes():
+        graph.add_node(node)
+    
+    # Add all relationships
+    for rel in fs_graph.get_all_relationships():
+        graph.add_references_relationships([rel])
+    for rel in doc_graph.get_all_relationships():
+        graph.add_references_relationships([rel])
     
     # Connect filesystem to code nodes
     # This would normally be done by the graph builder
