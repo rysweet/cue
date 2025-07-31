@@ -273,3 +273,9 @@ New specialized agents can be added to `.github/agents/` following the existing 
 - [Neo4j Documentation](https://neo4j.com/docs/)
 - [D3.js Documentation](https://d3js.org/)
 - [Playwright Documentation](https://playwright.dev/docs/intro)
+
+## Extension Management Memories
+
+- Command sequence for uninstalling and reinstalling the extension: 
+  - Uninstall: `code --uninstall-extension <extension-id>`
+  - Reinstall: `code --install-extension <extension-id>`
