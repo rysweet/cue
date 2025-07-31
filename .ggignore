@@ -1,0 +1,4 @@
+mcp-blarify-server/src/neo4j_container.py
+mcp-blarify-server/.env.example
+**/*.example
+**/test*/**
