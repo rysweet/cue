@@ -64,7 +64,7 @@ class Neo4jContainerManager:
         Args:
             config: Container configuration
                 - environment: 'development', 'test', or 'production'
-                - password: Neo4j password
+                - password: Neo4j password  # ggignore
                 - username: Neo4j username (default: 'neo4j')
                 - plugins: List of plugins to install (e.g., ['apoc'])
                 - memory: Memory limit (e.g., '2G')
