@@ -62,11 +62,7 @@ class TestLLMService(unittest.TestCase):
             
         self.assertIn("Azure OpenAI configuration is incomplete", str(context.exception))
         
-    @pytest.mark.skipif(
-        not os.getenv('AZURE_OPENAI_KEY'),
-        reason="AZURE_OPENAI_KEY not set in environment"
-    )
-    @patch('openai.AzureOpenAI')
+    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_success(self, mock_openai_class):
         """Test successful description generation."""
         # Mock OpenAI client
@@ -97,11 +93,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(description, "This class manages users")
         mock_client.chat.completions.create.assert_called_once()
         
-    @pytest.mark.skipif(
-        not os.getenv('AZURE_OPENAI_KEY'),
-        reason="AZURE_OPENAI_KEY not set in environment"
-    )
-    @patch('openai.AzureOpenAI')
+    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_with_retry(self, mock_openai_class):
         """Test description generation with retry on failure."""
         mock_client = MagicMock()
@@ -128,11 +120,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(description, "Success")
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
         
-    @pytest.mark.skipif(
-        not os.getenv('AZURE_OPENAI_KEY'),
-        reason="AZURE_OPENAI_KEY not set in environment"
-    )
-    @patch('openai.AzureOpenAI')
+    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_all_retries_fail(self, mock_openai_class):
         """Test description generation when all retries fail."""
         mock_client = MagicMock()
@@ -148,9 +136,10 @@ class TestLLMService(unittest.TestCase):
         }):
             service = LLMService()
         
-        description = service.generate_description("Generate a description for this code")
+        with self.assertRaises(Exception) as context:
+            service.generate_description("Generate a description for this code")
         
-        self.assertEqual(description, "Failed to generate description")
+        self.assertEqual(str(context.exception), "API Error")
         self.assertEqual(mock_client.chat.completions.create.call_count, 3)  # Initial + 2 retries
         
     def test_batch_description_generation(self):

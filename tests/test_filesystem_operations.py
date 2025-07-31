@@ -130,11 +130,8 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         
         # Since .git directory is skipped, no files within it should exist
         file_nodes = self.graph.get_nodes_by_label(NodeLabels.FILESYSTEM_FILE)
-        # Check using the node's path instead of relative_path
-        git_files = [n for n in file_nodes if ".git" in n.path]
-        # Debug: print git files found
-        if git_files:
-            print(f"Found git files: {[n.path for n in git_files]}")
+        # Check for files that are actually inside the .git directory
+        git_files = [n for n in file_nodes if "/.git/" in n.path]
         self.assertEqual(len(git_files), 0)
         
     def test_file_properties(self):
