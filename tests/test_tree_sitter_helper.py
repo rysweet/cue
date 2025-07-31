@@ -149,10 +149,15 @@ class TestTreeSitterHelper(unittest.TestCase):
         
         with patch.object(self.helper, '_get_content_from_file') as mock_get_content:
             with patch.object(self.helper, '_does_path_have_valid_extension') as mock_valid:
-                with patch.object(self.helper, '_handle_paths_with_valid_extension'):
+                with patch.object(self.helper, '_handle_paths_with_valid_extension') as mock_handle:
                     mock_get_content.return_value = "test content"
                     mock_valid.return_value = True
-                    self.helper.created_nodes = [mock_file_node]
+                    
+                    # Mock the side effect of _handle_paths_with_valid_extension to populate created_nodes
+                    def handle_side_effect(file, parent_folder=None):
+                        self.helper.created_nodes.append(mock_file_node)
+                    
+                    mock_handle.side_effect = handle_side_effect
                     
                     result = self.helper.create_nodes_and_relationships_in_file(mock_file)
                     
