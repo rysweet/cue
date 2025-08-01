@@ -1,0 +1,10 @@
+version: 2
+
+paths-ignore:
+  - '**/*.example'  # Example configuration files
+  - '**/test*/**'   # Test files often contain test credentials
+  
+# Additional patterns to ignore
+secret-patterns-ignored:
+  - name: docstring_parameters
+    regex: '^\s*-\s*password:\s*\w+\s*(password|credential)'
