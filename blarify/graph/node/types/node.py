@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Dict, Any
 from hashlib import md5
 from blarify.format_verifier import FormatVerifier
 import os
@@ -68,7 +68,7 @@ class Node:
     def extension(self) -> str:
         return os.path.splitext(self.pure_path)[1]
 
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         return {
             "type": self.label.name,
             "extra_labels": [],
