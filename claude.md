@@ -58,8 +58,26 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## Generic Claude Code Instructions
 
-@claude-generic-instructions.md
+@https://raw.githubusercontent.com/rysweet/gadugi/main/claude-generic-instructions.md
+
+## Agent Hierarchy
+
+@https://raw.githubusercontent.com/rysweet/gadugi/main/AGENT_HIERARCHY.md
 
 ## Project-Specific Instructions
 
 @claude-project-specific.md
+
+## Agent Management
+
+Agents are now managed via the gadugi repository. To update agents:
+1. Run `/agent:agent-manager check-and-update-agents`
+2. Or manually sync: `/agent:agent-manager sync gadugi`
+
+Available agents from gadugi:
+- workflow-master
+- orchestrator-agent
+- code-reviewer
+- code-review-response
+- prompt-writer
+- agent-manager
