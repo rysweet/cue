@@ -70,7 +70,9 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## Agent Management
 
-Agents are now managed via the gadugi repository. To update agents:
+Most agents are now managed via the gadugi repository. The agent-manager itself must remain local to manage synchronization.
+
+To update agents from gadugi:
 1. Run `/agent:agent-manager check-and-update-agents`
 2. Or manually sync: `/agent:agent-manager sync gadugi`
 
@@ -80,4 +82,9 @@ Available agents from gadugi:
 - code-reviewer
 - code-review-response
 - prompt-writer
-- agent-manager
+- task-analyzer
+- worktree-manager
+- execution-monitor
+
+Local agents:
+- agent-manager (required for synchronization)
