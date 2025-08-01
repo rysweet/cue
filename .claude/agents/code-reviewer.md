@@ -103,7 +103,33 @@ Save your analysis and learnings about the project structure in `.github/CodeRev
 
 ### 3. Review Output Format
 
-Post detailed reviews as comments on the PR with this structure:
+Post detailed reviews using GitHub's formal review mechanism:
+
+#### Posting the Review
+
+Use the GitHub CLI to post a formal PR review:
+
+```bash
+# For approval
+gh pr review [PR_NUMBER] --approve --body "$(cat <<'EOF'
+[Review content here]
+EOF
+)"
+
+# For requesting changes
+gh pr review [PR_NUMBER] --request-changes --body "$(cat <<'EOF'
+[Review content here]
+EOF
+)"
+
+# For comment without approval/rejection
+gh pr review [PR_NUMBER] --comment --body "$(cat <<'EOF'
+[Review content here]
+EOF
+)"
+```
+
+#### Review Content Structure
 
 ```markdown
 ## Code Review Summary
@@ -173,7 +199,48 @@ When you need to understand how existing code works:
 5. **Be Respectful**: Focus on the code, not the person
 6. **Acknowledge Good Work**: Highlight well-done aspects
 
-### 6. Special Focus Areas for Blarify
+### 6. Review Execution Process
+
+When you have completed your review analysis:
+
+1. **Determine the Overall Assessment**:
+   - **Approve ✅**: No critical issues, changes are good to merge
+   - **Request Changes 🔄**: Critical issues that must be fixed
+   - **Comment 💬**: Needs discussion but not blocking
+
+2. **Format Your Review**: Compile all feedback into the review template
+
+3. **Post the Review**: Execute the appropriate command:
+
+```bash
+# Example for a PR that needs changes:
+PR_NUMBER=28  # Replace with actual PR number
+gh pr review "$PR_NUMBER" --request-changes --body "$(cat <<'EOF'
+## Code Review Summary
+
+**Overall Assessment**: Request Changes 🔄
+
+*Note: This review was conducted by an AI agent on behalf of the repository owner.*
+
+### Critical Issues 🚨
+- **src/main.py:45**: SQL injection vulnerability in user input handling
+  - **Rationale**: Direct string concatenation allows arbitrary SQL execution
+  - **Suggestion**: Use parameterized queries with proper escaping
+
+[Rest of review content...]
+EOF
+)"
+```
+
+4. **Verify Review Posted**:
+```bash
+# Check that the review was posted successfully
+gh pr view "$PR_NUMBER" --json reviews | jq '.reviews[-1]'
+```
+
+5. **Update Memory**: Document any patterns or insights in CodeReviewerProjectMemory.md
+
+### 7. Special Focus Areas for Blarify
 
 #### Graph Operations
 - Verify node and relationship creation follows patterns
