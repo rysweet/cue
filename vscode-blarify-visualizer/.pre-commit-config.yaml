@@ -1,0 +1,47 @@
+repos:
+  - repo: local
+    hooks:
+      - id: typescript-quality
+        name: TypeScript Quality Pipeline
+        entry: scripts/check-typescript.sh
+        language: script
+        files: '^(src/.*\.(ts|js|tsx|jsx)|.*\.(json|md))$'
+        pass_filenames: false
+        stages: [pre-commit]
+        
+      - id: python-quality
+        name: Python Quality Pipeline  
+        entry: scripts/check-python.sh
+        language: script
+        files: '^bundled/.*\.py$'
+        pass_filenames: false
+        stages: [pre-commit]
+        
+      - id: cross-language-validation
+        name: Cross-Language Integration
+        entry: scripts/validate-integration.sh
+        language: script
+        files: '\.(ts|js|py|json|md)$'
+        pass_filenames: false
+        stages: [pre-commit]
+        
+      - id: secret-detection
+        name: Secret Detection
+        entry: scripts/check-secrets.sh
+        language: script
+        files: '.*'
+        pass_filenames: false
+        stages: [pre-commit]
+
+# Performance optimization settings
+ci:
+    autofix_commit_msg: |
+        [pre-commit.ci] auto fixes from pre-commit hooks
+        
+        for more information, see https://pre-commit.ci
+    autofix_prs: true
+    autoupdate_branch: ''
+    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+    autoupdate_schedule: weekly
+    skip: []
+    submodules: false

@@ -58,8 +58,29 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## Generic Claude Code Instructions
 
-@claude-generic-instructions.md
+See gadugi repository for generic Claude Code best practices and instructions.
 
 ## Project-Specific Instructions
 
 @claude-project-specific.md
+
+## Agent Management
+
+Most agents are now managed via the gadugi repository. The agent-manager itself must remain local to manage synchronization.
+
+To update agents from gadugi:
+1. Run `/agent:agent-manager check-and-update-agents`
+2. Or manually sync: `/agent:agent-manager sync gadugi`
+
+Available agents from gadugi:
+- workflow-master
+- orchestrator-agent
+- code-reviewer
+- code-review-response
+- prompt-writer
+- task-analyzer
+- worktree-manager
+- execution-monitor
+
+Local agents:
+- agent-manager (required for synchronization)
