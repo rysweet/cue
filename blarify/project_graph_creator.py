@@ -1,6 +1,4 @@
 import time
-from blarify.code_hierarchy.languages.go_definitions import GoDefinitions
-from blarify.code_hierarchy.languages.php_definitions import PhpDefinitions
 from blarify.code_references import LspQueryHelper, FileExtensionNotSupported
 from blarify.project_file_explorer import ProjectFilesIterator
 from blarify.graph.node import NodeLabels, NodeFactory
@@ -8,13 +6,9 @@ from blarify.graph.relationship import RelationshipCreator
 from blarify.graph.graph import Graph
 from blarify.code_hierarchy import TreeSitterHelper
 from blarify.code_hierarchy.languages import (
-    PythonDefinitions,
-    JavascriptDefinitions,
-    TypescriptDefinitions,
     FallbackDefinitions,
-    RubyDefinitions,
-    CsharpDefinitions,
-    JavaDefinitions
+    get_language_definition,
+    get_available_languages
 )
 from typing import List, TYPE_CHECKING, Optional
 from blarify.logger import Logger
@@ -40,18 +34,7 @@ class ProjectGraphCreator:
     lsp_query_helper: LspQueryHelper
     project_files_iterator: ProjectFilesIterator
     graph: Graph
-    languages: dict = {
-        ".py": PythonDefinitions,
-        ".js": JavascriptDefinitions,
-        ".jsx": JavascriptDefinitions,
-        ".ts": TypescriptDefinitions,
-        ".tsx": TypescriptDefinitions,
-        ".rb": RubyDefinitions,
-        ".cs": CsharpDefinitions,
-        ".go": GoDefinitions,
-        ".php": PhpDefinitions,
-        ".java": JavaDefinitions,
-    }
+    languages: dict = None  # Will be initialized in __init__
 
     def __init__(
         self,
@@ -69,6 +52,9 @@ class ProjectGraphCreator:
         self.lsp_query_helper = lsp_query_helper
         self.project_files_iterator = project_files_iterator
         self.graph_environment = graph_environment or GraphEnvironment("blarify", "repo", self.root_path)
+        
+        # Build languages dictionary dynamically based on available imports
+        self.languages = self._build_languages_dict()
         
         # Initialize LLM components
         self.enable_llm_descriptions = enable_llm_descriptions
@@ -128,6 +114,34 @@ class ProjectGraphCreator:
             logger.info("Documentation node generation enabled")
 
         self.graph = Graph()
+
+    def _build_languages_dict(self) -> dict:
+        """Build languages dictionary dynamically based on available imports."""
+        languages = {}
+        
+        # Map language names to file extensions
+        language_extension_map = {
+            'python': ['.py'],
+            'javascript': ['.js', '.jsx'],
+            'typescript': ['.ts', '.tsx'],
+            'ruby': ['.rb'],
+            'csharp': ['.cs'],
+            'go': ['.go'],
+            'php': ['.php'],
+            'java': ['.java'],
+        }
+        
+        # Populate languages dict with successfully imported definitions
+        for lang_name, extensions in language_extension_map.items():
+            definition_class = get_language_definition(lang_name)
+            if definition_class:
+                for ext in extensions:
+                    languages[ext] = definition_class
+            else:
+                logger.debug(f"Language support for {lang_name} is not available")
+        
+        logger.info(f"Available language support: {list(get_available_languages())}")
+        return languages
 
     def build(self) -> Graph:
         self._create_code_hierarchy()

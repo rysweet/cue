@@ -152,7 +152,20 @@ export async function activate(context: vscode.ExtensionContext) {
         
         const ingestWorkspaceCommand = vscode.commands.registerCommand(
             'blarifyVisualizer.ingestWorkspace',
-            ingestWorkspace
+            async () => {
+                outputChannel.appendLine('Command: ingestWorkspace invoked');
+                outputChannel.appendLine(`  neo4jManager: ${neo4jManager ? 'initialized' : 'NOT INITIALIZED'}`);
+                outputChannel.appendLine(`  blarifyIntegration: ${blarifyIntegration ? 'initialized' : 'NOT INITIALIZED'}`);
+                
+                if (!neo4jManager || !blarifyIntegration) {
+                    const message = 'Extension components not fully initialized. Please reload the window.';
+                    outputChannel.appendLine(`ERROR: ${message}`);
+                    vscode.window.showErrorMessage(message);
+                    return;
+                }
+                
+                await ingestWorkspace();
+            }
         );
         outputChannel.appendLine('  - ingestWorkspace registered');
         
