@@ -177,7 +177,10 @@ You MUST execute these phases in order for every prompt:
       exit 1
   fi
   ```
-- After code review verification, check if response needed: `/agent:code-review-response`
+- **MANDATORY**: After code review verification, invoke CodeReviewResponseAgent: `/agent:code-review-response`
+  - Even for approvals, acknowledge the review and confirm merge readiness
+  - Process any suggestions for future improvements
+  - Thank the reviewer and document outcomes
 - Monitor CI/CD pipeline status
 - Address any review feedback systematically
 - Make necessary corrections
