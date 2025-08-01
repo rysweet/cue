@@ -82,7 +82,7 @@ class ProjectFilesIterator:
         dirs = [dir for dir in dirs if not self._should_skip_directory(os.path.join(root, dir))]
         return dirs
 
-    def get_path_level_relative_to_root(self, path) -> int:
+    def get_path_level_relative_to_root(self, path: str) -> int:
         level = path.count(os.sep) - self.root_path.count(os.sep)
         return level
 
@@ -91,7 +91,7 @@ class ProjectFilesIterator:
 
         return [File(name=file, root_path=root, level=level) for file in files]
 
-    def empty_folders_from_dirs(self, root: str, dirs: List[str], level) -> List[Folder]:
+    def empty_folders_from_dirs(self, root: str, dirs: List[str], level: int) -> List[Folder]:
         return [
             Folder(
                 name=dir,
