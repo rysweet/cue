@@ -14,6 +14,10 @@ from blarify.graph.graph_environment import GraphEnvironment
 
 
 class TestDescriptionGenerator(unittest.TestCase):
+    mock_llm_service: MagicMock
+    graph_env: GraphEnvironment
+    generator: DescriptionGenerator
+    graph: Graph
     
     def setUp(self):
         self.mock_llm_service = MagicMock(spec=LLMService)

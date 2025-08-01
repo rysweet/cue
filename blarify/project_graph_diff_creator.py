@@ -7,7 +7,7 @@ from blarify.graph.graph_environment import GraphEnvironment
 from blarify.code_references.lsp_helper import LspQueryHelper
 from blarify.project_file_explorer import ProjectFilesIterator
 from blarify.graph.node import FileNode
-from typing import List, Set
+from typing import List, Set, Optional
 from dataclasses import dataclass
 from enum import Enum
 from blarify.graph.external_relationship_store import ExternalRelationshipStore

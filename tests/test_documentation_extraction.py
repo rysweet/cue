@@ -2,7 +2,7 @@
 Tests for documentation extraction and processing.
 """
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import tempfile
 import os
 from pathlib import Path
@@ -16,6 +16,8 @@ from blarify.graph.node.types.node_labels import NodeLabels
 
 class TestDocumentationParser(unittest.TestCase):
     """Test documentation file parsing."""
+    temp_dir: str
+    parser: DocumentationParser
     
     def setUp(self):
         """Set up test fixtures."""
@@ -87,6 +89,8 @@ class TestDocumentationParser(unittest.TestCase):
 
 class TestDocumentationGraphGenerator(unittest.TestCase):
     """Test documentation graph generation."""
+    temp_dir: str
+    mock_llm: Mock
     
     def setUp(self):
         """Set up test fixtures."""

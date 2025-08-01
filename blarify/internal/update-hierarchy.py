@@ -7,6 +7,7 @@ from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.code_references import LspQueryHelper
 from blarify.graph.graph_environment import GraphEnvironment
 from blarify.utils.file_remover import FileRemover
+from typing import List
 
 import dotenv
 import os
@@ -74,7 +75,7 @@ def update(updated_files: list, root_uri: str = None, blarignore_path: str = Non
     lsp_query_helper.shutdown_exit_close()
 
 
-def delete_updated_files_from_neo4j(updated_files, db_manager: Neo4jManager):
+def delete_updated_files_from_neo4j(updated_files: List[UpdatedFile], db_manager: Neo4jManager):
     for updated_file in updated_files:
         db_manager.detatch_delete_nodes_with_path(updated_file.path)
 
