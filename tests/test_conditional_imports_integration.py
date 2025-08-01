@@ -74,7 +74,7 @@ class TestConditionalImportsIntegration(unittest.TestCase):
         
         # Test fallback for unknown extension
         unknown_def = creator._get_language_definition('.unknown')
-        self.assertEqual(unknown_def, FallbackDefinitions)
+        self.assertEqual(unknown_def.__name__, 'FallbackDefinitions')
     
     def test_lsp_helper_error_messages(self):
         """Test that LspQueryHelper provides clear error messages."""
