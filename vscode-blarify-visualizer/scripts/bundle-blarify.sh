@@ -20,6 +20,21 @@ cp -r "$EXT_DIR/../blarify" "$BUNDLED_DIR/"
 cp "$EXT_DIR/../pyproject.toml" "$BUNDLED_DIR/"
 cp "$EXT_DIR/../poetry.lock" "$BUNDLED_DIR/" 2>/dev/null || true
 
+# Copy README.md to fix pyproject.toml reference
+echo "Copying README.md for pyproject.toml..."
+if [ -f "$EXT_DIR/../README.md" ]; then
+    cp "$EXT_DIR/../README.md" "$BUNDLED_DIR/"
+else
+    # Create a minimal README.md if it doesn't exist
+    cat > "$BUNDLED_DIR/README.md" << 'EOF'
+# Blarify
+
+A simple graph builder based on LSP calls for code visualization and analysis.
+
+This is the bundled version included with the Blarify VS Code extension.
+EOF
+fi
+
 # Copy neo4j-container-manager
 echo "Copying neo4j-container-manager..."
 if [ ! -d "$EXT_DIR/../neo4j-container-manager/dist" ]; then
@@ -108,7 +123,27 @@ def setup_blarify():
     blarify_dir = bundled_dir / "blarify"
     if blarify_dir.exists():
         print("Installing Blarify...")
-        subprocess.run([str(pip_exe), "install", "-e", str(bundled_dir)], check=True)
+        try:
+            subprocess.run([str(pip_exe), "install", "-e", str(bundled_dir)], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing Blarify: {e}")
+            # Check if pyproject.toml exists and has README reference
+            pyproject_file = bundled_dir / "pyproject.toml"
+            if pyproject_file.exists():
+                print("Checking pyproject.toml for README.md reference...")
+                with open(pyproject_file, 'r') as f:
+                    content = f.read()
+                    if 'readme = "README.md"' in content and not (bundled_dir / "README.md").exists():
+                        print("Creating missing README.md file...")
+                        with open(bundled_dir / "README.md", 'w') as readme:
+                            readme.write("# Blarify\\n\\nA simple graph builder based on LSP calls.")
+                        # Retry installation
+                        print("Retrying Blarify installation...")
+                        subprocess.run([str(pip_exe), "install", "-e", str(bundled_dir)], check=True)
+                    else:
+                        raise e
+            else:
+                raise e
     
     print("Setup complete!")
     return str(python_exe)
