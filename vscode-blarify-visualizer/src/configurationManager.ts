@@ -73,7 +73,7 @@ export class ConfigurationManager {
         const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
         passwords[containerName] = password;
         await config.update('neo4jPasswords', passwords, 
-            vscode.ConfigurationTarget.Workspace);
+            vscode.ConfigurationTarget.Global);
     }
     
     async clearNeo4jPassword(containerName: string): Promise<void> {
@@ -81,6 +81,6 @@ export class ConfigurationManager {
         const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
         delete passwords[containerName];
         await config.update('neo4jPasswords', passwords, 
-            vscode.ConfigurationTarget.Workspace);
+            vscode.ConfigurationTarget.Global);
     }
 }

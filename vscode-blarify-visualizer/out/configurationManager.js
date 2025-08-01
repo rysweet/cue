@@ -74,13 +74,13 @@ class ConfigurationManager {
         const config = vscode.workspace.getConfiguration(this.configSection);
         const passwords = config.get('neo4jPasswords', {});
         passwords[containerName] = password;
-        await config.update('neo4jPasswords', passwords, vscode.ConfigurationTarget.Workspace);
+        await config.update('neo4jPasswords', passwords, vscode.ConfigurationTarget.Global);
     }
     async clearNeo4jPassword(containerName) {
         const config = vscode.workspace.getConfiguration(this.configSection);
         const passwords = config.get('neo4jPasswords', {});
         delete passwords[containerName];
-        await config.update('neo4jPasswords', passwords, vscode.ConfigurationTarget.Workspace);
+        await config.update('neo4jPasswords', passwords, vscode.ConfigurationTarget.Global);
     }
 }
 exports.ConfigurationManager = ConfigurationManager;
