@@ -20,8 +20,8 @@ class DocumentedEntityNode(Node):
         description: str,
         source_file: str,
         level: int = 0,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         # For documented entities, use a file-like path format
         # Sanitize the name and type to create a valid path

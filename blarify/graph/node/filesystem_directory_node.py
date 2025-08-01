@@ -20,8 +20,8 @@ class FilesystemDirectoryNode(Node):
         level: int,
         relative_path: str,
         permissions: Optional[str] = None,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(
             label=NodeLabels.FILESYSTEM_DIRECTORY,

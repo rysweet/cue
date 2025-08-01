@@ -21,8 +21,8 @@ class DescriptionNode(Node):
         description_text: str,
         target_node_id: str,
         llm_model: str = "gpt-4",
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(
             label=NodeLabels.DESCRIPTION,

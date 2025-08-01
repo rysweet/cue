@@ -1,9 +1,8 @@
 import os
 import logging
 from typing import TYPE_CHECKING, Dict, Optional, List
-from pathlib import Path
 from blarify.graph.node import (
-    FilesystemFileNode, FilesystemDirectoryNode, Node, NodeLabels
+    FilesystemFileNode, FilesystemDirectoryNode, NodeLabels
 )
 from blarify.graph.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType

@@ -19,8 +19,8 @@ class DocumentationFileNode(Node):
         level: int,
         relative_path: str,
         doc_type: str,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(
             label=NodeLabels.DOCUMENTATION_FILE,
