@@ -42,8 +42,13 @@ export class ConfigurationManager {
     }
     
     isConfigured(): boolean {
-        const azureConfig = this.getAzureOpenAIConfig();
-        return !!(azureConfig.apiKey && azureConfig.endpoint);
+        try {
+            const azureConfig = this.getAzureOpenAIConfig();
+            return !!(azureConfig.apiKey && azureConfig.endpoint);
+        } catch (error: any) {
+            console.error('Failed to check configuration status:', error.message);
+            return false;
+        }
     }
     
     async promptForConfiguration(): Promise<boolean> {
@@ -61,26 +66,92 @@ export class ConfigurationManager {
         return false;
     }
     
-    // Neo4j password management
+    // Neo4j password management with enhanced error handling
     getNeo4jPassword(containerName: string): string | undefined {
-        const config = vscode.workspace.getConfiguration(this.configSection);
-        const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
-        return passwords[containerName];
+        try {
+            if (!containerName) {
+                throw new Error('Container name is required');
+            }
+            
+            const config = vscode.workspace.getConfiguration(this.configSection);
+            const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
+            
+            // Validate that the password is a string if it exists
+            const password = passwords[containerName];
+            if (password !== undefined && typeof password !== 'string') {
+                throw new Error(`Invalid password format for container ${containerName}`);
+            }
+            
+            return password;
+        } catch (error: any) {
+            console.error(`Failed to retrieve Neo4j password for ${containerName}:`, error.message);
+            // Return undefined to indicate password retrieval failed
+            return undefined;
+        }
     }
     
     async saveNeo4jPassword(containerName: string, password: string): Promise<void> {
-        const config = vscode.workspace.getConfiguration(this.configSection);
-        const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
-        passwords[containerName] = password;
-        await config.update('neo4jPasswords', passwords, 
-            vscode.ConfigurationTarget.Global);
+        try {
+            if (!containerName) {
+                throw new Error('Container name is required');
+            }
+            if (!password || typeof password !== 'string') {
+                throw new Error('Valid password string is required');
+            }
+            
+            const config = vscode.workspace.getConfiguration(this.configSection);
+            let passwords: Record<string, string>;
+            
+            try {
+                passwords = config.get<Record<string, string>>('neo4jPasswords', {});
+            } catch (getError: any) {
+                console.warn('Failed to get existing passwords, starting with empty object:', getError.message);
+                passwords = {};
+            }
+            
+            passwords[containerName] = password;
+            
+            await config.update('neo4jPasswords', passwords, 
+                vscode.ConfigurationTarget.Global);
+            
+        } catch (error: any) {
+            const errorMsg = `Failed to save Neo4j password for ${containerName}: ${error.message}`;
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+        }
     }
     
     async clearNeo4jPassword(containerName: string): Promise<void> {
-        const config = vscode.workspace.getConfiguration(this.configSection);
-        const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
-        delete passwords[containerName];
-        await config.update('neo4jPasswords', passwords, 
-            vscode.ConfigurationTarget.Global);
+        try {
+            if (!containerName) {
+                throw new Error('Container name is required');
+            }
+            
+            const config = vscode.workspace.getConfiguration(this.configSection);
+            let passwords: Record<string, string>;
+            
+            try {
+                passwords = config.get<Record<string, string>>('neo4jPasswords', {});
+            } catch (getError: any) {
+                console.warn('Failed to get existing passwords for clearing:', getError.message);
+                // If we can't get existing passwords, there's nothing to clear
+                return;
+            }
+            
+            if (!(containerName in passwords)) {
+                // Password doesn't exist, nothing to clear
+                return;
+            }
+            
+            delete passwords[containerName];
+            
+            await config.update('neo4jPasswords', passwords, 
+                vscode.ConfigurationTarget.Global);
+            
+        } catch (error: any) {
+            const errorMsg = `Failed to clear Neo4j password for ${containerName}: ${error.message}`;
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+        }
     }
 }
