@@ -223,3 +223,40 @@ This file maintains learnings and insights from code reviews to improve future r
 - **Repository Validation**: Includes URL validation and repository access verification
 - **Agent Validation**: Implements file format validation and integrity checks
 - **Permission Management**: Uses existing Claude Code permission system for tool access
+## Code Review Memory - 2025-08-01
+
+### PR #46: Fix Blarify tree_sitter_ruby ModuleNotFoundError
+
+#### What I Learned
+- **Dynamic Import Patterns**: The `importlib` + try-catch pattern for conditional imports is excellent for optional dependencies
+- **Graceful Degradation Architecture**: Building language dictionaries dynamically from successful imports provides robust fallback behavior
+- **Error Message Quality**: Clear, actionable error messages that show available alternatives significantly improve user experience
+- **Documentation Impact**: Comprehensive documentation (like LANGUAGE_SUPPORT.md) greatly enhances the value of a technical solution
+- **Backward Compatibility Strategy**: Using `globals()` assignment maintains module-level access while implementing dynamic loading
+
+#### Patterns to Watch
+- **Conditional Imports**: This pattern should be adopted for other optional features (LLM services, database backends)
+- **Warning vs Exception Strategy**: Using warnings for missing optional components while raising exceptions for critical errors
+- **Dynamic Dictionary Building**: Pattern of building configuration dictionaries based on successful imports/initializations
+- **Integration Testing**: Testing actual import behavior rather than just mocking provides better coverage
+
+#### Technical Insights
+- **Tree-sitter Integration**: Language parsers are loaded at import time, so failure must be handled early in the import chain
+- **Project Architecture**: The language definitions flow through: `__init__.py` → `ProjectGraphCreator` → `LspQueryHelper` → actual usage
+- **Extension Mapping**: File extensions map to language names, which map to definition classes - this three-layer mapping provides flexibility
+- **Fallback Behavior**: `FallbackDefinitions` provides a safe default when language-specific parsers aren't available
+
+#### Best Practices Observed
+- **Comprehensive Testing**: Integration tests that verify real behavior, not just mocked behavior
+- **Clear Documentation**: Step-by-step troubleshooting guides with actual command examples
+- **Organized Dependencies**: Clear separation and commenting of core vs optional dependencies in pyproject.toml
+- **User Experience Focus**: Transforming crashes into graceful degradation with helpful messages
+
+#### Future Review Focus Areas for Blarify
+- Look for similar optional dependency patterns that could benefit from conditional loading
+- Ensure new language support follows the established conditional import pattern
+- Verify that error messages provide actionable guidance to users
+- Check that integration tests cover real behavior, not just unit test mocks
+- Validate that documentation updates accompany significant architectural changes
+
+EOF < /dev/null
