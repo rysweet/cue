@@ -58,11 +58,7 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## Generic Claude Code Instructions
 
-@https://raw.githubusercontent.com/rysweet/gadugi/main/claude-generic-instructions.md
-
-## Agent Hierarchy
-
-@https://raw.githubusercontent.com/rysweet/gadugi/main/AGENT_HIERARCHY.md
+See gadugi repository for generic Claude Code best practices and instructions.
 
 ## Project-Specific Instructions
 
