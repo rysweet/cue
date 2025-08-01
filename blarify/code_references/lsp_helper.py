@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, List
 import psutil
 from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
@@ -6,6 +6,7 @@ from .types.Reference import Reference
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
+from blarify.vendor.multilspy.lsp_protocol_handler.lsp_types import Location
 
 if TYPE_CHECKING:
     from blarify.graph.node import DefinitionNode
@@ -106,7 +107,7 @@ class LspQueryHelper:
         references = self._request_references_with_exponential_backoff(node, server)
         return [Reference(reference) for reference in references]
 
-    def _request_references_with_exponential_backoff(self, node: "DefinitionNode", lsp: SyncLanguageServer):
+    def _request_references_with_exponential_backoff(self, node: "DefinitionNode", lsp: SyncLanguageServer) -> List[Location]:
         timeout = 10
         for _ in range(1, 3):
             try:

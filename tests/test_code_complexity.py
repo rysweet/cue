@@ -12,6 +12,10 @@ from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
 class TestCodeComplexityCalculator(unittest.TestCase):
     """Test code complexity calculations."""
     
+    calculator: CodeComplexityCalculator
+    PY_LANGUAGE: Language
+    parser: Parser
+    
     def setUp(self):
         """Set up test fixtures."""
         self.calculator = CodeComplexityCalculator()
@@ -123,6 +127,8 @@ def no_params():
 
 class TestComplexityMetrics(unittest.TestCase):
     """Test various complexity metric calculations."""
+    
+    calculator: CodeComplexityCalculator
     
     def setUp(self):
         """Set up test fixtures."""

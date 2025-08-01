@@ -76,6 +76,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         prompt_data = self.generator._create_prompt_for_node(file_node, self.graph)
         
         self.assertIsNotNone(prompt_data)
+        assert prompt_data is not None  # Type narrowing for pyright
         self.assertEqual(prompt_data["id"], "test-hash-1")
         self.assertIn("main.py", prompt_data["prompt"])
         self.assertIn("Python", prompt_data["prompt"])
@@ -92,6 +93,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         prompt_data = self.generator._create_prompt_for_node(function_node, self.graph)
         
         self.assertIsNotNone(prompt_data)
+        assert prompt_data is not None  # Type narrowing for pyright
         self.assertEqual(prompt_data["id"], "test-hash-2")
         self.assertIn("calculate_total", prompt_data["prompt"])
         self.assertIn("def calculate_total", prompt_data["prompt"])

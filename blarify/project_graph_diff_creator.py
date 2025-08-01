@@ -46,7 +46,6 @@ class PreviousNodeState:
 
 
 class ProjectGraphDiffCreator(ProjectGraphCreator):
-    diff_identifier: str
     added_and_modified_paths: List[str]
     file_diffs: List[FileDiff]
     pr_environment: GraphEnvironment
