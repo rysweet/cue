@@ -38,16 +38,15 @@ class LspQueryHelper:
 
     @staticmethod
     def get_language_definition_for_extension(extension: str) -> "LanguageDefinitions":
-        from blarify.code_hierarchy.languages import (
-            PythonDefinitions,
-            JavascriptDefinitions,
-            RubyDefinitions,
-            TypescriptDefinitions,
-            CsharpDefinitions,
-            GoDefinitions,
-            PhpDefinitions,
-            JavaDefinitions,
-        )
+        # Import here to avoid circular dependencies
+        from blarify.code_hierarchy.languages.python_definitions import PythonDefinitions
+        from blarify.code_hierarchy.languages.javascript_definitions import JavascriptDefinitions
+        from blarify.code_hierarchy.languages.ruby_definitions import RubyDefinitions
+        from blarify.code_hierarchy.languages.typescript_definitions import TypescriptDefinitions
+        from blarify.code_hierarchy.languages.csharp_definitions import CsharpDefinitions
+        from blarify.code_hierarchy.languages.go_definitions import GoDefinitions
+        from blarify.code_hierarchy.languages.php_definitions import PhpDefinitions
+        from blarify.code_hierarchy.languages.java_definitions import JavaDefinitions
 
         if extension in PythonDefinitions.get_language_file_extensions():
             return PythonDefinitions

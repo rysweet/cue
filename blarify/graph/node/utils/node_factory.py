@@ -65,8 +65,8 @@ class NodeFactory:
         body_node: "TreeSitterNode",
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Union[FileNode, ClassNode, FunctionNode] = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional[Union[FileNode, ClassNode, FunctionNode]] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> ClassNode:
         return ClassNode(
             name=class_name,
@@ -91,8 +91,8 @@ class NodeFactory:
         body_node: "TreeSitterNode",
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Union[FileNode, ClassNode, FunctionNode] = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional[Union[FileNode, ClassNode, FunctionNode]] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> FunctionNode:
         return FunctionNode(
             name=function_name,
@@ -118,8 +118,8 @@ class NodeFactory:
         body_node: "TreeSitterNode",
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Union[FileNode, ClassNode, FunctionNode] = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional[Union[FileNode, ClassNode, FunctionNode]] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> Union[ClassNode, FunctionNode]:
         if kind == NodeLabels.CLASS:
             return NodeFactory.create_class_node(
@@ -152,11 +152,16 @@ class NodeFactory:
 
     @staticmethod
     def create_deleted_node(
-        graph_environment: "GraphEnvironment" = None,
-    ):
+        graph_environment: Optional["GraphEnvironment"] = None,
+    ) -> DeletedNode:
+        if graph_environment is None:
+            path = f"file:///DELETED-{str(uuid4())}"
+        else:
+            path = f"file://{graph_environment.root_path}/DELETED-{str(uuid4())}"
+        
         return DeletedNode(
             label=NodeLabels.DELETED,
-            path="file://" + graph_environment.root_path + f"/DELETED-{str(uuid4())}",
+            path=path,
             name="DELETED",
             level=0,
             graph_environment=graph_environment,

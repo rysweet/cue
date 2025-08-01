@@ -23,8 +23,8 @@ class DefinitionNode(Node):
     body_node: Optional["TreeSitterNode"]
     _tree_sitter_node: "TreeSitterNode"
     _is_diff: bool
-    extra_labels = List[str]
-    extra_attributes = Dict[str, str]
+    extra_labels: List[str]
+    extra_attributes: Dict[str, str]
 
     def __init__(
         self, definition_range: "Reference", node_range: "Reference", code_text: str, body_node: Optional["TreeSitterNode"], tree_sitter_node: "TreeSitterNode", *args: Any, **kwargs: Any
@@ -35,6 +35,7 @@ class DefinitionNode(Node):
         self.code_text = code_text
         self.body_node = body_node
         self._tree_sitter_node = tree_sitter_node
+        self._is_diff = False  # Initialize the missing instance variable
         self.extra_labels = []
         self.extra_attributes = {}
 

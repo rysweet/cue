@@ -58,7 +58,7 @@ class ProjectGraphCreator:
         root_path: str,
         lsp_query_helper: LspQueryHelper,
         project_files_iterator: ProjectFilesIterator,
-        graph_environment: "GraphEnvironment" = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
         enable_llm_descriptions: bool = None,
         enable_filesystem_nodes: bool = None,
         enable_documentation_nodes: bool = None,
@@ -221,10 +221,10 @@ class ProjectGraphCreator:
         language = self._get_language_definition(file_extension=file_extension)
         return TreeSitterHelper(language_definitions=language, graph_environment=self.graph_environment)
 
-    def _get_language_definition(self, file_extension: str):
+    def _get_language_definition(self, file_extension: str) -> type:
         return self.languages.get(file_extension, FallbackDefinitions)
 
-    def _get_file_node_from_file_nodes(self, file_nodes) -> "FileNode":
+    def _get_file_node_from_file_nodes(self, file_nodes: List["Node"]) -> "FileNode":
         # File node should always be the first node in the list
         for node in file_nodes:
             if node.label == NodeLabels.FILE:

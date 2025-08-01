@@ -82,7 +82,7 @@ def main_diff(file_diffs: List[Any], root_uri: Optional[str] = None, blarignore_
     lsp_query_helper.shutdown_exit_close()
 
 
-def main_update(updated_files: list, root_uri: str = None, blarignore_path: str = None):
+def main_update(updated_files: List[str], root_uri: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
@@ -116,17 +116,17 @@ def main_update(updated_files: list, root_uri: str = None, blarignore_path: str 
     lsp_query_helper.shutdown_exit_close()
 
 
-def delete_updated_files_from_neo4j(updated_files, db_manager: Neo4jManager):
+def delete_updated_files_from_neo4j(updated_files: List[Any], db_manager: Neo4jManager) -> None:
     for updated_file in updated_files:
         db_manager.detatch_delete_nodes_with_path(updated_file.path)
 
 
 def main_diff_with_previous(
-    file_diffs: list,
-    root_uri: str = None,
-    blarignore_path: str = None,
-    previous_node_states: list[PreviousNodeState] = None,
-):
+    file_diffs: List[Any],
+    root_uri: Optional[str] = None,
+    blarignore_path: Optional[str] = None,
+    previous_node_states: Optional[List[PreviousNodeState]] = None,
+) -> None:
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 

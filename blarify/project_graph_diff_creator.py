@@ -7,10 +7,9 @@ from blarify.graph.graph_environment import GraphEnvironment
 from blarify.code_references.lsp_helper import LspQueryHelper
 from blarify.project_file_explorer import ProjectFilesIterator
 from blarify.graph.node import FileNode
-from typing import List
+from typing import List, Set
 from dataclasses import dataclass
 from enum import Enum
-from copy import copy
 from blarify.graph.external_relationship_store import ExternalRelationshipStore
 from blarify.graph.graph_update import GraphUpdate
 from blarify.graph.node.utils.id_calculator import IdCalculator
@@ -58,8 +57,8 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
         lsp_query_helper: LspQueryHelper,
         project_files_iterator: ProjectFilesIterator,
         file_diffs: List[FileDiff],
-        graph_environment: "GraphEnvironment" = None,
-        pr_environment: "GraphEnvironment" = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
+        pr_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(root_path, lsp_query_helper, project_files_iterator, graph_environment=graph_environment)
         self.graph = Graph()
@@ -144,19 +143,19 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
                 equivalent_node.add_extra_label(ChangeType.MODIFIED.value)
 
-    def _mark_new_nodes_with_label(self, previous_node_states: List[PreviousNodeState]):
+    def _mark_new_nodes_with_label(self, previous_node_states: List[PreviousNodeState]) -> None:
         previous_nodes_relative_id = {previous_node.relative_id for previous_node in previous_node_states}
 
         for path in self.added_and_modified_paths:
             for node in self.graph.get_nodes_by_path(path):
                 self._mark_new_node_if_absent(previous_nodes_relative_id, node)
 
-    def _mark_new_node_if_absent(self, previous_nodes_relative_id: str, node: Node):
+    def _mark_new_node_if_absent(self, previous_nodes_relative_id: Set[str], node: Node) -> None:
         is_relative_id_in_previous_nodes = node.relative_id in previous_nodes_relative_id
         if not is_relative_id_in_previous_nodes and isinstance(node, DefinitionNode):
             node.add_extra_label(ChangeType.ADDED.value)
 
-    def _mark_deleted_nodes_with_label(self, previous_node_states: List[PreviousNodeState]):
+    def _mark_deleted_nodes_with_label(self, previous_node_states: List[PreviousNodeState]) -> None:
         for previous_node in previous_node_states:
             equivalent_node: DefinitionNode = self.graph.get_node_by_relative_id(previous_node.relative_id)
             if not equivalent_node:
@@ -173,15 +172,15 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
                     rel_type=RelationshipType.DELETED,
                 )
 
-    def _mark_deleted_node_if_absent(self, previous_nodes_relative_id: str, node: Node):
+    def _mark_deleted_node_if_absent(self, previous_nodes_relative_id: str, node: Node) -> None:
         is_relative_id_in_previous_nodes = node.relative_id in previous_nodes_relative_id
         if not is_relative_id_in_previous_nodes and isinstance(node, DefinitionNode):
             node.add_extra_label(ChangeType.DELETED.value)
 
-    def mark_updated_and_added_nodes_as_diff(self):
+    def mark_updated_and_added_nodes_as_diff(self) -> None:
         self.mark_file_nodes_as_diff(self.get_file_nodes_from_path_list(self.added_and_modified_paths))
 
-    def keep_only_files_to_create(self):
+    def keep_only_files_to_create(self) -> None:
         paths_to_keep = self.get_parent_paths_from_paths(self.added_and_modified_paths)
         paths_to_keep.extend(self.added_and_modified_paths)
         paths_to_keep.extend(self.deleted_nodes_added_paths)
@@ -195,7 +194,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         return parent_paths
 
-    def get_parent_paths_from_path(self, path):
+    def get_parent_paths_from_path(self, path: str) -> List[str]:
         parents = []
 
         iterations = 0
@@ -208,12 +207,12 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         return parents
 
-    def raise_error_if_deeply_nested_file(self, iteration, path):
+    def raise_error_if_deeply_nested_file(self, iteration: int, path: str) -> None:
         MAX_ITERATIONS = 100000
         if iteration > MAX_ITERATIONS:
             raise ValueError(f"Deeply nested file, probably an infinite loop: {path}")
 
-    def create_relationship_from_references_for_modified_and_added_files(self):
+    def create_relationship_from_references_for_modified_and_added_files(self) -> None:
         file_nodes = self.get_file_nodes_from_path_list(self.added_and_modified_paths)
 
         paths = self.get_paths_referenced_by_file_nodes(file_nodes)
@@ -244,7 +243,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
             file_node.update_graph_environment_to_self_and_children(self.pr_environment)
             file_node.skeletonize()
 
-    def get_file_diff_for_path(self, path):
+    def get_file_diff_for_path(self, path: str) -> FileDiff:
         for file_diff in self.file_diffs:
             if file_diff.path == path:
                 return file_diff
@@ -254,7 +253,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
     def remove_paths_to_create_from_paths_referenced(self, paths_referenced: List[str]) -> List[str]:
         return [path for path in paths_referenced if path not in self.added_and_modified_paths]
 
-    def get_paths_referenced_by_file_node(self, file_node: FileNode) -> set:
+    def get_paths_referenced_by_file_node(self, file_node: FileNode) -> Set[str]:
         helper = self._get_tree_sitter_for_file_extension(file_node.extension)
         definitions = file_node.get_all_definition_ranges()
         identifiers = helper.get_all_identifiers(file_node)
@@ -262,7 +261,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         return {self.lsp_query_helper.get_definition_path_for_reference(ref, file_node.extension) for ref in filtered_identifiers}
 
-    def remove_definitions_from_identifiers(self, definitions, identifiers):
+    def remove_definitions_from_identifiers(self, definitions: List, identifiers: List) -> List:
         return [identifier for identifier in identifiers if identifier not in definitions]
 
     def get_file_nodes_from_path_list(self, paths: List[str]) -> List[FileNode]:
@@ -274,7 +273,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
                 file_nodes.append(file_node)
         return file_nodes
 
-    def add_deleted_relationships_and_nodes(self):
+    def add_deleted_relationships_and_nodes(self) -> None:
         for diff in self.file_diffs:
             if diff.change_type == ChangeType.DELETED:
                 deleted_node_pr_env = NodeFactory.create_deleted_node(
@@ -291,7 +290,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
                     rel_type=RelationshipType.DELETED,
                 )
 
-    def generate_file_id_from_path(self, path):
+    def generate_file_id_from_path(self, path: str) -> str:
         relative_path = PathCalculator.compute_relative_path_with_prefix(path, self.graph_environment.root_path)
         original_file_node_id = IdCalculator.generate_hashed_file_id(
             self.graph_environment.environment, self.graph_environment.diff_identifier, relative_path

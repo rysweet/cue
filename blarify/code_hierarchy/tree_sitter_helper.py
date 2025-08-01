@@ -20,9 +20,6 @@ class TreeSitterHelper:
     def __init__(
         self, language_definitions: "LanguageDefinitions", graph_environment: Optional["GraphEnvironment"] = None
     ) -> None:
-        # Import at runtime to avoid circular imports
-        from .languages import LanguageDefinitions
-        
         self.language_definitions: "LanguageDefinitions" = language_definitions
         self.parsers: Dict[str, Any] = self.language_definitions.get_parsers_for_extensions()
         self.graph_environment: Optional["GraphEnvironment"] = graph_environment
