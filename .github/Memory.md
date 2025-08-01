@@ -1,5 +1,5 @@
 # AI Assistant Memory
-Last Updated: 2025-08-01T13:00:00Z
+Last Updated: 2025-08-01T14:00:00Z
 
 ## Current Goals
 - ✅ Improve test coverage for Blarify codebase to >80% (ACHIEVED 3x improvement: 20.76% → 63.76%)
@@ -60,6 +60,13 @@ Last Updated: 2025-08-01T13:00:00Z
 - **Posted comprehensive response** on PR #28 addressing all feedback
 
 ## Recent Accomplishments
+- **Fixed critical workflow execution issues** (2025-08-01 14:00)
+  - **✅ Identified root cause**: AI was manually executing workflows instead of using agents
+  - **✅ Updated instructions**: Added CRITICAL section emphasizing agent usage
+  - **✅ Clarified hierarchy**: OrchestratorAgent → WorkflowMaster → Code-Reviewer
+  - **✅ Fixed import syntax**: Changed to native @ imports per Claude Code docs
+  - **✅ Posted code review**: Completed review for PR #36
+  - **✅ Created Issue #37**: Documented workflow execution gap
 - **Created PR #33 for code review mechanism fix** (2025-08-01 13:00)
   - **✅ Issue #32 created**: Documented problem with regular comments vs formal reviews
   - **✅ Branch created**: feature/code-review-mechanism-32
