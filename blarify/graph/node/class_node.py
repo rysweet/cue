@@ -1,5 +1,5 @@
 from blarify.graph.node import NodeLabels, DefinitionNode
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
     from blarify.code_references.types import Reference
@@ -19,7 +19,7 @@ class ClassNode(DefinitionNode):
     def node_repr_for_identifier(self) -> str:
         return "#" + self.name
 
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"]["start_line"] = self.node_range.range.start.line
         obj["attributes"]["end_line"] = self.node_range.range.end.line
