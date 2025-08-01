@@ -1,8 +1,6 @@
 {
   "permissions": {
-    "additionalDirectories": [
-      "/tmp"
-    ],
+    "additionalDirectories": ["/tmp"],
     "allow": [
       "Bash(awk:*)",
       "Bash(cat:*)",
@@ -89,23 +87,5 @@
       "WebFetch(domain:github.com)"
     ],
     "deny": []
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "matchers": {
-          "sessionType": [
-            "startup",
-            "resume"
-          ]
-        },
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Checking for agent updates...' && /agent:agent-manager check-and-update-agents"
-          }
-        ]
-      }
-    ]
   }
 }
