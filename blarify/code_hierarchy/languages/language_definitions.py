@@ -5,6 +5,8 @@ from typing import Set, Optional, Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
+    from blarify.graph.relationship import RelationshipType
+    from blarify.graph.node import NodeLabels
 
 
 class BodyNodeNotFound(Exception):

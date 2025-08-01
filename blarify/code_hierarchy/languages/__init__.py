@@ -1,7 +1,11 @@
-from .language_definitions import LanguageDefinitions
-# Re-export these classes for backward compatibility
-from .language_definitions import BodyNodeNotFound, IdentifierNodeNotFound  # noqa: F401
-from .fallback_definitions import FallbackDefinitions  # noqa: F401
+from .language_definitions import LanguageDefinitions, BodyNodeNotFound, IdentifierNodeNotFound
+from .fallback_definitions import FallbackDefinitions
+
+# Public API exports
+__all__ = [
+    'LanguageDefinitions', 'BodyNodeNotFound', 'IdentifierNodeNotFound', 'FallbackDefinitions',
+    'get_available_languages', 'get_language_definition'
+]
 
 # Import language-specific definitions conditionally to avoid failures
 # when tree-sitter language modules are not installed

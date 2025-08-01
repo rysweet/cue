@@ -79,9 +79,11 @@ class RubyDefinitions(LanguageDefinitions):
 
             # Convert string to NodeLabels enum
             node_label_enum = NodeLabels(node_label)
-            found_relationship_scope = RubyDefinitions._get_relationship_type_for_node(
+            relationship_type = RubyDefinitions._get_relationship_type_for_node(
                 tree_sitter_node=named_parent, relationships_types=rel_types[node_label_enum]
             )
+            if relationship_type:
+                found_relationship_scope = FoundRelationshipScope(node_in_scope=named_parent, relationship_type=relationship_type)
 
             named_parent = named_parent.parent
         return found_relationship_scope
