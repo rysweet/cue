@@ -84,8 +84,15 @@ if __name__ == "__main__":
     dotenv.load_dotenv()
     root_path = os.getenv("ROOT_PATH")
     blarignore_path = os.getenv("BLARIGNORE_PATH")
-    paths_to_update = os.getenv("PATHS_TO_UPDATE")
-    paths_to_update = paths_to_update.split(";")
+    paths_to_update_str = os.getenv("PATHS_TO_UPDATE")
+    
+    # Validate required environment variables
+    if root_path is None:
+        raise ValueError("ROOT_PATH environment variable is required")
+    if paths_to_update_str is None:
+        raise ValueError("PATHS_TO_UPDATE environment variable is required")
+        
+    paths_to_update = paths_to_update_str.split(";")
 
 
 

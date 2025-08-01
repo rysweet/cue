@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, List, Dict, Any, Union
+from typing import TYPE_CHECKING, Optional, List, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship import RelationshipCreator, Relationship

@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 from blarify.prebuilt.graph_builder import GraphBuilder
 from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.db_managers.falkordb_manager import FalkorDBManager
@@ -7,7 +7,13 @@ import dotenv
 import os
 
 
-def build(root_path: str = None, enable_llm_descriptions: bool = None):
+def build(root_path: Optional[str] = None, enable_llm_descriptions: Optional[bool] = None):
+    # Provide defaults for None values
+    if root_path is None:
+        root_path = os.getcwd()
+    if enable_llm_descriptions is None:
+        enable_llm_descriptions = False
+        
     graph_builder = GraphBuilder(
         root_path=root_path,
         extensions_to_skip=[".json"],
