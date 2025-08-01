@@ -99,8 +99,9 @@ You MUST execute these phases in order for every prompt:
 ### 9. Review Phase
 - Invoke code-reviewer sub-agent: `/agent:code-reviewer`
 - Monitor CI/CD pipeline status
-- Address any review feedback
+- Address any review feedback using CodeReviewResponseAgent if needed
 - Make necessary corrections
+- Commit and push any CodeReviewerProjectMemory.md updates
 - Ensure all checks pass before completion
 
 ## Progress Tracking
