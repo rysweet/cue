@@ -103,7 +103,7 @@ class DocumentationParser:
             Dictionary containing parsed documentation data
         """
         doc_files = self.find_documentation_files()
-        result = {
+        result: Dict[str, Any] = {
             "documentation_files": [],
             "concepts": [],
             "entities": [],

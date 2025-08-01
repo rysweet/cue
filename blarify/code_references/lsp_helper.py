@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Type
 import psutil
 from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
@@ -37,7 +37,7 @@ class LspQueryHelper:
         self.language_to_lsp_server = {}
 
     @staticmethod
-    def get_language_definition_for_extension(extension: str) -> "LanguageDefinitions":
+    def get_language_definition_for_extension(extension: str) -> Type["LanguageDefinitions"]:
         # Import here to avoid circular dependencies
         from blarify.code_hierarchy.languages.python_definitions import PythonDefinitions
         from blarify.code_hierarchy.languages.javascript_definitions import JavascriptDefinitions

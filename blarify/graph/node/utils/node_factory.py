@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from blarify.graph.graph_environment import GraphEnvironment
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
+    from ..types.definition_node import DefinitionNode
 
 
 class NodeFactory:
@@ -118,7 +119,7 @@ class NodeFactory:
         body_node: Optional["TreeSitterNode"],
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Optional["DefinitionNode"] = None,
+        parent: Optional[Union["DefinitionNode", FileNode, ClassNode, FunctionNode]] = None,
         graph_environment: Optional["GraphEnvironment"] = None,
     ) -> Union[ClassNode, FunctionNode]:
         if kind == NodeLabels.CLASS:

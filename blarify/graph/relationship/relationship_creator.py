@@ -1,10 +1,9 @@
 from typing import List, TYPE_CHECKING
 from blarify.graph.relationship import Relationship, RelationshipType
-from blarify.graph.node import NodeLabels
 
 if TYPE_CHECKING:
     from blarify.graph.graph import Graph
-    from blarify.graph.node import Node
+    from blarify.graph.node import Node, NodeLabels
     from blarify.code_hierarchy.tree_sitter_helper import TreeSitterHelper
     from blarify.code_references.types import Reference
 
@@ -14,7 +13,7 @@ class RelationshipCreator:
     def create_relationships_from_paths_where_node_is_referenced(
         references: list["Reference"], node: "Node", graph: "Graph", tree_sitter_helper: "TreeSitterHelper"
     ) -> List[Relationship]:
-        relationships = []
+        relationships: List[Relationship] = []
         for reference in references:
             file_node_reference = graph.get_file_node_by_path(path=reference.uri)
             if file_node_reference is None:
@@ -45,6 +44,9 @@ class RelationshipCreator:
 
     @staticmethod
     def _get_relationship_type(defined_node: "Node") -> RelationshipType:
+        # Import at runtime to avoid circular dependencies
+        from blarify.graph.node import NodeLabels
+        
         if defined_node.label == NodeLabels.FUNCTION:
             return RelationshipType.FUNCTION_DEFINITION
         elif defined_node.label == NodeLabels.CLASS:

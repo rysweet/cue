@@ -4,8 +4,6 @@ from blarify.graph.node.types.node import Node
 
 import re
 
-from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
-
 if TYPE_CHECKING:
     from ..class_node import ClassNode
     from ..function_node import FunctionNode
@@ -13,6 +11,7 @@ if TYPE_CHECKING:
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
     from blarify.graph.graph_environment import GraphEnvironment
+    from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
 
 
 class DefinitionNode(Node):
@@ -48,6 +47,9 @@ class DefinitionNode(Node):
 
     @property
     def stats(self) -> "NestingStats":
+        # Import at runtime to avoid circular dependencies
+        from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
+        
         if self.body_node is None:
             return NestingStats(0, 0, 0, 0)
         return CodeComplexityCalculator.calculate_nesting_stats(self.body_node, extension=self.extension)
@@ -59,7 +61,7 @@ class DefinitionNode(Node):
         self._defines.extend(nodes)
 
     def get_relationships(self) -> List["Relationship"]:
-        relationships = []
+        relationships: List["Relationship"] = []
         for node in self._defines:
             relationships.append(RelationshipCreator.create_defines_relationship(self, node))
 

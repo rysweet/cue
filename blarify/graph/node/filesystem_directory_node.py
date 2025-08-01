@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, List, Dict, Any
+from typing import TYPE_CHECKING, Optional, List, Dict, Any, Union
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship import RelationshipCreator, Relationship
@@ -12,6 +12,7 @@ class FilesystemDirectoryNode(Node):
     
     relative_path: str
     permissions: Optional[str]
+    _contains: List[Node]
     
     def __init__(
         self,
@@ -33,7 +34,7 @@ class FilesystemDirectoryNode(Node):
         )
         self.relative_path = relative_path
         self.permissions = permissions
-        self._contains = []
+        self._contains: List[Node] = []
     
     @property
     def node_repr_for_identifier(self) -> str:

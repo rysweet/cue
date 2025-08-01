@@ -34,7 +34,7 @@ class FolderNode(Node):
             self.relate_node_as_contain_relationship(node)
 
     def get_relationships(self) -> List[Relationship]:
-        relationships = []
+        relationships: List[Relationship] = []
         for node in self._contains:
             relationships.append(RelationshipCreator.create_contains_relationship(self, node))
 

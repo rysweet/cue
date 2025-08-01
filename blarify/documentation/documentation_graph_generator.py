@@ -2,7 +2,7 @@ import os
 import logging
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from blarify.graph.node import (
-    DocumentationFileNode, ConceptNode, DocumentedEntityNode
+    DocumentationFileNode, ConceptNode, DocumentedEntityNode, Node
 )
 from blarify.graph.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType
@@ -200,7 +200,7 @@ class DocumentationGraphGenerator:
                 
                 # Find matching code nodes
                 code_matches = self.documentation_linker.find_code_matches(entity, graph)
-                for code_node in code_matches[:3]:  # Limit to top 3 matches
+                for code_node in code_matches[:3]:  # type: Node  # Limit to top 3 matches
                     rel = Relationship(
                         start_node=entity_node,
                         end_node=code_node,
@@ -211,7 +211,7 @@ class DocumentationGraphGenerator:
             # Link code references
             for code_ref in extracted.get("code_references", []):
                 code_matches = self.documentation_linker.find_code_matches_by_reference(code_ref, graph)
-                for code_node in code_matches[:2]:  # Limit to top 2 matches
+                for code_node in code_matches[:2]:  # type: Node  # Limit to top 2 matches
                     rel = Relationship(
                         start_node=doc_node,
                         end_node=code_node,
@@ -227,7 +227,7 @@ class DocumentationGraphGenerator:
                 
                 # Find code that might implement the concept
                 implementing_nodes = self.documentation_linker.link_concepts_to_code(concept, graph)
-                for code_node in implementing_nodes[:2]:  # Limit matches
+                for code_node in implementing_nodes[:2]:  # type: Node  # Limit matches
                     rel = Relationship(
                         start_node=code_node,
                         end_node=concept_node,
