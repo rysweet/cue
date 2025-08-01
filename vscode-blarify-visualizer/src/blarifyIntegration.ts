@@ -12,6 +12,7 @@ export interface BlarifyResult {
 }
 
 export class BlarifyIntegration {
+    private static readonly DEFAULT_CONTAINER_NAME = 'blarify-visualizer-development';
     private lastAnalysis?: number;
     private pythonEnv: PythonEnvironment;
     
@@ -74,7 +75,7 @@ export class BlarifyIntegration {
             
             // Get the instance details - we need to access the private instance
             // For now, use the default pattern from test files
-            const containerName = 'blarify-visualizer-development';
+            const containerName = BlarifyIntegration.DEFAULT_CONTAINER_NAME;
             const savedPassword = this.configManager.getNeo4jPassword(containerName);
             
             return {
@@ -83,7 +84,8 @@ export class BlarifyIntegration {
                 password: savedPassword || 'test-password'
             };
         } catch (error) {
-            console.warn('Failed to get Neo4j connection details, using defaults:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.warn(`Failed to get Neo4j connection details: ${errorMessage}. Using default connection settings (bolt://localhost:7957).`);
             return {
                 uri: 'bolt://localhost:7957',
                 user: 'neo4j',
