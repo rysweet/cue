@@ -11,13 +11,30 @@ This file combines generic Claude Code best practices with project-specific inst
 **For ANY development task that requires multiple phases (issue, branch, code, PR):**
 
 1. **DO NOT manually execute workflow phases**
-2. **ALWAYS invoke WorkflowMaster**: 
+2. **Use the proper agent hierarchy**:
+   
+   **For multiple tasks or when parallelization is possible**:
+   ```
+   /agent:orchestrator-agent
+   
+   Execute these specific prompts in parallel:
+   - prompt-file-1.md
+   - prompt-file-2.md
+   ```
+   
+   **For single sequential tasks**:
    ```
    /agent:workflow-master
    
    Task: Execute workflow for /prompts/[prompt-file].md
    ```
-3. **Let WorkflowMaster handle**:
+
+3. **Agent Hierarchy**:
+   - **OrchestratorAgent**: Top-level coordinator for parallel execution
+   - **WorkflowMaster**: Handles individual workflow execution
+   - **Code-Reviewer**: Executes Phase 9 reviews
+
+4. **Automated Workflow Handling**:
    - Issue creation
    - Branch management  
    - Implementation tracking
@@ -31,10 +48,9 @@ This file combines generic Claude Code best practices with project-specific inst
 - Direct user requests for specific actions
 
 **Before ANY development task, ask yourself**:
-- Does this need an issue? → Use WorkflowMaster
-- Does this need a branch? → Use WorkflowMaster  
-- Does this need a PR? → Use WorkflowMaster
-- Is this a feature/fix? → Use WorkflowMaster
+- Multiple related tasks? → Use OrchestratorAgent
+- Single complex task? → Use WorkflowMaster
+- Need an issue/branch/PR? → Use agents, not manual execution
 
 ---
 

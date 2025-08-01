@@ -224,11 +224,14 @@ Context: [Provide specific context about the problem]
 Requirements: [What needs to be achieved]
 ```
 
-### Common Workflow Agents
-- **workflow-master**: Orchestrates complete development workflows from issue to PR
-- **code-reviewer**: Reviews pull requests 
+### Common Workflow Agents (in hierarchical order)
+- **orchestrator-agent**: Top-level coordinator for parallel task execution (use FIRST for multiple tasks)
+- **workflow-master**: Orchestrates individual development workflows from issue to PR
+- **code-reviewer**: Reviews pull requests (invoked by WorkflowMaster in Phase 9)
 - **prompt-writer**: Creates structured prompts
-- **orchestrator-agent**: Manages parallel task execution
+- **task-analyzer**: Analyzes dependencies (invoked by OrchestratorAgent)
+- **worktree-manager**: Manages git worktrees (invoked by OrchestratorAgent)
+- **execution-monitor**: Monitors parallel execution (invoked by OrchestratorAgent)
 
 ### Creating New Agents
 New specialized agents can be added to `.github/agents/` or `.claude/agents/` following the existing template structure. Each agent should have:
