@@ -21,3 +21,11 @@ easy/
 !blarify/vendor/**/*.json
 !.claude/settings.json
 
+# Workflow state management
+# Temporary workflow states (ignored to reduce git noise)
+.github/workflow-states/
+.github/WorkflowMasterState.md
+
+# Important workflow checkpoints (committed for recovery)
+!.github/workflow-checkpoints/
+
