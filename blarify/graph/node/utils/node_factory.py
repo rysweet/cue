@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class NodeFactory:
     @staticmethod
     def create_folder_node(
-        folder: "Folder", parent: FolderNode = None, graph_environment: "GraphEnvironment" = None
+        folder: "Folder", parent: Optional[FolderNode] = None, graph_environment: Optional["GraphEnvironment"] = None
     ) -> FolderNode:
         return FolderNode(
             path=folder.uri_path,
@@ -37,10 +37,10 @@ class NodeFactory:
         node_range: "Reference",
         definition_range: "Reference",
         code_text: str,
-        parent: FolderNode,
+        parent: Optional[FolderNode],
         tree_sitter_node: "TreeSitterNode",
         body_node: Optional["TreeSitterNode"] = None,
-        graph_environment: "GraphEnvironment" = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> FileNode:
         return FileNode(
             path=path,

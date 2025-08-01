@@ -1,4 +1,5 @@
 from tree_sitter import Tree, Parser
+from typing import List, TYPE_CHECKING, Tuple, Optional, Dict, Any
 
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from blarify.graph.node import NodeFactory
@@ -6,7 +7,6 @@ from blarify.code_references.types import Reference, Range, Point
 from .languages import LanguageDefinitions, BodyNodeNotFound, FallbackDefinitions
 from blarify.graph.node import NodeLabels
 from blarify.project_file_explorer import File
-from typing import List, TYPE_CHECKING, Tuple, Optional
 from blarify.graph.relationship import RelationshipType
 
 if TYPE_CHECKING:
@@ -17,26 +17,23 @@ if TYPE_CHECKING:
 
 
 class TreeSitterHelper:
-    language_definitions: LanguageDefinitions
-    parser: Parser
-    current_path: str
-    base_node_source_code: str
-    created_nodes: List["Node"]
-    graph_environment: Optional["GraphEnvironment"]
-
     def __init__(
         self, language_definitions: LanguageDefinitions, graph_environment: Optional["GraphEnvironment"] = None
     ):
-        self.language_definitions = language_definitions
-        self.parsers = self.language_definitions.get_parsers_for_extensions()
-        self.graph_environment = graph_environment
+        self.language_definitions: LanguageDefinitions = language_definitions
+        self.parsers: Dict[str, Any] = self.language_definitions.get_parsers_for_extensions()
+        self.graph_environment: Optional["GraphEnvironment"] = graph_environment
+        self.parser: Optional[Parser] = None
+        self.current_path: str = ""
+        self.base_node_source_code: str = ""
+        self.created_nodes: List["Node"] = []
 
     def get_all_identifiers(self, node: "FileNode") -> List["Reference"]:
         self.current_path = node.path
-        return self._traverse_and_find_identifiers(node._tree_sitter_node)
+        return self._traverse_and_find_identifiers(node.tree_sitter_node)
 
     def _traverse_and_find_identifiers(self, node: "TreeSitterNode") -> List["Reference"]:
-        identifiers = []
+        identifiers: List["Reference"] = []
 
         if node.type == "identifier":
             reference = self._get_reference_from_node(node)
@@ -52,7 +49,7 @@ class TreeSitterHelper:
     ) -> FoundRelationshipScope:
         node_in_point_reference = self._get_node_in_point_reference(node=node_referenced, reference=reference)
         found_relationship_scope = self.language_definitions.get_relationship_type(
-            node=original_node, node_in_point_reference=node_in_point_reference
+            node=original_node.tree_sitter_node, node_in_point_reference=node_in_point_reference
         )
 
         if not found_relationship_scope:
@@ -67,9 +64,9 @@ class TreeSitterHelper:
         start_point = (reference.range.start.line, reference.range.start.character)
         end_point = (reference.range.end.line, reference.range.end.character)
 
-        return node._tree_sitter_node.descendant_for_point_range(start_point, end_point)
+        return node.tree_sitter_node.descendant_for_point_range(start_point, end_point)
 
-    def create_nodes_and_relationships_in_file(self, file: File, parent_folder: "FolderNode" = None) -> List["Node"]:
+    def create_nodes_and_relationships_in_file(self, file: File, parent_folder: Optional["FolderNode"] = None) -> List["Node"]:
         self.current_path = file.uri_path
         self.created_nodes = []
         self.base_node_source_code = self._get_content_from_file(file)
@@ -84,11 +81,11 @@ class TreeSitterHelper:
         return [file_node]
 
     def _does_path_have_valid_extension(self, path: str) -> bool:
-        if self.language_definitions == FallbackDefinitions:
+        if isinstance(self.language_definitions, FallbackDefinitions):
             return False
         return any(path.endswith(extension) for extension in self.language_definitions.get_language_file_extensions())
 
-    def _handle_paths_with_valid_extension(self, file: File, parent_folder: "FolderNode" = None) -> None:
+    def _handle_paths_with_valid_extension(self, file: File, parent_folder: Optional["FolderNode"] = None) -> None:
         tree = self._parse(self.base_node_source_code, file.extension)
 
         file_node = self._create_file_node_from_module_node(
@@ -104,7 +101,7 @@ class TreeSitterHelper:
         return parser.parse(as_bytes)
 
     def _create_file_node_from_module_node(
-        self, module_node: "TreeSitterNode", file: File, parent_folder: "FolderNode" = None
+        self, module_node: "TreeSitterNode", file: File, parent_folder: Optional["FolderNode"] = None
     ) -> "Node":
         return NodeFactory.create_file_node(
             path=file.uri_path,
@@ -219,7 +216,7 @@ class TreeSitterHelper:
     def get_parent_node(self, context_stack: List["Node"]) -> "DefinitionNode":
         return context_stack[-1]
 
-    def _create_file_node_from_raw_file(self, file: File, parent_folder: "FolderNode" = None) -> "FileNode":
+    def _create_file_node_from_raw_file(self, file: File, parent_folder: Optional["FolderNode"] = None) -> "FileNode":
         return NodeFactory.create_file_node(
             path=file.uri_path,
             name=file.name,

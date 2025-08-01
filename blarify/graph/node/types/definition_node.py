@@ -41,6 +41,11 @@ class DefinitionNode(Node):
         super().__init__(*args, **kwargs)
 
     @property
+    def tree_sitter_node(self) -> "TreeSitterNode":
+        """Public access to the tree-sitter node."""
+        return self._tree_sitter_node
+
+    @property
     def stats(self) -> "NestingStats":
         if self.body_node is None:
             return NestingStats(0, 0, 0, 0)

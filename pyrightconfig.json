@@ -62,8 +62,8 @@
       "pythonVersion": "3.12"
     }
   ],
-  "venvPath": ".",
-  "venv": ".venv",
+  "venvPath": "/Users/ryan/Library/Caches/pypoetry/virtualenvs",
+  "venv": "blarify-cQEauSGv-py3.12",
   "autoImportCompletions": true,
   "strictListInference": true,
   "strictDictionaryInference": true,

@@ -15,17 +15,16 @@ class JavascriptDefinitions(LanguageDefinitions):
     CONTROL_FLOW_STATEMENTS = ["for_statement", "if_statement", "while_statement", "else_clause"]
     CONSEQUENCE_STATEMENTS = ["statement_block"]
     
-    @staticmethod
     def get_language_name() -> str:
         return "javascript"
 
-    @staticmethod
     def get_parsers_for_extensions() -> Dict[str, Parser]:
         return {
             ".js": Parser(Language(tsjavascript.language())),
             ".jsx": Parser(Language(tsjavascript.language())),
         }
 
+    @staticmethod
     def should_create_node(node: Node) -> bool:
         if node.type == "variable_declarator":
             return JavascriptDefinitions._is_variable_declaration_arrow_function(node)
@@ -34,19 +33,23 @@ class JavascriptDefinitions(LanguageDefinitions):
             node, ["class_declaration", "function_declaration", "method_definition", "interface_declaration"]
         )
 
+    @staticmethod
     def _is_variable_declaration_arrow_function(node: Node) -> bool:
         if node.type == "variable_declarator" and (children := node.child_by_field_name("value")):
             return children.type == "arrow_function"
 
+    @staticmethod
     def get_identifier_node(node: Node) -> Node:
         return LanguageDefinitions._get_identifier_node_base_implementation(node)
 
+    @staticmethod
     def get_relationship_type(node: GraphNode, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
         return JavascriptDefinitions._find_relationship_type(
             node_label=node.label,
             node_in_point_reference=node_in_point_reference,
         )
 
+    @staticmethod
     def _find_relationship_type(node_label: str, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
         relationship_types = JavascriptDefinitions._get_relationship_types_by_label()
         relevant_relationship_types = relationship_types.get(node_label, {})
@@ -55,6 +58,7 @@ class JavascriptDefinitions(LanguageDefinitions):
             node_in_point_reference, relevant_relationship_types
         )
 
+    @staticmethod
     def _get_relationship_types_by_label() -> dict:
         return {
             NodeLabels.CLASS: {
@@ -73,6 +77,7 @@ class JavascriptDefinitions(LanguageDefinitions):
             },
         }
 
+    @staticmethod
     def _traverse_and_find_relationships(node: Node, relationship_mapping: dict) -> Optional[RelationshipType]:
         while node is not None:
             relationship_type = JavascriptDefinitions._get_relationship_type_for_node(node, relationship_mapping)
@@ -95,7 +100,6 @@ class JavascriptDefinitions(LanguageDefinitions):
 
         return LanguageDefinitions._get_body_node_base_implementation(node)
 
-    @staticmethod
     def get_language_file_extensions() -> Set[str]:
         return {".js", ".jsx"}
 
