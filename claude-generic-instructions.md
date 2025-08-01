@@ -9,6 +9,11 @@
 
 **Memory.md is your persistent brain across sessions - USE IT!**
 
+**WHEN WORKING ON CLAUDE AGENTS OR INSTRUCTIONS**:
+- **READ** https://docs.anthropic.com/en/docs/claude-code/memory for proper import syntax
+- **READ** https://docs.anthropic.com/en/docs/claude-code/sub-agents for agent patterns
+- **USE** `@` syntax for imports, not manual includes
+
 ## Using GitHub CLI for Issue and PR Management
 
 **IMPORTANT**: When creating issues, PRs, or comments using `gh` CLI, always include a note that the action was performed by an AI agent on behalf of the repository owner. Add "*Note: This [issue/PR/comment] was created by an AI agent on behalf of the repository owner.*" to the body.

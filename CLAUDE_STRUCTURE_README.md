@@ -22,7 +22,7 @@ Instructions specific to the AI-SIP workshop repository:
 - Workshop-specific practices
 
 ### `CLAUDE.md`
-The main instruction file that combines both generic and project-specific instructions using a manual include approach with START/END markers.
+The main instruction file that combines both generic and project-specific instructions using Claude Code's `@` import syntax.
 
 ## Maintenance
 
@@ -30,7 +30,20 @@ When updating instructions:
 
 1. **For generic Claude Code practices**: Edit `claude-generic-instructions.md`
 2. **For project-specific guidance**: Edit `claude-project-specific.md`
-3. **Update CLAUDE.md**: Copy the updated content between the corresponding START/END markers
+3. **CLAUDE.md automatically imports both files** using `@` syntax - no manual updates needed!
+
+## Import Syntax
+
+CLAUDE.md uses Claude Code's native import syntax:
+```markdown
+@claude-generic-instructions.md
+@claude-project-specific.md
+```
+
+This supports:
+- Relative and absolute paths
+- Recursive imports (max 5 levels)
+- Home directory paths: `@~/.claude/shared-instructions.md`
 
 ## Adoption Guide
 
@@ -38,8 +51,12 @@ For other projects wanting to use this structure:
 
 1. Copy `claude-generic-instructions.md` to your project
 2. Create your own `[project]-specific.md` file with project details
-3. Create a `CLAUDE.md` that combines both using the template structure
-4. Optionally create a build script to automate the combination
+3. Create a `CLAUDE.md` that imports both using `@` syntax:
+   ```markdown
+   @claude-generic-instructions.md
+   @project-specific.md
+   ```
+4. Share common instructions across projects using home directory imports
 
 ## Benefits
 
