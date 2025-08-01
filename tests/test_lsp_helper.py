@@ -436,16 +436,85 @@ class TestLspQueryHelper(unittest.TestCase):
     
     def test_lsp_error_handling_coverage(self):
         """Test that LSP helper properly handles various error types."""
-        # Test that the helper can handle different types of LSP errors
-        # This is a simpler approach to test error handling without complex mocking
-        
-        # Test ConnectionError handling
+        # Test unsupported extension error handling
         with self.assertRaises(FileExtensionNotSupported):
             self.helper.get_language_definition_for_extension(".unknown")
         
-        # Test that the error handling structure exists
+        # Test error handling structure exists
         self.assertTrue(hasattr(self.helper, '_get_or_create_lsp_server'))
         self.assertTrue(hasattr(self.helper, '_restart_lsp_for_extension'))
+    
+    @patch('blarify.code_references.lsp_helper.PathCalculator')
+    def test_lsp_error_simulation_and_recovery(self, mock_path_calc):
+        """Test LSP error simulation and recovery behavior."""
+        # Create mock node for testing
+        mock_node = MagicMock()
+        mock_node.extension = ".py"
+        mock_node.path = "file:///test/file.py"
+        mock_node.definition_range.start_dict = {"line": 10, "character": 5}
+        
+        # Mock the path calculator
+        mock_path_calc.get_relative_path_from_uri.return_value = "file.py"
+        
+        # Test 1: Simulate LSP server creation failure and recovery
+        with patch.object(self.helper, 'get_language_definition_for_extension') as mock_get_lang:
+            with patch.object(self.helper, '_create_lsp_server') as mock_create:
+                with patch.object(self.helper, '_initialize_lsp_server') as mock_init:
+                    # Setup mocks
+                    mock_lang_def = MagicMock()
+                    mock_lang_def.get_language_name.return_value = "python"
+                    mock_get_lang.return_value = mock_lang_def
+                    
+                    # First attempt fails, second succeeds
+                    mock_server = MagicMock()
+                    mock_create.return_value = mock_server
+                    mock_init.side_effect = [ConnectionError("Server startup failed"), None]
+                    
+                    # Test that helper attempts retry on connection error
+                    try:
+                        self.helper._get_or_create_lsp_server(".py")
+                    except ConnectionError:
+                        pass  # Expected on first failure
+                    
+                    # Verify create and init were called
+                    mock_create.assert_called()
+                    mock_init.assert_called()
+        
+        # Test 2: Simulate LSP request timeout and restart behavior
+        mock_lsp = MagicMock()
+        mock_lsp.request_references.side_effect = TimeoutError("Request timeout")
+        
+        with patch.object(self.helper, '_restart_lsp_for_extension') as mock_restart:
+            with patch.object(self.helper, '_get_or_create_lsp_server') as mock_get_server:
+                mock_get_server.return_value = mock_lsp
+                
+                # This should trigger restart behavior after timeout
+                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)
+                
+                # Verify restart was attempted due to timeout
+                mock_restart.assert_called_with(extension=".py")
+                # Should return empty list after max retries
+                self.assertEqual(result, [])
+        
+        # Test 3: Simulate successful error recovery
+        mock_lsp_recovery = MagicMock()
+        # First call fails, subsequent calls succeed after restart
+        mock_lsp_recovery.request_references.side_effect = [
+            ConnectionResetError("Connection lost"),
+            [{"uri": "file:///test/ref.py", "range": {"start": {"line": 5, "character": 0}}}]
+        ]
+        
+        with patch.object(self.helper, '_restart_lsp_for_extension') as mock_restart:
+            with patch.object(self.helper, '_get_or_create_lsp_server') as mock_get_server:
+                # Return failed server first, then working server
+                mock_get_server.side_effect = [mock_lsp_recovery, mock_lsp_recovery]
+                
+                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp_recovery)
+                
+                # Verify recovery worked
+                mock_restart.assert_called_once_with(extension=".py")
+                self.assertEqual(len(result), 1)
+                self.assertEqual(result[0]["uri"], "file:///test/ref.py")
     
     def test_lsp_retry_mechanism_constants(self):
         """Test that retry mechanism uses appropriate error types."""
