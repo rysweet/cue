@@ -149,37 +149,72 @@ class TaskAnalyzer:
         content_lower = content.lower()
         name_lower = name.lower()
         
-        # Test coverage keywords
-        test_keywords = ['test', 'coverage', 'unit test', 'integration test', 'pytest']
-        if any(keyword in content_lower or keyword in name_lower for keyword in test_keywords):
-            return TaskType.TEST_COVERAGE
+        # Score different task types to pick the most likely one
+        scores = {
+            TaskType.TEST_COVERAGE: 0,
+            TaskType.BUG_FIX: 0,
+            TaskType.FEATURE_IMPLEMENTATION: 0,
+            TaskType.REFACTORING: 0,
+            TaskType.DOCUMENTATION: 0,
+            TaskType.CONFIGURATION: 0
+        }
         
-        # Bug fix keywords
-        bug_keywords = ['bug', 'fix', 'error', 'issue', 'problem', 'broken']
-        if any(keyword in content_lower or keyword in name_lower for keyword in bug_keywords):
-            return TaskType.BUG_FIX
+        # Test coverage indicators (must be strong indicators)
+        test_indicators = [
+            'test coverage', 'unit test', 'integration test', 'pytest', 
+            'write tests', 'test suite', 'coverage improvement'
+        ]
+        for indicator in test_indicators:
+            if indicator in content_lower or indicator in name_lower:
+                scores[TaskType.TEST_COVERAGE] += 3
         
-        # Feature keywords
-        feature_keywords = ['feature', 'implement', 'add', 'create', 'new']
-        if any(keyword in content_lower or keyword in name_lower for keyword in feature_keywords):
+        # Look for test-specific patterns
+        if 'test_' in content_lower or 'test_' in name_lower:
+            scores[TaskType.TEST_COVERAGE] += 2
+        if 'coverage' in name_lower:
+            scores[TaskType.TEST_COVERAGE] += 2
+        
+        # Bug fix indicators
+        bug_indicators = ['fix', 'bug', 'error', 'issue', 'problem', 'broken', 'circular import']
+        for indicator in bug_indicators:
+            if indicator in content_lower or indicator in name_lower:
+                scores[TaskType.BUG_FIX] += 2
+        
+        # Feature implementation indicators
+        feature_indicators = ['implement', 'add', 'create', 'new feature', 'build']
+        for indicator in feature_indicators:
+            if indicator in content_lower or indicator in name_lower:
+                scores[TaskType.FEATURE_IMPLEMENTATION] += 2
+        
+        # Refactoring indicators
+        refactor_indicators = ['refactor', 'improve', 'optimize', 'restructure', 'cleanup']
+        for indicator in refactor_indicators:
+            if indicator in content_lower or indicator in name_lower:
+                scores[TaskType.REFACTORING] += 2
+        
+        # Documentation indicators
+        doc_indicators = ['documentation', 'docs', 'readme', 'guide', 'tutorial']
+        for indicator in doc_indicators:
+            if indicator in content_lower or indicator in name_lower:
+                scores[TaskType.DOCUMENTATION] += 2
+        
+        # Configuration indicators
+        config_indicators = ['config', 'setup', 'configure', 'settings', 'environment']
+        for indicator in config_indicators:
+            if indicator in content_lower or indicator in name_lower:
+                scores[TaskType.CONFIGURATION] += 2
+        
+        # Return the highest scoring type, or default to feature implementation
+        max_score = max(scores.values())
+        if max_score == 0:
             return TaskType.FEATURE_IMPLEMENTATION
         
-        # Refactoring keywords
-        refactor_keywords = ['refactor', 'improve', 'optimize', 'restructure', 'cleanup']
-        if any(keyword in content_lower or keyword in name_lower for keyword in refactor_keywords):
-            return TaskType.REFACTORING
+        # Find the type with the highest score
+        for task_type, score in scores.items():
+            if score == max_score:
+                return task_type
         
-        # Documentation keywords
-        doc_keywords = ['documentation', 'docs', 'readme', 'guide', 'tutorial']
-        if any(keyword in content_lower or keyword in name_lower for keyword in doc_keywords):
-            return TaskType.DOCUMENTATION
-        
-        # Configuration keywords
-        config_keywords = ['config', 'setup', 'configure', 'settings', 'environment']
-        if any(keyword in content_lower or keyword in name_lower for keyword in config_keywords):
-            return TaskType.CONFIGURATION
-        
-        return TaskType.FEATURE_IMPLEMENTATION  # Default fallback
+        return TaskType.FEATURE_IMPLEMENTATION  # Fallback
     
     def _assess_complexity(self, content: str) -> TaskComplexity:
         """Assess task complexity based on content analysis"""
@@ -513,7 +548,7 @@ class TaskAnalyzer:
         execution_plan = self.generate_execution_plan()
         
         with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(execution_plan, f, indent=2)
+            json.dump(execution_plan, f, indent=2, default=str)
         
         print(f"📄 Analysis saved to: {output_file}")
 
