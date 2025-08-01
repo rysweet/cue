@@ -136,14 +136,59 @@ You MUST execute these phases in order for every prompt:
   - Note that PR was created by AI agent
 - Ensure all commits have proper format
 - Add footer: "*Note: This PR was created by an AI agent on behalf of the repository owner.*"
+- **CRITICAL**: Verify PR creation and update state atomically:
+  ```bash
+  PR_NUMBER=$(gh pr create ... | grep -o '[0-9]*$')
+  if [ -n "$PR_NUMBER" ]; then
+      complete_phase 8 "Pull Request" "verify_phase_8"
+  else
+      echo "ERROR: Failed to create PR!"
+      exit 1
+  fi
+  ```
 
-### 9. Review Phase
-- Invoke code-reviewer sub-agent: `/agent:code-reviewer`
+### 9. Review Phase (MANDATORY - NEVER SKIP)
+- **CRITICAL**: This phase MUST execute after Phase 8
+- **FIRST**: Check if code review already exists (recovery case)
+  ```bash
+  if ! gh pr view "$PR_NUMBER" --json reviews | grep -q "review"; then
+      echo "No review found, invoking code-reviewer..."
+      MUST_INVOKE_CODE_REVIEWER=true
+  else
+      echo "Review already exists, proceeding..."
+  fi
+  ```
+- **MANDATORY**: Invoke code-reviewer sub-agent: `/agent:code-reviewer`
+- **VERIFY** review was posted:
+  ```bash
+  # Wait for review to be posted
+  RETRY_COUNT=0
+  while [ $RETRY_COUNT -lt 5 ]; do
+      sleep 10
+      if gh pr view "$PR_NUMBER" --json reviews | grep -q "review"; then
+          echo "✅ Code review posted successfully"
+          break
+      fi
+      RETRY_COUNT=$((RETRY_COUNT + 1))
+  done
+  
+  if [ $RETRY_COUNT -eq 5 ]; then
+      echo "CRITICAL: Code review was not posted after 5 retries!"
+      exit 1
+  fi
+  ```
+- After code review verification, check if response needed: `/agent:code-review-response`
 - Monitor CI/CD pipeline status
-- Address any review feedback using CodeReviewResponseAgent if needed
+- Address any review feedback systematically
 - Make necessary corrections
-- Commit and push any CodeReviewerProjectMemory.md updates
-- Ensure all checks pass before completion
+- **CRITICAL**: Update state and commit memory files:
+  ```bash
+  complete_phase 9 "Review" "verify_phase_9"
+  
+  git add .github/Memory.md .github/CodeReviewerProjectMemory.md
+  git commit -m "docs: update project memory files" || true
+  git push || true
+  ```
 
 ## Progress Tracking
 
@@ -300,6 +345,52 @@ At the start of EVERY WorkflowMaster invocation:
    - Verify issue is still open
    - Confirm no conflicting changes
 
+4. **Detect orphaned PRs** (NEW):
+   ```bash
+   detect_orphaned_prs() {
+       echo "Checking for orphaned PRs..."
+       
+       # Find PRs created by WorkflowMaster without reviews
+       gh pr list --author "@me" --json number,title,createdAt,reviews | \
+       jq -r '.[] | select(.reviews | length == 0) | "PR #\(.number): \(.title)"' | \
+       while read -r pr_info; do
+           echo "⚠️  Found orphaned PR: $pr_info"
+           PR_NUM=$(echo "$pr_info" | grep -o '#[0-9]*' | cut -d'#' -f2)
+           
+           # Check if state file exists for this PR
+           if find .github/workflow-states -name "state.md" -exec grep -l "PR #$PR_NUM" {} \; | head -1; then
+               echo "Found state file, attempting to resume Phase 9..."
+               # Force Phase 9 execution
+               FORCE_PHASE_9=true
+               PR_NUMBER=$PR_NUM
+           fi
+       done
+   }
+   ```
+
+5. **State consistency validation**:
+   ```bash
+   validate_state_consistency() {
+       local STATE_FILE="$1"
+       
+       # Check if PR was created but Phase 8 not marked complete
+       if grep -q "PR #[0-9]" "$STATE_FILE" && ! grep -q "\[x\] Phase 8:" "$STATE_FILE"; then
+           echo "WARNING: PR created but Phase 8 not marked complete!"
+           # Auto-fix the state
+           sed -i "s/\[ \] Phase 8:/\[x\] Phase 8:/" "$STATE_FILE"
+       fi
+       
+       # Check if we're supposedly in Phase 9 but no review exists
+       if grep -q "\[x\] Phase 8:" "$STATE_FILE" && ! grep -q "\[x\] Phase 9:" "$STATE_FILE"; then
+           PR_NUM=$(grep -o "PR #[0-9]*" "$STATE_FILE" | cut -d'#' -f2)
+           if ! gh pr view "$PR_NUM" --json reviews | grep -q "review"; then
+               echo "CRITICAL: Phase 8 complete but no code review found!"
+               MUST_INVOKE_CODE_REVIEWER=true
+           fi
+       fi
+   }
+   ```
+
 ### Phase Checkpoint Triggers
 
 Save checkpoint IMMEDIATELY after:
@@ -311,6 +402,51 @@ Save checkpoint IMMEDIATELY after:
 - ✅ Documentation updated
 - ✅ PR created
 - ✅ Review feedback addressed
+
+### Atomic State Updates (CRITICAL)
+
+**NEVER** update state without verification:
+
+```bash
+# Atomic phase completion - BOTH succeed or BOTH fail
+complete_phase() {
+    local PHASE_NUM="$1"
+    local PHASE_NAME="$2"
+    local VERIFICATION_CMD="$3"
+    
+    echo "Completing Phase $PHASE_NUM: $PHASE_NAME"
+    
+    # First verify the phase actually completed
+    if ! eval "$VERIFICATION_CMD"; then
+        echo "ERROR: Phase $PHASE_NUM verification failed!"
+        return 1
+    fi
+    
+    # Update state file
+    STATE_FILE=".github/workflow-states/$TASK_ID/state.md"
+    sed -i "s/\[ \] Phase $PHASE_NUM:/\[x\] Phase $PHASE_NUM:/" "$STATE_FILE"
+    
+    # Commit state atomically
+    git add "$STATE_FILE"
+    git commit -m "chore: Phase $PHASE_NUM ($PHASE_NAME) completed for $TASK_ID" || {
+        echo "CRITICAL: Failed to commit state for Phase $PHASE_NUM"
+        exit 1
+    }
+    
+    echo "✅ Phase $PHASE_NUM state saved"
+}
+
+# Phase-specific verifications
+verify_phase_8() {
+    # Verify PR was actually created
+    gh pr view "$PR_NUMBER" >/dev/null 2>&1
+}
+
+verify_phase_9() {
+    # Verify code review was posted
+    gh pr view "$PR_NUMBER" --json reviews | grep -q "review"
+}
+```
 
 ### Interruption Handling
 
