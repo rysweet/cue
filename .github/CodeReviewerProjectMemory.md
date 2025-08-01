@@ -1,0 +1,79 @@
+# Code Reviewer Project Memory
+
+This file maintains learnings and insights from code reviews to improve future reviews and maintain consistency.
+
+## Code Review Memory - 2025-07-31
+
+### PR #18: Improve test coverage for core modules
+
+#### What I Learned
+- The project uses pytest for testing with coverage reporting via pytest-cov
+- Mock-based testing is preferred to avoid external dependencies (LSP servers, databases)
+- Tests must be idempotent and manage their own resources
+- Tree-sitter helper tests require careful mock setup due to parser initialization
+- Graph filtering uses OR logic: relationships kept if either start OR end node is in paths_to_keep
+
+#### Patterns to Watch
+- Tests should follow Arrange-Act-Assert pattern for clarity
+- Mock objects for nodes require specific attributes: id, path, label, relative_id
+- Integration tests with actual language definitions provide better coverage than pure mocks
+- Error simulation tests should cover realistic scenarios (ConnectionError, TimeoutError, etc.)
+
+#### Common Issues
+- Mock setup for tree-sitter parsing can be complex due to nested object structures
+- LSP error handling tests need careful sequencing of side_effects
+- Graph relationship filtering logic is not immediately intuitive (OR not AND)
+
+---
+
+## Project Architecture Insights
+
+### Testing Infrastructure
+- Tests located in `tests/` directory
+- Fixtures in `tests/fixtures/` for reusable test components
+- CI/CD uses GitHub Actions with Python 3.12
+- Coverage threshold enforced in CI
+
+### Key Modules and Their Responsibilities
+- `blarify/code_hierarchy/tree_sitter_helper.py`: Parses code using tree-sitter
+- `blarify/code_references/lsp_helper.py`: Manages LSP servers for symbol resolution
+- `blarify/llm_descriptions/llm_service.py`: Handles LLM integration for descriptions
+- `blarify/graph/graph.py`: Core graph operations and filtering
+
+### Code Style and Conventions
+- Python code formatted with Black
+- Type hints encouraged but not universally enforced
+- Docstrings follow Google style
+- Error handling uses specific exceptions, not bare except
+
+### Security Considerations
+- Azure OpenAI keys managed via environment variables
+- No credentials in code or test files
+- Input validation required for all external data
+- SQL parameterization used for database queries
+
+---
+
+## Review Guidelines Evolution
+
+### Effective Review Practices
+1. Check CI status before detailed review
+2. Run tests locally when reviewing test changes
+3. Verify mock objects match actual interfaces
+4. Consider edge cases and error scenarios
+5. Suggest specific improvements, not just identify issues
+
+### Communication Patterns
+- Use code blocks for specific suggestions
+- Provide rationale for all requested changes
+- Acknowledge good patterns and improvements
+- Distinguish between critical issues and nice-to-haves
+
+---
+
+## Future Improvements to Suggest
+1. Increase type hint coverage across the codebase
+2. Add mypy to CI pipeline for type checking
+3. Create more integration tests for end-to-end scenarios
+4. Document testing patterns in a dedicated guide
+5. Consider property-based testing for complex logic
