@@ -1,10 +1,10 @@
 from typing import Set, Optional
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from blarify.graph.relationship import RelationshipType
-from blarify.graph.node import NodeLabels
 
-from tree_sitter import Node, Language, Parser
-from blarify.graph.node import Node as GraphNode
+
+from tree_sitter import Node as TreeSitterNode, Language, Parser
+
 
 from .language_definitions import LanguageDefinitions
 import tree_sitter_javascript as tsjavascript
@@ -26,7 +26,8 @@ class JavascriptDefinitions(LanguageDefinitions):
             ".jsx": Parser(Language(tsjavascript.language())),
         }
 
-    def should_create_node(node: Node) -> bool:
+    @staticmethod
+    def should_create_node(node: TreeSitterNode) -> bool:
         if node.type == "variable_declarator":
             return JavascriptDefinitions._is_variable_declaration_arrow_function(node)
 
@@ -34,20 +35,24 @@ class JavascriptDefinitions(LanguageDefinitions):
             node, ["class_declaration", "function_declaration", "method_definition", "interface_declaration"]
         )
 
-    def _is_variable_declaration_arrow_function(node: Node) -> bool:
+    @staticmethod
+    def _is_variable_declaration_arrow_function(node: TreeSitterNode) -> bool:
         if node.type == "variable_declarator" and (children := node.child_by_field_name("value")):
             return children.type == "arrow_function"
 
-    def get_identifier_node(node: Node) -> Node:
+    @staticmethod
+    def get_identifier_node(node: TreeSitterNode) -> TreeSitterNode:
         return LanguageDefinitions._get_identifier_node_base_implementation(node)
 
-    def get_relationship_type(node: GraphNode, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
+    @staticmethod
+    def get_relationship_type(node: TreeSitterNode, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
         return JavascriptDefinitions._find_relationship_type(
-            node_label=node.label,
+            node_label=node.type,
             node_in_point_reference=node_in_point_reference,
         )
 
-    def _find_relationship_type(node_label: str, node_in_point_reference: Node) -> Optional[FoundRelationshipScope]:
+    @staticmethod
+    def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
         relationship_types = JavascriptDefinitions._get_relationship_types_by_label()
         relevant_relationship_types = relationship_types.get(node_label, {})
 
@@ -55,6 +60,7 @@ class JavascriptDefinitions(LanguageDefinitions):
             node_in_point_reference, relevant_relationship_types
         )
 
+    @staticmethod
     def _get_relationship_types_by_label() -> dict:
         return {
             NodeLabels.CLASS: {
@@ -73,6 +79,7 @@ class JavascriptDefinitions(LanguageDefinitions):
             },
         }
 
+    @staticmethod
     def _traverse_and_find_relationships(node: Node, relationship_mapping: dict) -> Optional[RelationshipType]:
         while node is not None:
             relationship_type = JavascriptDefinitions._get_relationship_type_for_node(node, relationship_mapping)
@@ -81,15 +88,17 @@ class JavascriptDefinitions(LanguageDefinitions):
             node = node.parent
         return None
 
+    @staticmethod
     def _get_relationship_type_for_node(
-        tree_sitter_node: Node, relationships_types: dict
+        tree_sitter_node: TreeSitterNode, relationships_types: dict
     ) -> Optional[RelationshipType]:
         if tree_sitter_node is None:
             return None
 
         return relationships_types.get(tree_sitter_node.type, None)
 
-    def get_body_node(node: Node) -> Node:
+    @staticmethod
+    def get_body_node(node: TreeSitterNode) -> TreeSitterNode:
         if JavascriptDefinitions._is_variable_declaration_arrow_function(node):
             return node.child_by_field_name("value").child_by_field_name("body")
 
@@ -99,7 +108,9 @@ class JavascriptDefinitions(LanguageDefinitions):
     def get_language_file_extensions() -> Set[str]:
         return {".js", ".jsx"}
 
-    def get_node_label_from_type(type: str) -> NodeLabels:
+    @staticmethod
+    def get_node_label_from_type(type: str) -> "NodeLabels":
+        from blarify.graph.node import NodeLabels
         # This method may need to be refactored to take the node instead in order to verify more complex node types
         if type == "variable_declarator":
             return NodeLabels.FUNCTION

@@ -4,7 +4,6 @@ from typing import List, TYPE_CHECKING, Tuple, Optional, Dict, Any
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from blarify.graph.node import NodeFactory
 from blarify.code_references.types import Reference, Range, Point
-from .languages import LanguageDefinitions, BodyNodeNotFound, FallbackDefinitions
 from blarify.graph.node import NodeLabels
 from blarify.project_file_explorer import File
 from blarify.graph.relationship import RelationshipType
@@ -14,12 +13,16 @@ if TYPE_CHECKING:
     from blarify.graph.node import DefinitionNode, Node, FolderNode, FileNode
     from blarify.code_references.types import Reference
     from blarify.graph.graph_environment import GraphEnvironment
+    from .languages import LanguageDefinitions, BodyNodeNotFound, FallbackDefinitions
 
 
 class TreeSitterHelper:
     def __init__(
-        self, language_definitions: LanguageDefinitions, graph_environment: Optional["GraphEnvironment"] = None
+        self, language_definitions: "LanguageDefinitions", graph_environment: Optional["GraphEnvironment"] = None
     ):
+        # Import at runtime to avoid circular imports
+        from .languages import LanguageDefinitions
+        
         self.language_definitions: LanguageDefinitions = language_definitions
         self.parsers: Dict[str, Any] = self.language_definitions.get_parsers_for_extensions()
         self.graph_environment: Optional["GraphEnvironment"] = graph_environment
@@ -81,6 +84,8 @@ class TreeSitterHelper:
         return [file_node]
 
     def _does_path_have_valid_extension(self, path: str) -> bool:
+        from .languages import FallbackDefinitions
+        
         if isinstance(self.language_definitions, FallbackDefinitions):
             return False
         return any(path.endswith(extension) for extension in self.language_definitions.get_language_file_extensions())
@@ -201,6 +206,8 @@ class TreeSitterHelper:
         return node_snippet, node_reference
 
     def _try_process_body_node_snippet(self, node: "TreeSitterNode") -> Tuple[str, "Reference"]:
+        from .languages import BodyNodeNotFound
+        
         try:
             return self._process_body_node_snippet(node)
         except BodyNodeNotFound:

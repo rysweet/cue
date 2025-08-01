@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any, Callable
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 import time
@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-def retry_on_exception(max_retries: int = 3, delay: float = 1.0, backoff: float = 2.0):
-    def decorator(func):
+def retry_on_exception(max_retries: int = 3, delay: float = 1.0, backoff: float = 2.0) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             retries = 0
             current_delay = delay
             
@@ -39,10 +39,10 @@ def retry_on_exception(max_retries: int = 3, delay: float = 1.0, backoff: float 
 class LLMService:
     def __init__(
         self,
-        api_key: str = None,
-        endpoint: str = None,
-        deployment_name: str = None,
-        api_version: str = None,
+        api_key: Optional[str] = None,
+        endpoint: Optional[str] = None,
+        deployment_name: Optional[str] = None,
+        api_version: Optional[str] = None,
         temperature: float = 0.3,
         max_tokens: int = 500
     ):

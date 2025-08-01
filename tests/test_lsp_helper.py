@@ -1,3 +1,4 @@
+from typing import Any
 import unittest
 from unittest.mock import MagicMock, patch, Mock, call
 from blarify.code_references.lsp_helper import (
@@ -88,7 +89,7 @@ class TestLspQueryHelper(unittest.TestCase):
     @patch('blarify.code_references.lsp_helper.MultilspyConfig')
     @patch('blarify.code_references.lsp_helper.MultilspyLogger')
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_create_lsp_server(self, mock_path_calc, mock_logger, mock_config, mock_sync_server):
+    def test_create_lsp_server(self, mock_path_calc: Any, mock_logger: Any, mock_config: Any, mock_sync_server: Any):
         """Test creating an LSP server."""
         # Mock language definitions
         mock_lang_def = MagicMock()
@@ -173,7 +174,7 @@ class TestLspQueryHelper(unittest.TestCase):
         self.assertEqual(self.helper.entered_lsp_servers["python"], mock_context)
         
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_get_paths_where_node_is_referenced(self, mock_path_calc):
+    def test_get_paths_where_node_is_referenced(self, mock_path_calc: Any):
         """Test getting references for a node."""
         # Mock node
         mock_node = MagicMock()
@@ -201,7 +202,7 @@ class TestLspQueryHelper(unittest.TestCase):
         self.assertIsInstance(result[0], Reference)
         
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_request_references_with_exponential_backoff_success(self, mock_path_calc):
+    def test_request_references_with_exponential_backoff_success(self, mock_path_calc: Any):
         """Test successful reference request."""
         mock_node = MagicMock()
         mock_node.extension = ".py"
@@ -223,7 +224,7 @@ class TestLspQueryHelper(unittest.TestCase):
         )
         
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_request_references_with_exponential_backoff_retry(self, mock_path_calc):
+    def test_request_references_with_exponential_backoff_retry(self, mock_path_calc: Any):
         """Test reference request with retry on timeout."""
         mock_node = MagicMock()
         mock_node.extension = ".py"
@@ -244,7 +245,7 @@ class TestLspQueryHelper(unittest.TestCase):
         self.assertEqual(len(result), 1)
         
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_request_references_with_exponential_backoff_failure(self, mock_path_calc):
+    def test_request_references_with_exponential_backoff_failure(self, mock_path_calc: Any):
         """Test reference request failing after all retries."""
         mock_node = MagicMock()
         mock_node.extension = ".py"
@@ -299,7 +300,7 @@ class TestLspQueryHelper(unittest.TestCase):
                         self.helper._restart_lsp_for_extension(".py")
                         
     @patch('blarify.code_references.lsp_helper.threading.Thread')
-    def test_exit_lsp_server_with_context(self, mock_thread_class):
+    def test_exit_lsp_server_with_context(self, mock_thread_class: Any):
         """Test exiting LSP server with context manager."""
         mock_context = MagicMock()
         self.helper.entered_lsp_servers["python"] = mock_context
@@ -317,7 +318,7 @@ class TestLspQueryHelper(unittest.TestCase):
         self.assertNotIn("python", self.helper.language_to_lsp_server)
         
     @patch('blarify.code_references.lsp_helper.threading.Thread')
-    def test_exit_lsp_server_with_timeout(self, mock_thread_class):
+    def test_exit_lsp_server_with_timeout(self, mock_thread_class: Any):
         """Test exiting LSP server when context manager times out."""
         mock_context = MagicMock()
         self.helper.entered_lsp_servers["python"] = mock_context
@@ -341,7 +342,7 @@ class TestLspQueryHelper(unittest.TestCase):
             
     @patch('blarify.code_references.lsp_helper.psutil')
     @patch('blarify.code_references.lsp_helper.asyncio')
-    def test_manual_cleanup_lsp_server(self, mock_asyncio, mock_psutil):
+    def test_manual_cleanup_lsp_server(self, mock_asyncio: Any, mock_psutil: Any):
         """Test manual cleanup of LSP server."""
         # Mock server and process
         mock_server = MagicMock()
@@ -377,7 +378,7 @@ class TestLspQueryHelper(unittest.TestCase):
         mock_loop.call_soon_threadsafe.assert_called_once_with(mock_loop.stop)
         
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_get_definition_path_for_reference(self, mock_path_calc):
+    def test_get_definition_path_for_reference(self, mock_path_calc: Any):
         """Test getting definition path for a reference."""
         mock_reference = MagicMock()
         mock_reference.uri = "file:///test/ref.py"
@@ -395,7 +396,7 @@ class TestLspQueryHelper(unittest.TestCase):
         self.assertEqual(result, "file:///test/def.py")
         
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_get_definition_path_for_reference_no_definitions(self, mock_path_calc):
+    def test_get_definition_path_for_reference_no_definitions(self, mock_path_calc: Any):
         """Test getting definition path when no definitions found."""
         mock_reference = MagicMock()
         
@@ -445,7 +446,7 @@ class TestLspQueryHelper(unittest.TestCase):
         self.assertTrue(hasattr(self.helper, '_restart_lsp_for_extension'))
     
     @patch('blarify.code_references.lsp_helper.PathCalculator')
-    def test_lsp_error_simulation_and_recovery(self, mock_path_calc):
+    def test_lsp_error_simulation_and_recovery(self, mock_path_calc: Any):
         """Test LSP error simulation and recovery behavior."""
         # Create mock node for testing
         mock_node = MagicMock()

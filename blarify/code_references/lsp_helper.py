@@ -68,7 +68,7 @@ class LspQueryHelper:
         else:
             raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
 
-    def _create_lsp_server(self, language_definitions: "LanguageDefinitions", timeout=15) -> SyncLanguageServer:
+    def _create_lsp_server(self, language_definitions: "LanguageDefinitions", timeout: int = 15) -> SyncLanguageServer:
         language = language_definitions.get_language_name()
         config = MultilspyConfig.from_dict({"code_language": language})
         logger = MultilspyLogger()
@@ -80,7 +80,7 @@ class LspQueryHelper:
         DEPRECATED, LSP servers are started on demand
         """
 
-    def _get_or_create_lsp_server(self, extension, timeout=15) -> SyncLanguageServer:
+    def _get_or_create_lsp_server(self, extension: str, timeout: int = 15) -> SyncLanguageServer:
         language_definitions = self.get_language_definition_for_extension(extension)
         language = language_definitions.get_language_name()
 
@@ -92,12 +92,12 @@ class LspQueryHelper:
             self._initialize_lsp_server(language, new_lsp)
             return new_lsp
 
-    def _initialize_lsp_server(self, language, lsp):
+    def _initialize_lsp_server(self, language: str, lsp: SyncLanguageServer) -> None:
         context = lsp.start_server()
         context.__enter__()
         self.entered_lsp_servers[language] = context
 
-    def initialize_directory(self, file) -> None:
+    def initialize_directory(self, file: str) -> None:
         """
         DEPRECATED, LSP servers are started on demand
         """
@@ -107,7 +107,7 @@ class LspQueryHelper:
         references = self._request_references_with_exponential_backoff(node, server)
         return [Reference(reference) for reference in references]
 
-    def _request_references_with_exponential_backoff(self, node, lsp):
+    def _request_references_with_exponential_backoff(self, node: "DefinitionNode", lsp: SyncLanguageServer):
         timeout = 10
         for _ in range(1, 3):
             try:
@@ -129,7 +129,7 @@ class LspQueryHelper:
         logger.error("Failed to get references, returning empty list")
         return []
 
-    def _restart_lsp_for_extension(self, extension):
+    def _restart_lsp_for_extension(self, extension: str) -> None:
         language_definitions = self.get_language_definition_for_extension(extension)
         language_name = language_definitions.get_language_name()
         self.exit_lsp_server(language_name)
@@ -143,7 +143,7 @@ class LspQueryHelper:
         except ConnectionResetError:
             logger.error("Connection reset error")
 
-    def exit_lsp_server(self, language) -> None:
+    def exit_lsp_server(self, language: str) -> None:
         # First try to properly exit the context manager if it exists
         if language in self.entered_lsp_servers:
             context = self.entered_lsp_servers[language]
@@ -175,7 +175,7 @@ class LspQueryHelper:
         if language in self.language_to_lsp_server:
             del self.language_to_lsp_server[language]
 
-    def _manual_cleanup_lsp_server(self, language) -> None:
+    def _manual_cleanup_lsp_server(self, language: str) -> None:
         """Manual cleanup when context manager exit fails or doesn't exist."""
         if language not in self.language_to_lsp_server:
             return
@@ -232,7 +232,7 @@ class LspQueryHelper:
 
         return definitions[0]["uri"]
 
-    def _request_definition_with_exponential_backoff(self, reference: Reference, lsp, extension):
+    def _request_definition_with_exponential_backoff(self, reference: Reference, lsp: SyncLanguageServer, extension: str):
         timeout = 10
         for _ in range(1, 3):
             try:

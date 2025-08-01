@@ -1,3 +1,4 @@
+from typing import Optional, Any
 """
 Factory functions for creating test nodes.
 """
@@ -24,7 +25,7 @@ def get_test_graph_environment():
     )
 
 
-def create_file_node(name="test.py", path=None, level=1):
+def create_file_node(name: str = "test.py", path: Optional[str] = None, level: int = 1):
     """Create a file node with default values."""
     from unittest.mock import Mock
     
@@ -55,15 +56,15 @@ def create_file_node(name="test.py", path=None, level=1):
     )
 
 
-def create_folder_node(name="src", path=None, level=0):
+def create_folder_node(name: str = "src", path: Optional[str] = None, level: int = 0):
     """Create a folder node with default values."""
     if path is None:
         path = f"file:///test/{name}"
     return FolderNode(path=path, name=name, level=level)
 
 
-def create_class_node(name="TestClass", path="file:///test/main.py", 
-                     start_line=10, end_line=50):
+def create_class_node(name: str = "TestClass", path: Optional[str] = "file:///test/main.py", 
+                     start_line: int = 10, end_line: int = 50):
     """Create a class node with default values."""
     from unittest.mock import Mock
     
@@ -91,8 +92,8 @@ def create_class_node(name="TestClass", path="file:///test/main.py",
     )
 
 
-def create_function_node(name="test_function", path="file:///test/main.py",
-                        start_line=5, end_line=8):
+def create_function_node(name: str = "test_function", path: Optional[str] = "file:///test/main.py",
+                        start_line: int = 5, end_line: int = 8):
     """Create a function node with default values."""
     from unittest.mock import Mock
     
@@ -120,8 +121,8 @@ def create_function_node(name="test_function", path="file:///test/main.py",
     )
 
 
-def create_filesystem_file_node(name="test.py", relative_path=None,
-                               size=1024, extension=".py"):
+def create_filesystem_file_node(name: str = "test.py", relative_path: Optional[str] = None,
+                               size: int = 1024, extension: str = ".py"):
     """Create a filesystem file node with default values."""
     if relative_path is None:
         relative_path = f"src/{name}"
@@ -137,7 +138,7 @@ def create_filesystem_file_node(name="test.py", relative_path=None,
     )
 
 
-def create_filesystem_directory_node(name="src", relative_path=None):
+def create_filesystem_directory_node(name: str = "src", relative_path: Optional[str] = None):
     """Create a filesystem directory node with default values."""
     if relative_path is None:
         relative_path = name
@@ -150,8 +151,8 @@ def create_filesystem_directory_node(name="src", relative_path=None):
     )
 
 
-def create_documentation_file_node(name="README.md", relative_path=None,
-                                  format="markdown"):
+def create_documentation_file_node(name: str = "README.md", relative_path: Optional[str] = None,
+                                  format: str = "markdown"):
     """Create a documentation file node with default values."""
     if relative_path is None:
         relative_path = name
@@ -165,8 +166,8 @@ def create_documentation_file_node(name="README.md", relative_path=None,
     )
 
 
-def create_concept_node(name="Design Pattern", description=None,
-                       source_file="README.md"):
+def create_concept_node(name: str = "Design Pattern", description: Optional[str] = None,
+                       source_file: str = "README.md"):
     """Create a concept node with default values."""
     if description is None:
         description = f"Description of {name}"
@@ -178,8 +179,8 @@ def create_concept_node(name="Design Pattern", description=None,
     )
 
 
-def create_documented_entity_node(name="UserService", entity_type="class",
-                                 description=None, source_file="README.md"):
+def create_documented_entity_node(name: str = "UserService", entity_type: str = "class",
+                                 description: Optional[str] = None, source_file: str = "README.md"):
     """Create a documented entity node with default values."""
     if description is None:
         description = f"Description of {name}"
@@ -192,8 +193,8 @@ def create_documented_entity_node(name="UserService", entity_type="class",
     )
 
 
-def create_description_node(target_node_id, description="Test description",
-                           model="gpt-4", path=None):
+def create_description_node(target_node_id: str, description: str = "Test description",
+                           model: str = "gpt-4", path: Optional[str] = None):
     """Create a description node with default values."""
     if path is None:
         path = f"file:///test/description_{target_node_id}"
