@@ -81,7 +81,9 @@ You MUST execute these phases in order for every prompt:
   - Link to original issue (Fixes #N)
   - Summary of testing performed
   - Any breaking changes or migration notes
+  - Note that PR was created by AI agent
 - Ensure all commits have proper format
+- Add footer: "*Note: This PR was created by an AI agent on behalf of the repository owner.*"
 
 ### 9. Review Phase
 - Invoke code-reviewer sub-agent: `/agent:code-reviewer`

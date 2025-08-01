@@ -129,3 +129,30 @@ This file maintains learnings and insights from code reviews to improve future r
 - Include "Last Updated" timestamps in memory files for tracking
 - Separate implementation prompts from actual sub-agent definitions
 - Test sub-agent invocation before finalizing implementation
+
+---
+
+## Code Review Memory - 2025-08-01
+
+### PR #22: feat: implement WorkflowMaster sub-agent for workflow orchestration
+
+#### What I Learned
+- WorkflowMaster implements a comprehensive 9-phase workflow execution pattern for systematic development
+- Claude Code sub-agents can coordinate with each other via explicit invocation patterns (e.g., `/agent:code-reviewer`)
+- Workflow templates provide reusable patterns for different development scenarios (features vs bug fixes)
+- State management through Memory.md enables graceful interruption and resumption of workflows
+- TodoWrite tool integration enables real-time progress tracking throughout workflow execution
+- Directory organization matters: `.claude/agents/` for agents, `.claude/docs/` for documentation, `.claude/templates/` for reusable patterns
+
+#### Patterns to Watch
+- YAML frontmatter in workflow-master.md follows correct format with proper tool specifications
+- Error handling strategies should be comprehensive (git conflicts, test failures, CI/CD issues)
+- Agent coordination requires explicit invocation syntax with proper agent naming
+- Workflow phases should be executed in strict order to maintain quality gates
+- State persistence patterns using Memory.md for workflow continuation
+
+#### Architectural Insights
+- WorkflowMaster serves as orchestrator for complete development lifecycles
+- Integration with existing tools: GitHub CLI, TodoWrite, code-reviewer sub-agent
+- Template-based approach enables standardization across different workflow types
+- Quality standards enforcement through defined success criteria for each phase

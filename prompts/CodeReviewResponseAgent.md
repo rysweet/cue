@@ -172,6 +172,11 @@ The agent should parse review feedback and categorize it:
    - Summarize agreements and decisions
    - Document decisions for future reference
 
+3. Communication templates:
+   - All PR comments must include: "*Note: This response was posted by an AI agent on behalf of the repository owner.*"
+   - All PR edits must include similar attribution
+   - Maintain transparency about AI agent involvement
+
 ## Testing Requirements
 
 ### Response Quality Testing
