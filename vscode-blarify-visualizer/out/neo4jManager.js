@@ -26,162 +26,132 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Neo4jManager = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
-const child_process_1 = require("child_process");
-const util_1 = require("util");
-const execAsync = (0, util_1.promisify)(child_process_1.exec);
+// Constants
+const CONTAINER_PREFIX = 'blarify-visualizer';
+const ENVIRONMENT = 'development';
 class Neo4jManager {
     constructor(configManager, extensionPath) {
         this.configManager = configManager;
         this.extensionPath = extensionPath;
+        this.instance = null;
+        this.driver = null;
+        this.manager = null;
         this.outputChannel = vscode.window.createOutputChannel('Neo4j Manager');
+        this.initializeContainerManager();
     }
-    generatePassword() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
-        let password = '';
-        for (let i = 0; i < 16; i++) {
-            password += chars.charAt(Math.floor(Math.random() * chars.length));
+    /**
+     * Initialize the container manager module
+     */
+    initializeContainerManager() {
+        if (this.manager)
+            return;
+        try {
+            const containerManagerPath = path.join(this.extensionPath, 'bundled', 'neo4j-container-manager');
+            this.outputChannel.appendLine(`[Neo4j] Loading container manager from: ${containerManagerPath}`);
+            const { Neo4jContainerManager } = require(containerManagerPath);
+            this.outputChannel.appendLine(`[Neo4j] Container manager module loaded successfully`);
+            this.manager = new Neo4jContainerManager({
+                logger: {
+                    info: (msg) => this.outputChannel.appendLine(`[Neo4j] ${msg}`),
+                    error: (msg) => this.outputChannel.appendLine(`[Neo4j ERROR] ${msg}`),
+                    warn: (msg) => this.outputChannel.appendLine(`[Neo4j WARN] ${msg}`),
+                    debug: (msg) => this.outputChannel.appendLine(`[Neo4j Debug] ${msg}`)
+                }
+            });
+            this.outputChannel.appendLine(`[Neo4j] Container manager instance created`);
         }
-        return password;
+        catch (error) {
+            this.outputChannel.appendLine(`Failed to load neo4j-container-manager: ${error}`);
+            throw new Error(`Neo4j container manager not found. Error: ${error}`);
+        }
     }
+    /**
+     * Ensure Neo4j is running - simplified version that relies on fixed container manager
+     */
     async ensureRunning() {
-        if (!this.manager) {
+        if (this.instance && this.driver) {
             try {
-                const containerManagerPath = path.join(this.extensionPath, 'bundled', 'neo4j-container-manager');
-                this.outputChannel.appendLine(`[Neo4j] Loading container manager from: ${containerManagerPath}`);
-                const { Neo4jContainerManager } = require(containerManagerPath);
-                this.outputChannel.appendLine(`[Neo4j] Container manager module loaded successfully`);
-                this.manager = new Neo4jContainerManager({
-                    logger: {
-                        info: (msg) => this.outputChannel.appendLine(`[Neo4j] ${msg}`),
-                        error: (msg) => this.outputChannel.appendLine(`[Neo4j ERROR] ${msg}`),
-                        warn: (msg) => this.outputChannel.appendLine(`[Neo4j WARN] ${msg}`),
-                        debug: (msg) => this.outputChannel.appendLine(`[Neo4j Debug] ${msg}`)
-                    }
-                });
-                this.outputChannel.appendLine(`[Neo4j] Container manager instance created`);
+                await this.driver.verifyConnectivity();
+                this.outputChannel.appendLine('[Neo4j] Existing instance is healthy');
+                return;
             }
             catch (error) {
-                this.outputChannel.appendLine(`Failed to load neo4j-container-manager: ${error}`);
-                throw new Error(`Neo4j container manager not found. Error: ${error}`);
+                this.outputChannel.appendLine(`[Neo4j] Existing instance is not responding: ${error.message}, will restart`);
+                this.instance = null;
+                this.driver = null;
             }
         }
         if (!this.instance) {
-            const containerPrefix = 'blarify-visualizer';
-            const environment = 'development';
-            const containerName = `${containerPrefix}-${environment}`;
-            // Try to use existing container with saved password first
-            let savedPassword = this.configManager.getNeo4jPassword(containerName);
-            if (savedPassword) {
-                this.outputChannel.appendLine(`[Neo4j] Found saved password for container: ${containerName}`);
-                this.outputChannel.appendLine(`[Neo4j] Trying to connect with saved password...`);
-                try {
-                    this.instance = await this.manager.start({
-                        environment: environment,
-                        containerPrefix: containerPrefix,
-                        password: savedPassword,
-                        username: 'neo4j'
-                    });
-                    this.outputChannel.appendLine(`[Neo4j] Connected to existing container successfully`);
-                    this.outputChannel.appendLine(`URI: ${this.instance.uri}`);
-                    this.outputChannel.appendLine(`Container ID: ${this.instance.containerId}`);
-                    return; // Success! Exit early
-                }
-                catch (error) {
-                    this.outputChannel.appendLine(`[Neo4j] Failed to connect with saved password: ${error.message}`);
-                    // Clear invalid password
-                    await this.configManager.clearNeo4jPassword(containerName);
-                    this.outputChannel.appendLine(`[Neo4j] Cleared invalid saved password`);
-                }
-            }
-            else {
-                this.outputChannel.appendLine(`[Neo4j] No saved password found for container: ${containerName}`);
-            }
-            // If we get here, either no saved password or connection failed
-            // Remove existing container and start fresh
-            this.outputChannel.appendLine(`[Neo4j] Removing any existing containers...`);
+            const containerName = `${CONTAINER_PREFIX}-${ENVIRONMENT}`;
+            let password;
             try {
-                // Check if container exists first
-                const { stdout: psOutput } = await execAsync(`docker ps -a --filter name=${containerName} --format "{{.ID}}"`);
-                if (psOutput.trim()) {
-                    this.outputChannel.appendLine(`[Neo4j] Found existing container: ${psOutput.trim()}`);
-                    // Get volume name before removing container
-                    const { stdout: volumeOutput } = await execAsync(`docker inspect ${containerName} --format '{{range .Mounts}}{{.Name}}{{end}}' 2>/dev/null || true`);
-                    const volumeName = volumeOutput.trim();
-                    // Force remove the container
-                    const { stdout: rmOutput, stderr: rmError } = await execAsync(`docker rm -f ${containerName} 2>&1`);
-                    if (rmOutput)
-                        this.outputChannel.appendLine(`[Neo4j] Container removed: ${rmOutput.trim()}`);
-                    if (rmError && !rmError.includes('No such container')) {
-                        this.outputChannel.appendLine(`[Neo4j] Remove error: ${rmError.trim()}`);
-                    }
-                    // Also remove the volume to prevent authentication issues
-                    if (volumeName) {
-                        this.outputChannel.appendLine(`[Neo4j] Removing volume: ${volumeName}`);
-                        const { stdout: volRmOutput, stderr: volRmError } = await execAsync(`docker volume rm ${volumeName} 2>&1 || true`);
-                        if (volRmOutput)
-                            this.outputChannel.appendLine(`[Neo4j] Volume removed: ${volRmOutput.trim()}`);
-                        if (volRmError && !volRmError.includes('No such volume')) {
-                            this.outputChannel.appendLine(`[Neo4j] Volume remove error: ${volRmError.trim()}`);
-                        }
-                    }
-                    // Also remove volumes with the container manager naming pattern
-                    this.outputChannel.appendLine(`[Neo4j] Checking for additional volumes...`);
-                    const { stdout: volListOutput } = await execAsync(`docker volume ls --format "{{.Name}}" | grep -E "^blarify-neo4j-${environment}" || true`);
-                    const volumes = volListOutput.trim().split('\n').filter(v => v);
-                    for (const vol of volumes) {
-                        if (vol) {
-                            this.outputChannel.appendLine(`[Neo4j] Removing volume: ${vol}`);
-                            await execAsync(`docker volume rm ${vol} 2>&1 || true`);
-                        }
-                    }
-                    // Wait for Docker to clean up
-                    this.outputChannel.appendLine(`[Neo4j] Waiting for cleanup...`);
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    // Verify container is gone
-                    const { stdout: checkOutput } = await execAsync(`docker ps -a --filter name=${containerName} --format "{{.ID}}"`);
-                    if (checkOutput.trim()) {
-                        throw new Error(`Failed to remove container ${containerName}`);
-                    }
-                    this.outputChannel.appendLine(`[Neo4j] Container and volume successfully removed`);
+                // Attempt to retrieve saved password with error handling
+                const savedPassword = this.configManager.getNeo4jPassword(containerName);
+                if (savedPassword) {
+                    this.outputChannel.appendLine(`[Neo4j] Found saved password for container: ${containerName}`);
+                    password = savedPassword;
                 }
                 else {
-                    this.outputChannel.appendLine(`[Neo4j] No existing container found`);
+                    this.outputChannel.appendLine(`[Neo4j] No saved password found, generating new one`);
+                    password = this.generatePassword();
                 }
             }
-            catch (e) {
-                this.outputChannel.appendLine(`[Neo4j] Critical error during cleanup: ${e.message}`);
-                throw new Error(`Failed to clean up existing container: ${e.message}`);
+            catch (error) {
+                this.outputChannel.appendLine(`[Neo4j] Error retrieving password: ${error.message}, generating new one`);
+                password = this.generatePassword();
             }
-            const password = this.generatePassword();
-            this.outputChannel.appendLine(`[Neo4j] Generated new password for Neo4j`);
             this.outputChannel.appendLine(`[Neo4j] Starting container with config:`);
-            this.outputChannel.appendLine(`  - Environment: ${environment}`);
-            this.outputChannel.appendLine(`  - Container prefix: ${containerPrefix}`);
+            this.outputChannel.appendLine(`  - Environment: ${ENVIRONMENT}`);
+            this.outputChannel.appendLine(`  - Container prefix: ${CONTAINER_PREFIX}`);
+            this.outputChannel.appendLine(`  - Container name: ${containerName}`);
             this.outputChannel.appendLine(`  - Username: neo4j`);
+            this.outputChannel.appendLine(`  - Using ${password === this.configManager.getNeo4jPassword(containerName) ? 'saved' : 'new'} password`);
             try {
                 this.outputChannel.appendLine(`[Neo4j] Calling container manager start method...`);
+                const startTime = Date.now();
                 this.instance = await this.manager.start({
-                    environment: environment,
-                    containerPrefix: containerPrefix,
+                    environment: ENVIRONMENT,
+                    containerPrefix: CONTAINER_PREFIX,
                     password: password,
                     username: 'neo4j'
                 });
-                this.outputChannel.appendLine(`[Neo4j] Container manager returned successfully`);
+                const startDuration = Date.now() - startTime;
+                this.outputChannel.appendLine(`[Neo4j] Container manager returned successfully in ${startDuration}ms`);
                 this.outputChannel.appendLine(`[Neo4j] Neo4j started successfully`);
                 this.outputChannel.appendLine(`[Neo4j] URI: ${this.instance.uri}`);
                 this.outputChannel.appendLine(`[Neo4j] Container ID: ${this.instance.containerId}`);
-                // Save password
+                // Check container age if available
+                if (typeof this.instance.createdAt === 'string' || typeof this.instance.createdAt === 'number') {
+                    const containerAge = this.getContainerAge(this.instance.createdAt);
+                    this.outputChannel.appendLine(`[Neo4j] Container age: ${containerAge}`);
+                    // Warn if container is older than 7 days
+                    if (containerAge.includes('day') && parseInt(containerAge) > 7) {
+                        this.outputChannel.appendLine(`[Neo4j WARN] Container is older than 7 days, consider recreation for optimal performance`);
+                    }
+                }
+                // Save password for future use with error handling
                 try {
                     await this.configManager.saveNeo4jPassword(containerName, password);
-                    this.outputChannel.appendLine(`[Neo4j] Password saved successfully for container: ${containerName}`);
+                    this.outputChannel.appendLine(`[Neo4j] Password saved successfully to global configuration`);
                 }
-                catch (e) {
-                    this.outputChannel.appendLine(`[Neo4j] Could not save password: ${e}`);
+                catch (saveError) {
+                    this.outputChannel.appendLine(`[Neo4j WARN] Failed to save password: ${saveError.message}`);
+                    // Don't fail the entire operation if password saving fails
                 }
             }
             catch (error) {
                 this.outputChannel.appendLine(`[Neo4j] Container manager start failed: ${error.message}`);
-                this.outputChannel.appendLine(`[Neo4j] Error stack: ${error.stack}`);
+                this.outputChannel.appendLine(`[Neo4j] Error details: ${error.stack || 'No stack trace available'}`);
+                // If password retrieval failed, clear potentially corrupted password
+                if (error.message.includes('password') || error.message.includes('authentication')) {
+                    try {
+                        await this.configManager.clearNeo4jPassword(containerName);
+                        this.outputChannel.appendLine(`[Neo4j] Cleared potentially corrupted saved password`);
+                    }
+                    catch (clearError) {
+                        this.outputChannel.appendLine(`[Neo4j WARN] Failed to clear password: ${clearError.message}`);
+                    }
+                }
                 throw new Error(`Cannot start Neo4j: ${error.message}`);
             }
         }
@@ -236,29 +206,10 @@ class Neo4jManager {
         try {
             await session.run('MATCH (n) DETACH DELETE n');
             for (const node of nodes) {
-                await session.run(`
-                    CREATE (n:${node.type || 'Node'})
-                    SET n = $props
-                `, {
-                    props: {
-                        id: node.id,
-                        name: node.name || node.id,
-                        path: node.path,
-                        ...node.properties
-                    }
-                });
+                await session.run('CREATE (n:Node {id: $id, name: $name, type: $type, filePath: $filePath})', node);
             }
             for (const edge of edges) {
-                await session.run(`
-                    MATCH (a {id: $sourceId})
-                    MATCH (b {id: $targetId})
-                    CREATE (a)-[r:${edge.type || 'RELATED_TO'}]->(b)
-                    SET r = $props
-                `, {
-                    sourceId: edge.source,
-                    targetId: edge.target,
-                    props: edge.properties || {}
-                });
+                await session.run('MATCH (a:Node {id: $source}), (b:Node {id: $target}) CREATE (a)-[:DEPENDS_ON {type: $type}]->(b)', edge);
             }
         }
         finally {
@@ -269,35 +220,23 @@ class Neo4jManager {
         const driver = await this.getDriver();
         const session = driver.session();
         try {
-            const nodeResult = await session.run(`
-                MATCH (n)
-                RETURN labels(n) as labels, count(n) as count
-            `);
+            const nodeCountResult = await session.run('MATCH (n) RETURN count(n) as count');
+            const nodeCount = nodeCountResult.records[0].get('count').toNumber();
+            const relCountResult = await session.run('MATCH ()-[r]->() RETURN count(r) as count');
+            const relationshipCount = relCountResult.records[0].get('count').toNumber();
+            const nodeTypesResult = await session.run('MATCH (n) RETURN n.type as type, count(n) as count');
             const nodeTypes = {};
-            let totalNodes = 0;
-            nodeResult.records.forEach(record => {
-                const labels = record.get('labels');
-                const count = record.get('count').toNumber();
-                if (labels.length > 0) {
-                    nodeTypes[labels[0]] = count;
-                    totalNodes += count;
-                }
+            nodeTypesResult.records.forEach(record => {
+                nodeTypes[record.get('type')] = record.get('count').toNumber();
             });
-            const relResult = await session.run(`
-                MATCH ()-[r]->()
-                RETURN type(r) as type, count(r) as count
-            `);
+            const relTypesResult = await session.run('MATCH ()-[r]->() RETURN type(r) as type, count(r) as count');
             const relationshipTypes = {};
-            let totalRelationships = 0;
-            relResult.records.forEach(record => {
-                const type = record.get('type');
-                const count = record.get('count').toNumber();
-                relationshipTypes[type] = count;
-                totalRelationships += count;
+            relTypesResult.records.forEach(record => {
+                relationshipTypes[record.get('type')] = record.get('count').toNumber();
             });
             return {
-                nodeCount: totalNodes,
-                relationshipCount: totalRelationships,
+                nodeCount,
+                relationshipCount,
                 nodeTypes,
                 relationshipTypes
             };
@@ -306,25 +245,65 @@ class Neo4jManager {
             await session.close();
         }
     }
-    async exportData() {
-        if (!this.manager || !this.instance) {
-            throw new Error('Neo4j not running');
-        }
-        const dataManager = this.manager.getDataManager();
-        const exportPath = await dataManager.exportData(this.instance.name);
-        return exportPath;
-    }
-    async importData(dataPath) {
-        if (!this.manager || !this.instance) {
-            throw new Error('Neo4j not running');
-        }
-        const dataManager = this.manager.getDataManager();
-        await dataManager.importData(this.instance.name, dataPath);
-    }
-    dispose() {
+    async dispose() {
         if (this.driver) {
-            this.driver.close();
-            this.driver = undefined;
+            await this.driver.close();
+            this.driver = null;
+        }
+        if (this.instance && this.instance.stop) {
+            await this.instance.stop();
+            this.instance = null;
+        }
+        this.outputChannel.dispose();
+    }
+    /**
+     * Generate a cryptographically secure password using Node.js crypto module
+     */
+    generatePassword() {
+        try {
+            const crypto = require('crypto');
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            const passwordLength = 16;
+            const randomBytes = crypto.randomBytes(passwordLength);
+            let password = '';
+            for (let i = 0; i < passwordLength; i++) {
+                password += chars[randomBytes[i] % chars.length];
+            }
+            this.outputChannel.appendLine(`[Neo4j] Generated secure password of length ${passwordLength}`);
+            return password;
+        }
+        catch (error) {
+            this.outputChannel.appendLine(`[Neo4j ERROR] Failed to generate secure password: ${error.message}`);
+            // Fallback to a simple but less secure method if crypto fails
+            const fallbackPassword = 'fallback-' + Date.now().toString(36);
+            this.outputChannel.appendLine(`[Neo4j WARN] Using fallback password generation method`);
+            return fallbackPassword;
+        }
+    }
+    /**
+     * Calculate container age from creation timestamp
+     */
+    getContainerAge(createdAt) {
+        try {
+            const creationTime = typeof createdAt === 'string' ? new Date(createdAt).getTime() : createdAt;
+            const now = Date.now();
+            const ageMs = now - creationTime;
+            const minutes = Math.floor(ageMs / (1000 * 60));
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            if (days > 0) {
+                return `${days} day${days > 1 ? 's' : ''}, ${hours % 24} hour${(hours % 24) > 1 ? 's' : ''}`;
+            }
+            else if (hours > 0) {
+                return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes % 60} minute${(minutes % 60) > 1 ? 's' : ''}`;
+            }
+            else {
+                return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+            }
+        }
+        catch (error) {
+            this.outputChannel.appendLine(`[Neo4j WARN] Failed to calculate container age: ${error.message}`);
+            return 'unknown';
         }
     }
 }
