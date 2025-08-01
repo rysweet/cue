@@ -8,9 +8,10 @@ class FolderNode(Node):
     path: str
     name: str
     level: int
+    _contains: List[Union[FileNode, "FolderNode"]]
 
     def __init__(self, path: str, name: str, level: int, *args, **kwargs):
-        self._contains = []
+        self._contains: List[Union[FileNode, "FolderNode"]] = []
         super().__init__(NodeLabels.FOLDER, path, name, level, *args, **kwargs)
 
     @property
@@ -39,5 +40,5 @@ class FolderNode(Node):
 
         return relationships
 
-    def filter_children_by_path(self, paths: List[str]):
+    def filter_children_by_path(self, paths: List[str]) -> None:
         self._contains = [node for node in self._contains if node.path in paths]
