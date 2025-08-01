@@ -29,6 +29,6 @@ easy/
 # Important workflow checkpoints (committed for recovery)
 !.github/workflow-checkpoints/
 
-# Agent manager cache
+# Agent Manager cache
 .claude/agent-manager/cache/
 
