@@ -6,6 +6,38 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ---
 
+## CRITICAL: Workflow Execution Pattern
+
+**For ANY development task that requires multiple phases (issue, branch, code, PR):**
+
+1. **DO NOT manually execute workflow phases**
+2. **ALWAYS invoke WorkflowMaster**: 
+   ```
+   /agent:workflow-master
+   
+   Task: Execute workflow for /prompts/[prompt-file].md
+   ```
+3. **Let WorkflowMaster handle**:
+   - Issue creation
+   - Branch management  
+   - Implementation tracking
+   - PR creation
+   - Code review invocation (Phase 9)
+   - State management
+
+**Only execute manual steps for**:
+- Quick fixes that don't need full workflow
+- Investigations or analysis
+- Direct user requests for specific actions
+
+**Before ANY development task, ask yourself**:
+- Does this need an issue? → Use WorkflowMaster
+- Does this need a branch? → Use WorkflowMaster  
+- Does this need a PR? → Use WorkflowMaster
+- Is this a feature/fix? → Use WorkflowMaster
+
+---
+
 ## Generic Claude Code Instructions
 
 The following section contains universal best practices applicable to any Claude Code project.

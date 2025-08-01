@@ -211,6 +211,10 @@ If the user expressed frustration or provided feedback:
 
 ## Using and Creating Reusable Agents
 
+### CRITICAL: Use Agents for Workflows
+
+**If a task involves creating issues, branches, code changes, and PRs, you MUST use an orchestration agent (like WorkflowMaster) rather than executing steps manually.**
+
 ### Using Agents
 To invoke a reusable agent, use the following pattern:
 ```
@@ -219,6 +223,12 @@ To invoke a reusable agent, use the following pattern:
 Context: [Provide specific context about the problem]
 Requirements: [What needs to be achieved]
 ```
+
+### Common Workflow Agents
+- **workflow-master**: Orchestrates complete development workflows from issue to PR
+- **code-reviewer**: Reviews pull requests 
+- **prompt-writer**: Creates structured prompts
+- **orchestrator-agent**: Manages parallel task execution
 
 ### Creating New Agents
 New specialized agents can be added to `.github/agents/` or `.claude/agents/` following the existing template structure. Each agent should have:
