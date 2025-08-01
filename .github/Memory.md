@@ -1,11 +1,12 @@
 # AI Assistant Memory
-Last Updated: 2025-07-31T19:30:00Z
+Last Updated: 2025-07-31T21:00:00Z
 
 ## Current Goals
 - ✅ Improve test coverage for Blarify codebase to >80% (ACHIEVED 3x improvement: 20.76% → 63.76%)
 - ✅ Set up comprehensive CI/CD pipeline for automated testing (COMPLETED)
 - ✅ Fix all failing tests in the codebase (COMPLETED - 160 tests passing)
 - ✅ Fix all hanging and problematic tests (COMPLETED)
+- 🔄 Continue improving test coverage for low-coverage modules
 
 ## Todo List
 - [x] Write prompt file for test coverage improvement agent
@@ -26,8 +27,26 @@ Last Updated: 2025-07-31T19:30:00Z
 - [x] Fix tree-sitter import issues in test environment
 - [x] Fix 75+ failing tests in CI environment
 - [x] Fix remaining 29 failing tests (filesystem and LLM integration tests)
+- [x] Write comprehensive tests for lsp_helper.py
+- [x] Write comprehensive tests for tree_sitter_helper.py
+- [x] Improve tests for llm_service.py
+- [x] Improve tests for graph.py
+- [x] Fix failing tree_sitter_helper test in CI (PR #18)
+- [ ] Write tests for definition_node.py (currently 33.07%)
+- [ ] Write tests for relationship_creator.py (currently 34.29%)
+- [ ] Write tests for documentation_linker.py (currently 16.07%)
+- [ ] Improve tests for concept_extractor.py (currently 53.33%)
+- [ ] Improve tests for documentation_graph_generator.py (currently 62.50%)
 
 ## Recent Accomplishments
+- **Created issue #17 and PR #18 for test coverage improvements** (2025-07-31)
+  - Fixed failing tree_sitter_helper test that was blocking CI
+  - All CI checks now passing on PR #18
+  - Added comprehensive tests for 4 critical modules:
+    - `test_lsp_helper.py`: 30 tests covering LSP server management
+    - `test_tree_sitter_helper.py`: 32 tests covering tree-sitter parsing
+    - `test_llm_service.py`: Enhanced to 30 tests with retry mechanism tests
+    - `test_graph_comprehensive.py`: 15 tests covering graph operations
 - **All CI checks passing on PR #14** - https://github.com/rysweet/cue/pull/14
 - **Fixed CI configuration issues**:
   - Removed Python 3.10 and 3.11 from CI matrix (now only Python 3.12)
