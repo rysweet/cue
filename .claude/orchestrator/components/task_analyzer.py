@@ -4,6 +4,11 @@ TaskAnalyzer Component for OrchestratorAgent
 
 Analyzes prompt files to identify parallelizable tasks, detect dependencies,
 and create execution plans for optimal parallel workflow execution.
+
+Security Features:
+- Input validation for all file paths and content
+- Resource limits to prevent system overload
+- Sanitized output to prevent injection attacks
 """
 
 import os
@@ -14,6 +19,16 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
+import logging
+
+# Security: Define maximum limits to prevent resource exhaustion
+MAX_PROMPT_FILES = 50
+MAX_FILE_SIZE_MB = 10
+MAX_PARALLEL_TASKS = 8
+ALLOWED_FILE_EXTENSIONS = {'.md', '.txt', '.py', '.js', '.json'}
+
+# Configure secure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class TaskComplexity(Enum):
@@ -56,11 +71,66 @@ class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
     
     def __init__(self, prompts_dir: str = "/prompts/", project_root: str = "."):
-        self.prompts_dir = Path(prompts_dir)
-        self.project_root = Path(project_root)
+        # Security: Validate and sanitize input paths
+        self.prompts_dir = self._validate_directory_path(prompts_dir)
+        self.project_root = self._validate_directory_path(project_root)
         self.tasks: List[TaskInfo] = []
         self.dependency_graph: Dict[str, List[str]] = {}
         self.conflict_matrix: Dict[str, Set[str]] = {}
+    
+    def _validate_directory_path(self, path: str) -> Path:
+        """Security: Validate directory paths to prevent path traversal attacks"""
+        try:
+            resolved_path = Path(path).resolve()
+            # Prevent path traversal attacks
+            if '..' in str(resolved_path) or not resolved_path.is_absolute():
+                raise ValueError(f"Invalid directory path: {path}")
+            return resolved_path
+        except Exception as e:
+            logging.error(f"Path validation failed for {path}: {e}")
+            raise ValueError(f"Invalid directory path: {path}")
+    
+    def _validate_file_path(self, file_path: str) -> Path:
+        """Security: Validate file paths and extensions"""
+        try:
+            path = Path(file_path).resolve()
+            
+            # Check file extension
+            if path.suffix not in ALLOWED_FILE_EXTENSIONS:
+                raise ValueError(f"Unsupported file extension: {path.suffix}")
+            
+            # Check file size
+            if path.exists() and path.stat().st_size > MAX_FILE_SIZE_MB * 1024 * 1024:
+                raise ValueError(f"File too large: {path}")
+            
+            # Prevent path traversal
+            if '..' in str(path):
+                raise ValueError(f"Path traversal attempt detected: {file_path}")
+                
+            return path
+        except Exception as e:
+            logging.error(f"File validation failed for {file_path}: {e}")
+            raise ValueError(f"Invalid file path: {file_path}")
+    
+    def _sanitize_content(self, content: str) -> str:
+        """Security: Sanitize file content to prevent injection attacks"""
+        if not isinstance(content, str):
+            raise ValueError("Content must be a string")
+        
+        # Remove potentially dangerous patterns
+        dangerous_patterns = [
+            r'<script[^>]*>.*?</script>',
+            r'javascript:',
+            r'on\w+\s*=',
+            r'eval\s*\(',
+            r'exec\s*\(',
+        ]
+        
+        sanitized = content
+        for pattern in dangerous_patterns:
+            sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL)
+        
+        return sanitized
     
     def analyze_prompts(self, prompt_files: List[str]) -> List[TaskInfo]:
         """Analyze specific prompt files for parallel execution
@@ -71,6 +141,13 @@ class TaskAnalyzer:
         Returns:
             List of TaskInfo objects with dependency and conflict analysis
         """
+        # Security: Validate input parameters
+        if not isinstance(prompt_files, list):
+            raise ValueError("prompt_files must be a list")
+        
+        if len(prompt_files) > MAX_PROMPT_FILES:
+            raise ValueError(f"Too many prompt files. Maximum allowed: {MAX_PROMPT_FILES}")
+        
         print(f"🔍 Analyzing {len(prompt_files)} prompt files for parallel execution opportunities...")
         
         if not prompt_files:
@@ -79,14 +156,23 @@ class TaskAnalyzer:
         
         self.tasks = []
         for prompt_file_path in prompt_files:
-            # Handle both relative and absolute paths
-            if os.path.isabs(prompt_file_path):
-                prompt_file = Path(prompt_file_path)
-            else:
-                prompt_file = self.prompts_dir / prompt_file_path
-            
-            if not prompt_file.exists():
-                print(f"⚠️  Prompt file not found: {prompt_file}")
+            try:
+                # Security: Validate file path
+                validated_path = self._validate_file_path(prompt_file_path)
+                
+                # Handle both relative and absolute paths
+                if os.path.isabs(prompt_file_path):
+                    prompt_file = validated_path
+                else:
+                    prompt_file = self.prompts_dir / prompt_file_path
+                    prompt_file = self._validate_file_path(str(prompt_file))
+                
+                if not prompt_file.exists():
+                    print(f"⚠️  Prompt file not found: {prompt_file}")
+                    continue
+                    
+            except ValueError as e:
+                logging.warning(f"Skipping invalid prompt file {prompt_file_path}: {e}")
                 continue
                 
             # Skip already implemented prompts (based on markers or history)

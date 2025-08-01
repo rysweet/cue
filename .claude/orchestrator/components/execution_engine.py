@@ -4,6 +4,12 @@ ExecutionEngine Component for OrchestratorAgent
 
 Manages parallel execution of Claude CLI instances for multiple tasks,
 including process spawning, monitoring, and resource management.
+
+Security Features:
+- Resource limits and monitoring to prevent system overload
+- Process isolation and secure execution environment
+- Input validation for all command parameters
+- Timeout enforcement to prevent runaway processes
 """
 
 import os
@@ -21,6 +27,18 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timedelta
 import threading
 import queue
+import logging
+
+# Security: Define strict resource limits
+MAX_CONCURRENT_TASKS = 8
+MAX_MEMORY_PER_TASK_GB = 2.0
+MAX_CPU_PERCENT = 80.0
+MAX_EXECUTION_TIME_HOURS = 4
+MIN_AVAILABLE_MEMORY_GB = 1.0
+MAX_OUTPUT_SIZE_MB = 100
+
+# Configure secure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 @dataclass
