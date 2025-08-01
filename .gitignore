@@ -30,6 +30,5 @@ easy/
 !.github/workflow-checkpoints/
 
 # Agent Manager cache
-.claude/agent-manager/cache/repositories/
-.claude/agent-manager/cache/downloaded/
+.claude/agent-manager/cache/
 
