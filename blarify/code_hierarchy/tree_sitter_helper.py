@@ -46,8 +46,11 @@ class TreeSitterHelper:
 
     def get_reference_type(
         self, original_node: "DefinitionNode", reference: "Reference", node_referenced: "DefinitionNode"
-    ) -> FoundRelationshipScope:
+    ) -> Optional[FoundRelationshipScope]:
         node_in_point_reference = self._get_node_in_point_reference(node=node_referenced, reference=reference)
+        if node_in_point_reference is None:
+            return None
+        
         found_relationship_scope = self.language_definitions.get_relationship_type(
             node=original_node.tree_sitter_node, node_in_point_reference=node_in_point_reference
         )
