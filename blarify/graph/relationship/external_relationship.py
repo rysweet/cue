@@ -1,3 +1,4 @@
+from typing import Dict, Any
 from blarify.graph.relationship.relationship_type import RelationshipType
 
 
@@ -7,7 +8,7 @@ class ExternalRelationship:
         self.target = end_node_id
         self.type = rel_type
 
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         return {
             "sourceId": self.source,
             "targetId": self.target,

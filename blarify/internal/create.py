@@ -1,9 +1,10 @@
+from typing import List, Dict, Any, Tuple
 from blarify.graph.graph_environment import GraphEnvironment
 from blarify.prebuilt.graph_builder import GraphBuilder
 from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.db_managers.falkordb_manager import FalkorDBManager
 import json
-
+import logging
 
 import dotenv
 import os
@@ -31,7 +32,7 @@ NAMES_TO_SKIP = [
 ]
 
 
-def build():
+def build() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     logging.basicConfig(level=logging.DEBUG)
     root_path = os.getenv("ROOT_PATH")
     print(f"Root path: {root_path}")
@@ -51,7 +52,7 @@ def build():
     
     return relationships, nodes
 
-def save_to_neo4j(relationships, nodes):
+def save_to_neo4j(relationships: List[Dict[str, Any]], nodes: List[Dict[str, Any]]) -> None:
     company_id = os.getenv("COMPANY_ID")
     repo_id = os.getenv("REPO_ID")
 
