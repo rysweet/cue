@@ -1,10 +1,12 @@
-from typing import Optional, Set, Dict
+from typing import Optional, Set, Dict, TYPE_CHECKING
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from .language_definitions import LanguageDefinitions
-from blarify.graph.relationship import RelationshipType
-from blarify.graph.node import NodeLabels
 import tree_sitter_go as tsgo
 from tree_sitter import Language, Parser, Node as TreeSitterNode
+
+if TYPE_CHECKING:
+    from blarify.graph.relationship import RelationshipType
+    from blarify.graph.node import NodeLabels
 
 
 
@@ -70,7 +72,9 @@ class GoDefinitions(LanguageDefinitions):
         )
 
     @staticmethod
-    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
+    def _get_relationship_types_by_label() -> Dict["NodeLabels", Dict[str, "RelationshipType"]]:
+        from blarify.graph.relationship import RelationshipType
+        from blarify.graph.node import NodeLabels
         return {
             NodeLabels.CLASS: {
                 "import_declaration": RelationshipType.IMPORTS,

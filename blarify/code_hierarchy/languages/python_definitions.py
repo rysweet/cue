@@ -1,9 +1,13 @@
-from typing import Optional, Set, Dict
+from typing import Optional, Set, Dict, TYPE_CHECKING
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from .language_definitions import LanguageDefinitions
-from blarify.graph.relationship import RelationshipType
-from blarify.graph.node import NodeLabels
+
+
 import tree_sitter_python as tspython
+
+if TYPE_CHECKING:
+    from blarify.graph.relationship import RelationshipType
+    from blarify.graph.node import NodeLabels
 from tree_sitter import Language, Parser, Node as TreeSitterNode
 
 
@@ -46,6 +50,7 @@ class PythonDefinitions(LanguageDefinitions):
     @staticmethod
     def get_node_label_from_type(type: str) -> "NodeLabels":
         from blarify.graph.node import NodeLabels
+        
         return {
             "class_definition": NodeLabels.CLASS,
             "function_definition": NodeLabels.FUNCTION,
@@ -57,6 +62,8 @@ class PythonDefinitions(LanguageDefinitions):
 
     @staticmethod  
     def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
+        from blarify.graph.node import NodeLabels
+        
         relationship_types = PythonDefinitions._get_relationship_types_by_label()
         # Convert string to NodeLabels enum
         node_label_enum = NodeLabels(node_label)
@@ -67,7 +74,9 @@ class PythonDefinitions(LanguageDefinitions):
         )
 
     @staticmethod
-    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
+    def _get_relationship_types_by_label() -> Dict["NodeLabels", Dict[str, "RelationshipType"]]:
+        from blarify.graph.relationship import RelationshipType
+        from blarify.graph.node import NodeLabels
         return {
             NodeLabels.CLASS: {
                 "import_from_statement": RelationshipType.IMPORTS,

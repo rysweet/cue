@@ -1,10 +1,12 @@
-from typing import Set, Optional, Dict
+from typing import Set, Optional, Dict, TYPE_CHECKING
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
-from blarify.graph.relationship import RelationshipType
-from blarify.graph.node import NodeLabels
 from tree_sitter import Node as TreeSitterNode, Language, Parser
 from .language_definitions import LanguageDefinitions
 import tree_sitter_javascript as tsjavascript
+
+if TYPE_CHECKING:
+    from blarify.graph.relationship import RelationshipType
+    from blarify.graph.node import NodeLabels
 
 
 class JavascriptDefinitions(LanguageDefinitions):
@@ -60,7 +62,9 @@ class JavascriptDefinitions(LanguageDefinitions):
         )
 
     @staticmethod
-    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
+    def _get_relationship_types_by_label() -> Dict["NodeLabels", Dict[str, "RelationshipType"]]:
+        from blarify.graph.relationship import RelationshipType
+        from blarify.graph.node import NodeLabels
         return {
             NodeLabels.CLASS: {
                 "import_specifier": RelationshipType.IMPORTS,
@@ -97,7 +101,9 @@ class JavascriptDefinitions(LanguageDefinitions):
         return {".js", ".jsx"}
 
     @staticmethod
-    def get_node_label_from_type(type: str) -> NodeLabels:
+    def get_node_label_from_type(type: str) -> "NodeLabels":
+        from blarify.graph.node import NodeLabels
+        
         # This method may need to be refactored to take the node instead in order to verify more complex node types
         if type == "variable_declarator":
             return NodeLabels.FUNCTION

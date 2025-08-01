@@ -1,10 +1,14 @@
-from typing import Dict, Set, Optional
+from typing import Dict, Set, Optional, TYPE_CHECKING
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
-from blarify.graph.node import NodeLabels
-from blarify.graph.relationship import RelationshipType
+
+
 
 from tree_sitter import Parser, Node as TreeSitterNode, Language
 import tree_sitter_ruby as tsruby
+
+if TYPE_CHECKING:
+    from blarify.graph.relationship import RelationshipType
+    from blarify.graph.node import NodeLabels
 from .language_definitions import LanguageDefinitions
 
 
@@ -33,6 +37,7 @@ class RubyDefinitions(LanguageDefinitions):
     @staticmethod
     def get_node_label_from_type(type: str) -> "NodeLabels":
         from blarify.graph.node import NodeLabels
+        
         if type == "class":
             return NodeLabels.CLASS
         if type == "method":
@@ -51,6 +56,9 @@ class RubyDefinitions(LanguageDefinitions):
 
     @staticmethod
     def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
+        from blarify.graph.relationship import RelationshipType
+        from blarify.graph.node import NodeLabels
+        
         # Traverse up to find the named parent
         named_parent = node_in_point_reference
         rel_types = RubyDefinitions._get_relationship_types_by_label()
@@ -84,7 +92,9 @@ class RubyDefinitions(LanguageDefinitions):
         return method_node is not None and method_node.text == b"new"
 
     @staticmethod
-    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
+    def _get_relationship_types_by_label() -> Dict["NodeLabels", Dict[str, "RelationshipType"]]:
+        from blarify.graph.relationship import RelationshipType
+        from blarify.graph.node import NodeLabels
         return {
             NodeLabels.CLASS: {"superclass": RelationshipType.INHERITS},
             NodeLabels.FUNCTION: {
@@ -94,8 +104,8 @@ class RubyDefinitions(LanguageDefinitions):
 
     @staticmethod
     def _get_relationship_type_for_node(
-        tree_sitter_node: Optional[TreeSitterNode], relationships_types: Dict[str, RelationshipType]
-    ) -> Optional[RelationshipType]:
+        tree_sitter_node: Optional[TreeSitterNode], relationships_types: Dict[str, "RelationshipType"]
+    ) -> Optional["RelationshipType"]:
         if tree_sitter_node is None:
             return None
 

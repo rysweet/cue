@@ -1,43 +1,46 @@
-# Lazy import to avoid circular dependencies
-# Import language definitions classes only when needed at runtime
+from .language_definitions import LanguageDefinitions
+# Re-export these classes for backward compatibility
+from .language_definitions import BodyNodeNotFound, IdentifierNodeNotFound  # noqa: F401
+from .fallback_definitions import FallbackDefinitions  # noqa: F401
 
-def __getattr__(name: str):
-    """Lazy loading to prevent import cycles"""
-    if name == "LanguageDefinitions":
-        from .language_definitions import LanguageDefinitions
-        return LanguageDefinitions
-    elif name == "BodyNodeNotFound":
-        from .language_definitions import BodyNodeNotFound
-        return BodyNodeNotFound
-    elif name == "IdentifierNodeNotFound":
-        from .language_definitions import IdentifierNodeNotFound
-        return IdentifierNodeNotFound
-    elif name == "PythonDefinitions":
-        from .python_definitions import PythonDefinitions
-        return PythonDefinitions
-    elif name == "JavascriptDefinitions":
-        from .javascript_definitions import JavascriptDefinitions
-        return JavascriptDefinitions
-    elif name == "TypescriptDefinitions":
-        from .typescript_definitions import TypescriptDefinitions
-        return TypescriptDefinitions
-    elif name == "RubyDefinitions":
-        from .ruby_definitions import RubyDefinitions
-        return RubyDefinitions
-    elif name == "FallbackDefinitions":
-        from .fallback_definitions import FallbackDefinitions
-        return FallbackDefinitions
-    elif name == "CsharpDefinitions":
-        from .csharp_definitions import CsharpDefinitions
-        return CsharpDefinitions
-    elif name == "GoDefinitions":
-        from .go_definitions import GoDefinitions
-        return GoDefinitions
-    elif name == "PhpDefinitions":
-        from .php_definitions import PhpDefinitions
-        return PhpDefinitions
-    elif name == "JavaDefinitions":
-        from .java_definitions import JavaDefinitions
-        return JavaDefinitions
-    else:
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+# Import language-specific definitions conditionally to avoid failures
+# when tree-sitter language modules are not installed
+import importlib
+import warnings
+from typing import List, Dict, Type, Optional
+
+# Dictionary to store successfully imported language definitions
+_language_definitions: Dict[str, Type[LanguageDefinitions]] = {}
+
+# Try to import each language definition module
+_language_modules = {
+    'python': ('python_definitions', 'PythonDefinitions'),
+    'javascript': ('javascript_definitions', 'JavascriptDefinitions'),
+    'typescript': ('typescript_definitions', 'TypescriptDefinitions'),
+    'ruby': ('ruby_definitions', 'RubyDefinitions'),
+    'csharp': ('csharp_definitions', 'CsharpDefinitions'),
+    'go': ('go_definitions', 'GoDefinitions'),
+    'php': ('php_definitions', 'PhpDefinitions'),
+    'java': ('java_definitions', 'JavaDefinitions'),
+}
+
+for lang_name, (module_name, class_name) in _language_modules.items():
+    try:
+        module = importlib.import_module(f'.{module_name}', package='blarify.code_hierarchy.languages')
+        definition_class = getattr(module, class_name)
+        _language_definitions[lang_name] = definition_class
+        # Make the class available at module level for backward compatibility
+        globals()[class_name] = definition_class
+    except ImportError as e:
+        warnings.warn(f"Could not import {lang_name} language support: {e}. {lang_name} files will be skipped.")
+    except Exception as e:
+        warnings.warn(f"Error importing {lang_name} language support: {e}. {lang_name} files will be skipped.")
+
+# Function to get available language definitions
+def get_available_languages() -> List[str]:
+    """Returns a list of available language names that have been successfully imported."""
+    return list(_language_definitions.keys())
+
+def get_language_definition(language_name: str) -> Optional[Type[LanguageDefinitions]]:
+    """Returns the language definition class for the given language name, or None if not available."""
+    return _language_definitions.get(language_name)
