@@ -515,13 +515,34 @@ class TestTreeSitterHelper(unittest.TestCase):
         # Test with actual PythonDefinitions instance
         python_helper = TreeSitterHelper(PythonDefinitions)
         
-        # Verify the parsers are set up correctly
+        # Verify the parsers dictionary is properly populated
         self.assertIn(".py", python_helper.parsers)
+        self.assertIsNotNone(python_helper.parsers[".py"])
         self.assertEqual(python_helper.language_definitions, PythonDefinitions)
+        
+        # Test that language definitions integration works
+        extensions = PythonDefinitions.get_language_file_extensions()
+        self.assertIn(".py", extensions)
+        for ext in extensions:
+            self.assertIn(ext, python_helper.parsers)
         
         # Test path validation works with actual definitions
         self.assertTrue(python_helper._does_path_have_valid_extension("test.py"))
         self.assertFalse(python_helper._does_path_have_valid_extension("test.txt"))
+        
+        # Test that parser integration actually functions
+        # Verify the parser object has expected tree-sitter methods
+        parser = python_helper.parsers[".py"]
+        self.assertTrue(hasattr(parser, 'parse'))
+        self.assertTrue(callable(getattr(parser, 'parse')))
+        
+        # Test that language definitions methods work correctly
+        self.assertEqual(PythonDefinitions.get_language_name(), "python")
+        
+        # Verify node label mapping works
+        mock_node_type = "function_definition"
+        label = PythonDefinitions.get_node_label_from_type(mock_node_type)
+        self.assertIsNotNone(label)
     
     def test_with_fallback_definitions(self):
         """Test TreeSitterHelper behavior with FallbackDefinitions."""
