@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional, List, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship import RelationshipCreator, Relationship
@@ -39,7 +39,7 @@ class FilesystemDirectoryNode(Node):
     def node_repr_for_identifier(self) -> str:
         return f"/FILESYSTEM_DIR[{self.relative_path}]"
     
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"].update({
             "relative_path": self.relative_path,

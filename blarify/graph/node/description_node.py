@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 
@@ -40,7 +40,7 @@ class DescriptionNode(Node):
     def node_repr_for_identifier(self) -> str:
         return f"/DESCRIPTION[{self.target_node_id}]"
     
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"].update({
             "description_text": self.description_text,
