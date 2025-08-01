@@ -165,7 +165,83 @@ docker logs -f blarify-visualizer-development
 
 ## Common Issues and Solutions
 
-### 1. Container Already Exists Error
+### 1. Extension Setup and Bundling Issues
+
+#### Missing README.md Error
+**Error**: `FileNotFoundError: [Errno 2] No such file or directory: 'README.md'` during pip install
+
+**Root Cause**: The bundled pyproject.toml references a README.md file that wasn't included in the bundling process.
+
+**Solution**: Ensure README.md is copied during bundling:
+```bash
+# Fixed in bundle-blarify.sh
+if [ -f "$EXT_DIR/../README.md" ]; then
+    cp "$EXT_DIR/../README.md" "$BUNDLED_DIR/"
+else
+    # Create a minimal README.md if it doesn't exist
+    cat > "$BUNDLED_DIR/README.md" << 'EOF'
+# Blarify
+A simple graph builder based on LSP calls for code visualization and analysis.
+EOF
+fi
+```
+
+#### Python Environment Setup Failures
+**Error**: Various pip install errors during first-time setup
+
+**Root Cause**: Missing Python, network issues, or file permissions
+
+**Solution**: Enhanced error handling with retry logic:
+```typescript
+// PythonEnvironment.ts includes retry mechanism
+async ensureSetup(retryCount: number = 0): Promise<string> {
+    try {
+        // Setup logic with detailed error messages
+    } catch (error) {
+        if (retryCount < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return this.ensureSetup(retryCount + 1);
+        }
+        throw error;
+    }
+}
+```
+
+#### Setup/Ingestion Race Condition
+**Error**: "Blarify integration not initialized" when trying to analyze workspace
+
+**Root Cause**: User attempts ingestion before setup completes
+
+**Solution**: Proper synchronization with setup state tracking:
+```typescript
+// Extension waits for setup completion
+if (!setupState.isSetupComplete) {
+    await vscode.window.withProgress({
+        title: "Waiting for Blarify setup to complete"
+    }, async (progress) => {
+        while (!setupState.isSetupComplete && elapsed < maxWaitTime) {
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+            // ... polling logic
+        }
+    });
+}
+```
+
+#### Bundling Configuration Issues
+**Error**: Missing files in bundled directory during extension packaging
+
+**Solution**: Verify bundling script includes all required files:
+```bash
+# Check bundle-blarify.sh includes:
+# - README.md copy
+# - pyproject.toml
+# - Blarify source code
+# - Neo4j container manager
+# - Requirements.txt generation
+# - Setup.py with error handling
+```
+
+### 2. Container Already Exists Error
 **Error**: "The container name is already in use"
 
 **Solution**: Implement proper cleanup before starting:
@@ -250,15 +326,35 @@ echo "Cleanup complete"
 ```
 
 ### 2. Extension Testing Checklist
+
+#### Pre-deployment Testing
 - [ ] Compile TypeScript: `npm run compile`
 - [ ] Run unit tests: `npm test`
+- [ ] Validate bundled files exist:
+  - [ ] `bundled/README.md` exists
+  - [ ] `bundled/pyproject.toml` exists
+  - [ ] `bundled/setup.py` contains error handling
+  - [ ] `bundled/blarify/main.py` exists
+  - [ ] `bundled/requirements.txt` exists
 - [ ] Package extension: `npm run package`
+
+#### Installation Testing
 - [ ] Clean up Docker resources
 - [ ] Install extension: `code-insiders --install-extension *.vsix --force`
 - [ ] Test in new window: `bash test-vscode-new-window.sh`
-- [ ] Check logs in Output panel
+
+#### Setup Validation
+- [ ] Extension activation completes without errors
+- [ ] Check setup progress in Output panel
+- [ ] Verify Python environment setup completes
+- [ ] Confirm setup state tracking works
+- [ ] Test that ingestion waits for setup completion
+
+#### Runtime Testing
 - [ ] Verify container is running: `docker ps`
 - [ ] Test HTTP endpoint: `curl http://localhost:[port]`
+- [ ] Try workspace ingestion after setup
+- [ ] Verify error handling works for common failures
 
 ### 3. Log Analysis Commands
 ```bash

@@ -9,7 +9,7 @@ export class PythonEnvironment {
     
     constructor(private extensionPath: string) {}
     
-    async ensureSetup(): Promise<string> {
+    async ensureSetup(retryCount: number = 0): Promise<string> {
         if (this.isSetup && this.pythonPath) {
             return this.pythonPath;
         }
@@ -28,18 +28,20 @@ export class PythonEnvironment {
             return pythonExe;
         }
         
-        // Run setup
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Setting up Blarify",
-            cancellable: false
-        }, async (progress) => {
-            progress.report({ message: "Installing Python dependencies..." });
-            
-            const setupScript = path.join(bundledDir, 'setup.py');
-            const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
-            
-            return new Promise<void>((resolve, reject) => {
+        // Run setup with retry logic
+        const maxRetries = 2;
+        try {
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: retryCount > 0 ? `Setting up Blarify (Retry ${retryCount})` : "Setting up Blarify",
+                cancellable: false
+            }, async (progress) => {
+                progress.report({ message: "Installing Python dependencies..." });
+                
+                const setupScript = path.join(bundledDir, 'setup.py');
+                const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+                
+                return new Promise<void>((resolve, reject) => {
                 const setup = spawn(pythonCommand, [setupScript], {
                     cwd: bundledDir,
                     env: process.env
@@ -68,15 +70,37 @@ export class PythonEnvironment {
                         this.isSetup = true;
                         resolve();
                     } else {
-                        reject(new Error(`Setup failed: ${errorOutput || output}`));
+                        const errorMessage = errorOutput || output || 'Unknown error during setup';
+                        let userFriendlyMessage = `Python setup failed (exit code ${code}): ${errorMessage}`;
+                        
+                        // Provide more specific error messages for common issues
+                        if (errorMessage.includes('README.md')) {
+                            userFriendlyMessage = `Setup failed due to missing README.md file. This is likely a bundling issue. Full error: ${errorMessage}`;
+                        } else if (errorMessage.includes('pip install')) {
+                            userFriendlyMessage = `Failed to install Python dependencies. Please ensure you have internet connectivity and Python is properly installed. Full error: ${errorMessage}`;
+                        } else if (errorMessage.includes('permission')) {
+                            userFriendlyMessage = `Permission denied during setup. Try running VS Code as administrator or check file permissions. Full error: ${errorMessage}`;
+                        }
+                        
+                        reject(new Error(userFriendlyMessage));
                     }
                 });
                 
                 setup.on('error', (error) => {
                     reject(new Error(`Failed to run setup: ${error.message}`));
                 });
+                });
             });
-        });
+        } catch (error) {
+            // Retry logic for transient failures
+            if (retryCount < maxRetries) {
+                console.log(`Setup attempt ${retryCount + 1} failed, retrying... Error: ${error}`);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+                return this.ensureSetup(retryCount + 1);
+            } else {
+                throw error; // Re-throw after max retries
+            }
+        }
         
         if (!this.pythonPath) {
             throw new Error('Python setup completed but executable not found');
