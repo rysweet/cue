@@ -121,10 +121,14 @@ class DefinitionNode(Node):
         return len(self._get_text_for_skeleton()) - (end_byte - start_byte)
 
     def get_start_text_bytes(self, parent_text_bytes: bytes, bytes_offset: int) -> Tuple[bytes, int]:
+        if self.body_node is None:
+            raise ValueError("body_node is None")
         start_byte = self.body_node.start_byte + bytes_offset - 1
         return parent_text_bytes[:start_byte], start_byte
 
     def get_end_text_bytes(self, parent_text_bytes: bytes, bytes_offset: int) -> Tuple[bytes, int]:
+        if self.body_node is None:
+            raise ValueError("body_node is None")
         end_byte = self.body_node.end_byte + bytes_offset + 1
         return self.remove_line_break_if_present(text=parent_text_bytes[end_byte:]), end_byte
 

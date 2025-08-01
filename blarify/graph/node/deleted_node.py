@@ -8,4 +8,6 @@ class DeletedNode(Node):
         super().__init__(*args, **kwargs)
 
     def _identifier(self):
+        if self.graph_environment is None:
+            raise ValueError("graph_environment is None")
         return PathCalculator.compute_relative_path_with_prefix(self.pure_path, self.graph_environment.root_path)
