@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Specialized sub-agent for conducting thorough code reviews on pull requests
-tools: read, grep, ls, bash, web_search, web_fetch, todo_write
+tools: Read, Grep, LS, Bash, WebSearch, WebFetch, TodoWrite
 ---
 
 # Code Review Sub-Agent for Blarify
@@ -65,7 +65,7 @@ Save your analysis and learnings about the project structure in `.github/CodeRev
 
 #### Python-Specific Checks
 - [ ] Type hints provided for function signatures
-- [ ] No mypy errors (`dmypy run --`)
+- [ ] No mypy errors (`mypy .` or `mypy blarify/`)
 - [ ] Modern Python features used appropriately (f-strings, walrus operator where clear)
 - [ ] Context managers used for resource management
 - [ ] No use of dangerous functions (eval, exec, unsafe pickle)
@@ -207,24 +207,22 @@ When you need to understand how existing code works:
 
 ## Tools and Commands
 
+If these tools are configured in the project environment, they can be used during review:
+
 ```bash
 # Check Python code quality
 black --check .
 flake8 .
-mypy .
 
-# Run tests with coverage
+# Run tests with coverage  
 pytest --cov=blarify tests/
 
-# Check for security issues
-bandit -r blarify/
-safety check
-
-# Analyze complexity
-radon cc blarify/ -a
-
-# Check for common issues
-pylint blarify/
+# Additional tools (if available):
+# mypy .                    # Type checking
+# bandit -r blarify/        # Security analysis
+# safety check              # Dependency vulnerabilities
+# radon cc blarify/ -a      # Complexity analysis
+# pylint blarify/           # Additional linting
 ```
 
 ## Continuous Learning

@@ -1,5 +1,7 @@
 # Code Reviewer Project Memory
 
+Last Updated: 2025-08-01T20:35:00Z
+
 This file maintains learnings and insights from code reviews to improve future reviews and maintain consistency.
 
 ## Code Review Memory - 2025-07-31
@@ -103,3 +105,27 @@ This file maintains learnings and insights from code reviews to improve future r
 3. Create more integration tests for end-to-end scenarios
 4. Document testing patterns in a dedicated guide
 5. Consider property-based testing for complex logic
+
+---
+
+## Code Review Memory - 2025-08-01
+
+### PR #19: feat: add specialized code review sub-agent for enhanced PR reviews
+
+#### What I Learned
+- Claude Code sub-agents require tools in comma-separated format with capitalized names (Read, Grep, etc.)
+- Sub-agents must be placed in `.claude/agents/` directory with proper YAML frontmatter
+- Not all standard Python development tools (bandit, safety, radon, pylint) are configured in every project
+- Review priorities should align with team preferences (security > data corruption > performance confirmed)
+
+#### Patterns to Watch
+- YAML frontmatter formatting must match Claude Code documentation exactly
+- Tool availability should be verified before recommending specific commands
+- Memory files benefit from version/timestamp tracking
+- Prompts in `/prompts/` are for planning, actual sub-agents go in `.claude/agents/`
+
+#### Process Improvements
+- Always verify tool configuration before including in review checklists
+- Include "Last Updated" timestamps in memory files for tracking
+- Separate implementation prompts from actual sub-agent definitions
+- Test sub-agent invocation before finalizing implementation
