@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
     from blarify.graph.graph_environment import GraphEnvironment
+    from blarify.stats.complexity import NestingStats
 
 
 class DefinitionNode(Node):
