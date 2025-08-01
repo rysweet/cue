@@ -1,0 +1,35 @@
+# Agent Manager Configuration for Gadugi Repository
+
+repositories:
+  - name: "gadugi"
+    url: "https://github.com/rysweet/gadugi"
+    type: "github"
+    branch: "main"
+    auth:
+      type: "public"
+    priority: 1
+    auto_update: true
+    description: "Community-driven collection of reusable Claude Code agents"
+
+settings:
+  # Update behavior
+  auto_update: true
+  check_interval: "24h"
+  update_on_startup: true
+  
+  # Cache settings
+  cache_ttl: "7d"
+  max_cache_size: "50MB"
+  offline_mode: false
+  
+  # Security settings
+  verify_checksums: true
+  allow_unsigned: false
+  scan_agents: true
+  
+  # Agent selection
+  install_all_on_init: false
+  auto_install_categories:
+    - "workflow"
+    - "quality"
+    - "infrastructure"
