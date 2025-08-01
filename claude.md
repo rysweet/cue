@@ -24,6 +24,8 @@ The workshop focuses on:
 
 ## Using GitHub CLI for Issue and PR Management
 
+**IMPORTANT**: When creating issues, PRs, or comments using `gh` CLI, always include a note that the action was performed by an AI agent on behalf of the repository owner. Add "*Note: This [issue/PR/comment] was created by an AI agent on behalf of the repository owner.*" to the body.
+
 ### Issues
 ```bash
 # Create a new issue
@@ -274,13 +276,7 @@ New specialized agents can be added to `.github/agents/` following the existing 
 - [D3.js Documentation](https://d3js.org/)
 - [Playwright Documentation](https://playwright.dev/docs/intro)
 
-## Extension Management Memories
+## Git Guidelines
 
-- Command sequence for uninstalling and reinstalling the extension: 
-  - Uninstall: `code-insiders --uninstall-extension <extension-id>`
-  - Reinstall: `code-insiders --install-extension <extension-id>`
-  - Note: Use `code-insiders` (not `code`) as VS Code Insiders is installed
-
-## CI Management
-
-- Use `scripts/check_ci_status.sh` to efficiently check the ci status of a PR
+### Git Workflow Rules
+- **Never commit directly to main**
