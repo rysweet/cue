@@ -7,6 +7,7 @@ Last Updated: 2025-08-01T10:17:00Z
 - ✅ Fix password persistence for container reuse (COMPLETED)
 - ✅ Document troubleshooting workflow (COMPLETED)
 - ✅ Implement comprehensive multi-language pre-commit workflow (COMPLETED)
+- 🔄 Fix Neo4j Authentication "Missing Key Principal" Error for 5.x Compatibility (IN PROGRESS - Issue #56)
 
 ## Todo List
 - [x] Fix container manager password mismatch in reuseExistingContainer
@@ -149,3 +150,25 @@ All implementation phases completed:
 3. ✅ Python quality pipeline with Ruff/pyright/pytest  
 4. ✅ Cross-language integration and performance optimization
 5. ✅ Developer experience and comprehensive documentation
+
+## Neo4j Authentication Fix Research - 2025-08-01T15:30:00Z
+
+### Issue #56: Neo4j Authentication "Missing Key Principal" Error Analysis
+- **Root Cause Identified**: Python neo4j_manager.py uses tuple format `auth=(user, password)` which is incompatible with Neo4j 5.x
+- **Current Implementation**: Line 35 in `/bundled/blarify/db_managers/neo4j_manager.py` uses deprecated authentication format
+- **Neo4j Driver Version**: Already compatible at `^5.25.0` in pyproject.toml - no driver upgrade needed
+- **Compatibility Requirements**: Must maintain backward compatibility with Neo4j 4.x while adding 5.x support
+
+### Technical Analysis Complete
+- **Primary File**: `/bundled/blarify/db_managers/neo4j_manager.py` requires authentication method update
+- **Container Integration**: VS Code TypeScript manager (`/src/neo4jManager.ts`) handles Docker containers, Python handles authentication
+- **Testing Infrastructure**: Limited existing tests for authentication scenarios - comprehensive test suite needed
+- **Docker Integration**: Container manager in `/bundled/neo4j-container-manager/` may need credential passing updates
+
+### Implementation Strategy
+1. **Replace tuple authentication** with `neo4j.basic_auth(user, password)` function call
+2. **Add authentication scheme detection** and fallback mechanisms
+3. **Implement comprehensive error handling** for "missing key principal" specific errors
+4. **Create test suite** covering Neo4j 4.x and 5.x authentication scenarios
+5. **Update Docker integration** to ensure consistent authentication format
+6. **Add migration utilities** for existing user configurations
