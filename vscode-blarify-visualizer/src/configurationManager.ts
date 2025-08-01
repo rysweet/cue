@@ -6,12 +6,6 @@ export interface AzureOpenAIConfig {
     deploymentName: string;
 }
 
-export interface Neo4jConfig {
-    uri: string;
-    username: string;
-    password: string;
-}
-
 export interface VisualizationConfig {
     nodeLimit: number;
     defaultLayout: 'force-directed' | 'hierarchical' | 'circular';
@@ -26,15 +20,6 @@ export class ConfigurationManager {
             apiKey: config.get('azureOpenAI.apiKey', ''),
             endpoint: config.get('azureOpenAI.endpoint', ''),
             deploymentName: config.get('azureOpenAI.deploymentName', 'gpt-4')
-        };
-    }
-    
-    getNeo4jConfig(): Neo4jConfig {
-        const config = vscode.workspace.getConfiguration(this.configSection);
-        return {
-            uri: config.get('neo4j.uri', 'bolt://localhost:7687'),
-            username: config.get('neo4j.username', 'neo4j'),
-            password: config.get('neo4j.password', '')
         };
     }
     
@@ -74,5 +59,28 @@ export class ConfigurationManager {
         }
         
         return false;
+    }
+    
+    // Neo4j password management
+    getNeo4jPassword(containerName: string): string | undefined {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
+        return passwords[containerName];
+    }
+    
+    async saveNeo4jPassword(containerName: string, password: string): Promise<void> {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
+        passwords[containerName] = password;
+        await config.update('neo4jPasswords', passwords, 
+            vscode.ConfigurationTarget.Workspace);
+    }
+    
+    async clearNeo4jPassword(containerName: string): Promise<void> {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        const passwords = config.get<Record<string, string>>('neo4jPasswords', {});
+        delete passwords[containerName];
+        await config.update('neo4jPasswords', passwords, 
+            vscode.ConfigurationTarget.Workspace);
     }
 }

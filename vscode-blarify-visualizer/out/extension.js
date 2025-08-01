@@ -37,6 +37,13 @@ let graphDataProvider;
 let statusBarManager;
 let configManager;
 let outputChannel;
+// Setup state tracking
+const setupState = {
+    isSetupComplete: false,
+    canPromptForAnalysis() {
+        return this.isSetupComplete;
+    }
+};
 async function activate(context) {
     console.log('Blarify Visualizer is now active!');
     // Create output channel for debugging
@@ -46,41 +53,101 @@ async function activate(context) {
     outputChannel.appendLine(`Extension path: ${context.extensionPath}`);
     outputChannel.appendLine(`Extension mode: ${context.extensionMode}`);
     outputChannel.show();
-    // Initialize configuration manager
-    configManager = new configurationManager_1.ConfigurationManager();
-    outputChannel.appendLine('Configuration manager initialized');
-    // Initialize status bar
-    statusBarManager = new statusBarManager_1.StatusBarManager();
-    context.subscriptions.push(statusBarManager);
-    outputChannel.appendLine('Status bar manager initialized');
-    // Initialize Neo4j manager
-    neo4jManager = new neo4jManager_1.Neo4jManager(configManager);
-    context.subscriptions.push(neo4jManager);
-    outputChannel.appendLine('Neo4j manager initialized');
-    // Initialize Blarify integration
-    blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager);
-    outputChannel.appendLine('Blarify integration initialized');
-    // Initialize graph data provider
-    graphDataProvider = new graphDataProvider_1.GraphDataProvider(neo4jManager, configManager);
-    outputChannel.appendLine('Graph data provider initialized');
+    // Initialize components with error handling
+    try {
+        configManager = new configurationManager_1.ConfigurationManager();
+        outputChannel.appendLine('Configuration manager initialized');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR initializing configuration manager: ${error}`);
+        // Create a minimal config manager
+        configManager = new configurationManager_1.ConfigurationManager();
+    }
+    try {
+        statusBarManager = new statusBarManager_1.StatusBarManager();
+        context.subscriptions.push(statusBarManager);
+        outputChannel.appendLine('Status bar manager initialized');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR initializing status bar: ${error}`);
+    }
+    try {
+        neo4jManager = new neo4jManager_1.Neo4jManager(configManager, context.extensionPath);
+        context.subscriptions.push(neo4jManager);
+        outputChannel.appendLine('Neo4j manager initialized');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR initializing Neo4j manager: ${error}`);
+        // This might happen if bundled module fails to load, but we still want commands to work
+    }
+    try {
+        blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager, context.extensionPath);
+        outputChannel.appendLine('Blarify integration initialized');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR initializing Blarify integration: ${error}`);
+    }
+    try {
+        graphDataProvider = new graphDataProvider_1.GraphDataProvider(neo4jManager, configManager);
+        outputChannel.appendLine('Graph data provider initialized');
+    }
+    catch (error) {
+        outputChannel.appendLine(`ERROR initializing graph data provider: ${error}`);
+    }
     // Skip Docker startup in test environment
     const isTestMode = context.extensionMode === vscode.ExtensionMode.Test;
     outputChannel.appendLine(`Extension mode: ${context.extensionMode} (Test mode: ${isTestMode})`);
     if (!isTestMode) {
-        // Start Neo4j container
-        statusBarManager.setStatus('Starting Neo4j...', 'sync~spin');
-        try {
-            await neo4jManager.ensureRunning();
-            statusBarManager.setStatus('Neo4j ready', 'database');
-            // Prompt user to ingest workspace on startup
-            const shouldIngest = await vscode.window.showInformationMessage('Would you like to analyze your workspace with Blarify?', 'Yes', 'Not now');
-            if (shouldIngest === 'Yes') {
-                await ingestWorkspace();
+        // Start background tasks asynchronously to not block activation
+        setTimeout(async () => {
+            // Run all setup tasks (including Neo4j)
+            await runSetupTasks();
+            // Only show prompt when setup is complete
+            if (setupState.canPromptForAnalysis()) {
+                await promptForInitialAnalysis();
             }
+        }, 1000); // Delay to ensure extension is fully activated
+    }
+    async function runSetupTasks() {
+        try {
+            outputChannel.appendLine('Running setup tasks...');
+            // Check Azure OpenAI configuration
+            if (configManager && !configManager.isConfigured()) {
+                const configured = await configManager.promptForConfiguration();
+                if (!configured) {
+                    vscode.window.showInformationMessage('Some features may be limited without Azure OpenAI configuration. You can configure it later in settings.');
+                }
+            }
+            // Start Neo4j as part of setup
+            outputChannel.appendLine('Starting Neo4j...');
+            if (neo4jManager && statusBarManager) {
+                statusBarManager.setStatus('Starting Neo4j...', 'sync~spin');
+                try {
+                    await neo4jManager.ensureRunning();
+                    statusBarManager.setStatus('Neo4j ready', 'database');
+                    outputChannel.appendLine('Neo4j started successfully');
+                }
+                catch (error) {
+                    statusBarManager.setStatus('Neo4j offline', 'warning');
+                    outputChannel.appendLine(`Failed to start Neo4j: ${error}`);
+                    throw new Error(`Neo4j startup failed: ${error}`);
+                }
+            }
+            // Add any other setup tasks here
+            // e.g., checking Python, installing dependencies, etc.
+            setupState.isSetupComplete = true;
+            outputChannel.appendLine('Setup tasks completed');
         }
         catch (error) {
-            statusBarManager.setStatus('Neo4j failed', 'error');
-            vscode.window.showErrorMessage(`Failed to start Neo4j: ${error}`);
+            outputChannel.appendLine(`Error during setup: ${error}`);
+            setupState.isSetupComplete = false;
+        }
+    }
+    async function promptForInitialAnalysis() {
+        outputChannel.appendLine('Prompting for initial analysis...');
+        const shouldIngest = await vscode.window.showInformationMessage('Would you like to analyze your workspace with Blarify?', 'Yes', 'Not now');
+        if (shouldIngest === 'Yes') {
+            await ingestWorkspace();
         }
     }
     // Register commands
@@ -154,6 +221,23 @@ async function showVisualization(context) {
     }
 }
 async function ingestWorkspace() {
+    // Check if components are initialized
+    if (!blarifyIntegration) {
+        vscode.window.showErrorMessage('Blarify integration not initialized. Please reload the window.');
+        return;
+    }
+    if (!neo4jManager) {
+        vscode.window.showErrorMessage('Neo4j manager not initialized. Please reload the window.');
+        return;
+    }
+    // Ensure Neo4j is running before attempting analysis
+    try {
+        await neo4jManager.ensureRunning();
+    }
+    catch (error) {
+        vscode.window.showErrorMessage(`Neo4j is not running: ${error}. Please restart Neo4j and try again.`);
+        return;
+    }
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         vscode.window.showErrorMessage('No workspace folder open');
@@ -165,19 +249,25 @@ async function ingestWorkspace() {
         cancellable: true
     }, async (progress, token) => {
         try {
-            statusBarManager.setStatus('Analyzing...', 'sync~spin');
+            if (statusBarManager) {
+                statusBarManager.setStatus('Analyzing...', 'sync~spin');
+            }
             progress.report({ increment: 0, message: 'Starting analysis...' });
             const result = await blarifyIntegration.analyzeWorkspace(workspaceFolder.uri.fsPath, progress, token);
             progress.report({ increment: 50, message: 'Saving to Neo4j...' });
             await neo4jManager.saveGraph(result.nodes, result.edges);
             progress.report({ increment: 100, message: 'Complete!' });
-            statusBarManager.setStatus('Analysis complete', 'check');
+            if (statusBarManager) {
+                statusBarManager.setStatus('Analysis complete', 'check');
+            }
             vscode.window.showInformationMessage(`Analysis complete: ${result.nodes.length} nodes, ${result.edges.length} relationships`);
             // Refresh any open visualizations
             visualizationPanel_1.VisualizationPanel.refreshAll();
         }
         catch (error) {
-            statusBarManager.setStatus('Analysis failed', 'error');
+            if (statusBarManager) {
+                statusBarManager.setStatus('Analysis failed', 'error');
+            }
             vscode.window.showErrorMessage(`Analysis failed: ${error}`);
         }
     });

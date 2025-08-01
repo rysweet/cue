@@ -49,3 +49,6 @@ coverage/
 
 # Optional eslint cache
 .eslintcache
+
+# Bundled dependencies (should be built during packaging)
+bundled/

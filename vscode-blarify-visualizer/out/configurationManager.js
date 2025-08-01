@@ -37,14 +37,6 @@ class ConfigurationManager {
             deploymentName: config.get('azureOpenAI.deploymentName', 'gpt-4')
         };
     }
-    getNeo4jConfig() {
-        const config = vscode.workspace.getConfiguration(this.configSection);
-        return {
-            uri: config.get('neo4j.uri', 'bolt://localhost:7687'),
-            username: config.get('neo4j.username', 'neo4j'),
-            password: config.get('neo4j.password', '')
-        };
-    }
     getVisualizationConfig() {
         const config = vscode.workspace.getConfiguration(this.configSection);
         return {
@@ -71,6 +63,24 @@ class ConfigurationManager {
             return true;
         }
         return false;
+    }
+    // Neo4j password management
+    getNeo4jPassword(containerName) {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        const passwords = config.get('neo4jPasswords', {});
+        return passwords[containerName];
+    }
+    async saveNeo4jPassword(containerName, password) {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        const passwords = config.get('neo4jPasswords', {});
+        passwords[containerName] = password;
+        await config.update('neo4jPasswords', passwords, vscode.ConfigurationTarget.Workspace);
+    }
+    async clearNeo4jPassword(containerName) {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        const passwords = config.get('neo4jPasswords', {});
+        delete passwords[containerName];
+        await config.update('neo4jPasswords', passwords, vscode.ConfigurationTarget.Workspace);
     }
 }
 exports.ConfigurationManager = ConfigurationManager;
