@@ -23,6 +23,17 @@ You MUST execute these phases in order for every prompt:
 
 ### 1. Initial Setup Phase
 - Read and analyze the prompt file thoroughly
+- Validate prompt structure - MUST contain these sections:
+  - Overview or Introduction
+  - Problem Statement or Requirements
+  - Technical Analysis or Implementation Plan
+  - Testing Requirements
+  - Success Criteria
+  - Implementation Steps or Workflow
+- If prompt is missing required sections:
+  - Invoke PromptWriter: `/agent:prompt-writer`
+  - Request creation of properly structured prompt
+  - Use the new prompt for workflow execution
 - Extract key information:
   - Feature/task description
   - Technical requirements
@@ -97,7 +108,7 @@ You MUST execute these phases in order for every prompt:
 Use TodoWrite to maintain task lists throughout execution:
 
 ```python
-# Example task structure
+# Required task structure - all fields are mandatory
 [
   {"id": "1", "content": "Create GitHub issue for [feature]", "status": "pending", "priority": "high"},
   {"id": "2", "content": "Create feature branch", "status": "pending", "priority": "high"},
@@ -109,6 +120,15 @@ Use TodoWrite to maintain task lists throughout execution:
   {"id": "8", "content": "Complete code review", "status": "pending", "priority": "high"}
 ]
 ```
+
+### Task Validation Requirements
+Each task object MUST include:
+- `id`: Unique string identifier
+- `content`: Description of the task
+- `status`: One of "pending", "in_progress", "completed"
+- `priority`: One of "high", "medium", "low"
+
+Validate task structure before submission to TodoWrite to prevent runtime errors.
 
 Update task status in real-time:
 - `pending` → `in_progress` → `completed`
