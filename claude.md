@@ -2,7 +2,7 @@
 
 This file combines generic Claude Code best practices with project-specific instructions for the AI-SIP workshop repository.
 
-⚠️ **FIRST ACTION**: Check and update `.github/Memory.md` ! ⚠️
+⚠️ **FIRST ACTION**: Check and update @.github/Memory.md ! ⚠️
 
 ⚠️ **SECOND ACTION**: When working on Claude agents or instructions, read https://docs.anthropic.com/en/docs/claude-code/memory ! ⚠️
 

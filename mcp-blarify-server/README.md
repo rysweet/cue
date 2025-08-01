@@ -8,6 +8,15 @@ This MCP server sits in front of a Neo4j database containing a Blarify graph rep
 
 ## Features
 
+### Automatic Neo4j Container Management
+
+The server now includes transparent Neo4j container management:
+- **Automatic Startup**: Neo4j container starts automatically when the server starts
+- **Dynamic Port Allocation**: Automatically finds available ports to avoid conflicts  
+- **Data Persistence**: Graph data persists across server restarts
+- **Lifecycle Management**: Container stops when server stops
+- **No User Intervention**: Works transparently without manual Docker commands
+
 ### Tools
 
 1. **`getContextForFiles`**
@@ -48,13 +57,26 @@ cd mcp-blarify-server
 pip install -r requirements.txt
 ```
 
-3. Configure environment variables:
+3. Install Neo4j container manager (optional, for automatic container management):
+```bash
+npm install @blarify/neo4j-container-manager
+# Or if using local development version:
+cd ../neo4j-container-manager && npm install && npm run build && cd ../mcp-blarify-server
+```
+
+4. Configure environment variables:
 ```bash
 # Neo4j configuration
-export NEO4J_URI="bolt://localhost:7687"
+export NEO4J_URI="bolt://localhost:7687"  # Only used if MANAGE_NEO4J_CONTAINER=false
 export NEO4J_USERNAME="neo4j"
 export NEO4J_PASSWORD="your-password"
 export NEO4J_DATABASE="neo4j"
+
+# Container management (new)
+export MANAGE_NEO4J_CONTAINER="true"  # Auto-manage Neo4j container lifecycle
+export NEO4J_DATA_DIR="./.blarify/neo4j"  # Data persistence directory
+export ENVIRONMENT="development"  # or "test", "production"
+export DEBUG="false"
 
 # Azure OpenAI configuration (optional but recommended)
 export AZURE_OPENAI_API_KEY="your-api-key"
@@ -90,9 +112,8 @@ Add to your Claude Desktop configuration:
       "args": ["-m", "src.server"],
       "cwd": "/path/to/mcp-blarify-server",
       "env": {
-        "NEO4J_URI": "bolt://localhost:7687",
-        "NEO4J_USERNAME": "neo4j",
-        "NEO4J_PASSWORD": "your-password",
+        "MANAGE_NEO4J_CONTAINER": "true",
+        "NEO4J_PASSWORD": "your-secure-password",
         "AZURE_OPENAI_API_KEY": "your-api-key",
         "AZURE_OPENAI_ENDPOINT": "https://your-instance.openai.azure.com/"
       }
@@ -100,6 +121,12 @@ Add to your Claude Desktop configuration:
   }
 }
 ```
+
+With automatic container management enabled, you don't need to:
+- Install Neo4j separately
+- Start/stop Neo4j manually
+- Configure ports (they're allocated dynamically)
+- Worry about data loss (it persists in the data directory)
 
 ### Example Queries
 
@@ -143,6 +170,12 @@ mcp-blarify-server/
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
+| **Container Management** | | |
+| `MANAGE_NEO4J_CONTAINER` | Auto-manage Neo4j container | `true` |
+| `NEO4J_DATA_DIR` | Directory for Neo4j data persistence | `./.blarify/neo4j` |
+| `ENVIRONMENT` | Environment mode (development/test/production) | `development` |
+| `DEBUG` | Enable debug logging | `false` |
+| **Neo4j Connection** | | |
 | `NEO4J_URI` | Neo4j connection URI | `bolt://localhost:7687` |
 | `NEO4J_USERNAME` | Neo4j username | `neo4j` |
 | `NEO4J_PASSWORD` | Neo4j password | `password` |
