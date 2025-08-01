@@ -3,6 +3,7 @@ Fixed tests for graph functionality that match actual implementation.
 """
 import unittest
 from unittest.mock import Mock, MagicMock, patch
+from typing import Any
 from blarify.graph.graph import Graph
 from blarify.graph.relationship.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType
@@ -13,7 +14,7 @@ from blarify.graph.node.types.node import Node
 class MockNode(Node):
     """Mock node that implements abstract methods."""
     
-    def __init__(self, label, path, name, level, **kwargs):
+    def __init__(self, label: NodeLabels, path: str, name: str, level: int, **kwargs: Any):
         super().__init__(label=label, path=path, name=name, level=level, **kwargs)
     
     @property
