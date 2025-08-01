@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from blarify.graph.node import DefinitionNode, Node, FolderNode, FileNode
     from blarify.code_references.types import Reference
     from blarify.graph.graph_environment import GraphEnvironment
-    from .languages import LanguageDefinitions
+    from blarify.code_hierarchy.languages.language_definitions import LanguageDefinitions
 
 
 class TreeSitterHelper:
@@ -126,7 +126,7 @@ class TreeSitterHelper:
             # if content cannot be read, return empty string
             return ""
 
-    def _traverse(self, tree_sitter_node: "TreeSitterNode", context_stack: List["Node"]) -> None:
+    def _traverse(self, tree_sitter_node: "TreeSitterNode", context_stack: Optional[List["Node"]] = None) -> None:
         """Perform a recursive preorder traversal of the tree."""
 
         if context_stack is None:
@@ -150,7 +150,7 @@ class TreeSitterHelper:
         identifier_name, identifier_reference = self._process_identifier_node(node=tree_sitter_node)
 
         node_reference = self._get_reference_from_node(tree_sitter_node)
-        node_snippet = tree_sitter_node.text.decode("utf-8")
+        node_snippet = tree_sitter_node.text.decode("utf-8") if tree_sitter_node.text else ""
         body_node = self._try_process_body_node_snippet(tree_sitter_node)
         parent_node = self.get_parent_node(context_stack)
 
@@ -178,7 +178,7 @@ class TreeSitterHelper:
         return identifier_name, identifier_reference
 
     def _get_identifier_name(self, identifier_node: "TreeSitterNode") -> str:
-        identifier_name = identifier_node.text.decode("utf-8")
+        identifier_name = identifier_node.text.decode("utf-8") if identifier_node.text else ""
         return identifier_name
 
     def _get_code_snippet_from_base_file(self, node_range: "Range") -> str:
@@ -202,15 +202,15 @@ class TreeSitterHelper:
         node_snippet = self._get_code_snippet_from_base_file(node_reference.range)
         return node_snippet, node_reference
 
-    def _try_process_body_node_snippet(self, node: "TreeSitterNode") -> Tuple[str, "Reference"]:
-        from .languages import BodyNodeNotFound
+    def _try_process_body_node_snippet(self, node: "TreeSitterNode") -> Optional["TreeSitterNode"]:
+        from blarify.code_hierarchy.languages.language_definitions import BodyNodeNotFound
         
         try:
             return self._process_body_node_snippet(node)
         except BodyNodeNotFound:
             return None
 
-    def _process_body_node_snippet(self, node: "TreeSitterNode") -> Tuple[str, "Reference"]:
+    def _process_body_node_snippet(self, node: "TreeSitterNode") -> "TreeSitterNode":
         body_node = self.language_definitions.get_body_node(node)
         return body_node
 

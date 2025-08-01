@@ -94,14 +94,14 @@ class RubyDefinitions(LanguageDefinitions):
 
     @staticmethod
     def _get_relationship_type_for_node(
-        tree_sitter_node: TreeSitterNode, relationships_types: Dict[str, RelationshipType]
-    ) -> Optional[FoundRelationshipScope]:
+        tree_sitter_node: Optional[TreeSitterNode], relationships_types: Dict[str, RelationshipType]
+    ) -> Optional[RelationshipType]:
         if tree_sitter_node is None:
             return None
 
         for field_name, relationship_type in relationships_types.items():
             if tree_sitter_node.type == field_name:
-                return FoundRelationshipScope(node_in_scope=tree_sitter_node, relationship_type=relationship_type)
+                return relationship_type
 
         return None
 

@@ -118,7 +118,7 @@ class NodeFactory:
         body_node: "TreeSitterNode",
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Optional[Union[FileNode, ClassNode, FunctionNode]] = None,
+        parent: Optional["DefinitionNode"] = None,
         graph_environment: Optional["GraphEnvironment"] = None,
     ) -> Union[ClassNode, FunctionNode]:
         if kind == NodeLabels.CLASS:
