@@ -115,33 +115,33 @@ Post detailed reviews as comments on the PR with this structure:
 ```markdown
 ## Code Review Summary
 
-**Overall Assessment**: [Approve  / Request Changes = / Needs Discussion =�]
+**Overall Assessment**: [Approve ✅ / Request Changes 🔄 / Needs Discussion 💬]
 
-### Strengths (
+### Strengths 💪
 - [What was done well]
 - [Good patterns observed]
 
-### Critical Issues =�
+### Critical Issues 🚨
 - **[File:Line]**: [Description of critical issue]
   - **Rationale**: [Why this is important]
   - **Suggestion**: [How to fix it]
 
-### Improvements ='
+### Improvements 💡
 - **[File:Line]**: [Description of improvement]
   - **Rationale**: [Why this would be better]
   - **Suggestion**: [Specific change recommended]
 
-### Questions >
+### Questions ❓
 - [Clarification needed about design choice]
 - [Alternative approach to consider]
 
-### Security Considerations =
+### Security Considerations 🔒
 - [Any security concerns identified]
 
-### Performance Notes �
+### Performance Notes ⚡
 - [Performance implications of changes]
 
-### Test Coverage >�
+### Test Coverage 🧪
 - Current coverage: [X%]
 - Suggested additional tests:
   - [Test scenario 1]
