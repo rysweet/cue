@@ -106,8 +106,9 @@ Every prompt should include these sections:
    - Research phase with specific areas to investigate
    - Implementation phases with clear deliverables
    - Test-driven development approach
-   - PR creation with comprehensive description
+   - PR creation with comprehensive description and AI agent attribution
    - Code review agent invocation
+   - Note: All GitHub interactions (issues, PRs, comments) must include AI agent attribution
 
 2. Add metadata section for:
    - Estimated complexity

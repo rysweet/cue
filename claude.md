@@ -24,6 +24,8 @@ The workshop focuses on:
 
 ## Using GitHub CLI for Issue and PR Management
 
+**IMPORTANT**: When creating issues, PRs, or comments using `gh` CLI, always include a note that the action was performed by an AI agent on behalf of the repository owner. Add "*Note: This [issue/PR/comment] was created by an AI agent on behalf of the repository owner.*" to the body.
+
 ### Issues
 ```bash
 # Create a new issue

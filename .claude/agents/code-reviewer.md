@@ -110,6 +110,8 @@ Post detailed reviews as comments on the PR with this structure:
 
 **Overall Assessment**: [Approve ✅ / Request Changes 🔄 / Needs Discussion 💬]
 
+*Note: This review was conducted by an AI agent on behalf of the repository owner.*
+
 ### Strengths 💪
 - [What was done well]
 - [Good patterns observed]
