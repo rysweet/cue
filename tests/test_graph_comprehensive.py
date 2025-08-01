@@ -342,6 +342,161 @@ class TestGraphComprehensive(unittest.TestCase):
         self.assertEqual(len(all_nodes), 3)
         for node in nodes:
             self.assertIn(node, all_nodes)
+    
+    def test_filtered_graph_with_self_referencing_relationships(self):
+        """Test filtering graph with self-referencing relationships."""
+        # Create a node that has a relationship to itself
+        mock_node = MagicMock(spec=Node)
+        mock_node.id = "self_ref_node"
+        mock_node.path = "/keep/self_ref.py"
+        mock_node.label = NodeLabels.CLASS
+        mock_node.relative_id = "self_ref_node"
+        mock_node.filter_children_by_path = MagicMock()
+        
+        self.graph.add_node(mock_node)
+        
+        # Create self-referencing relationship
+        mock_self_rel = MagicMock(spec=Relationship)
+        mock_self_rel.start_node = mock_node
+        mock_self_rel.end_node = mock_node  # Self-reference
+        
+        self.graph.add_references_relationships([mock_self_rel])
+        
+        # Filter by paths that include the self-referencing node
+        paths_to_keep = ["/keep/self_ref.py"]
+        filtered_graph = self.graph.filtered_graph_by_paths(paths_to_keep)
+        
+        # Verify the self-referencing relationship is preserved
+        filtered_relationships = filtered_graph.get_all_relationships()
+        self.assertEqual(len(filtered_relationships), 1)
+        self.assertIn(mock_self_rel, filtered_relationships)
+        
+        # Verify the node is still present
+        self.assertIsNotNone(filtered_graph.get_node_by_id("self_ref_node"))
+    
+    def test_filtered_graph_with_circular_references(self):
+        """Test filtering graph with circular references between nodes."""
+        # Create three nodes in a circular reference pattern
+        node_a = MagicMock(spec=Node)
+        node_a.id = "node_a"
+        node_a.path = "/keep/a.py"
+        node_a.label = NodeLabels.CLASS  
+        node_a.relative_id = "node_a"
+        node_a.filter_children_by_path = MagicMock()
+        
+        node_b = MagicMock(spec=Node)
+        node_b.id = "node_b"
+        node_b.path = "/keep/b.py"
+        node_b.label = NodeLabels.CLASS
+        node_b.relative_id = "node_b"
+        node_b.filter_children_by_path = MagicMock()
+        
+        node_c = MagicMock(spec=Node)
+        node_c.id = "node_c"
+        node_c.path = "/discard/c.py"  # This will be filtered out
+        node_c.label = NodeLabels.CLASS
+        node_c.relative_id = "node_c"
+        node_c.filter_children_by_path = MagicMock()
+        
+        self.graph.add_node(node_a)
+        self.graph.add_node(node_b)
+        self.graph.add_node(node_c)
+        
+        # Create circular relationships: A -> B -> C -> A
+        rel_a_to_b = MagicMock(spec=Relationship)
+        rel_a_to_b.start_node = node_a
+        rel_a_to_b.end_node = node_b
+        
+        rel_b_to_c = MagicMock(spec=Relationship)
+        rel_b_to_c.start_node = node_b
+        rel_b_to_c.end_node = node_c
+        
+        rel_c_to_a = MagicMock(spec=Relationship)
+        rel_c_to_a.start_node = node_c
+        rel_c_to_a.end_node = node_a
+        
+        self.graph.add_references_relationships([rel_a_to_b, rel_b_to_c, rel_c_to_a])
+        
+        # Filter to keep only A and B (C will be discarded)
+        paths_to_keep = ["/keep/a.py", "/keep/b.py"]
+        filtered_graph = self.graph.filtered_graph_by_paths(paths_to_keep)
+        
+        # Verify only A and B nodes are kept
+        self.assertIsNotNone(filtered_graph.get_node_by_id("node_a"))
+        self.assertIsNotNone(filtered_graph.get_node_by_id("node_b"))
+        self.assertIsNone(filtered_graph.get_node_by_id("node_c"))
+        
+        # Verify relationships are filtered appropriately
+        filtered_relationships = filtered_graph.get_all_relationships()
+        
+        # Should keep all relationships because:
+        # - A -> B (both nodes kept)
+        # - B -> C (start node B is kept, even though end node C is discarded)
+        # - C -> A (end node A is kept, even though start node C is discarded)
+        # The filtering logic keeps relationships where EITHER start OR end node is in paths_to_keep
+        
+        self.assertEqual(len(filtered_relationships), 3)
+        self.assertIn(rel_a_to_b, filtered_relationships)  # A -> B
+        self.assertIn(rel_b_to_c, filtered_relationships)  # B -> C (kept because B is kept)
+        self.assertIn(rel_c_to_a, filtered_relationships)  # C -> A (kept because A is kept)
+    
+    def test_filtered_graph_with_complex_relationship_patterns(self):
+        """Test filtering with complex patterns including bidirectional relationships."""
+        # Create nodes
+        node1 = MagicMock(spec=Node)
+        node1.id = "node1"
+        node1.path = "/keep/file1.py"
+        node1.label = NodeLabels.CLASS
+        node1.relative_id = "node1"
+        node1.filter_children_by_path = MagicMock()
+        
+        node2 = MagicMock(spec=Node)
+        node2.id = "node2"
+        node2.path = "/discard/file2.py"
+        node2.label = NodeLabels.CLASS
+        node2.relative_id = "node2"
+        node2.filter_children_by_path = MagicMock()
+        
+        self.graph.add_node(node1)
+        self.graph.add_node(node2)
+        
+        # Create bidirectional relationships
+        rel_1_to_2 = MagicMock(spec=Relationship)
+        rel_1_to_2.start_node = node1
+        rel_1_to_2.end_node = node2
+        
+        rel_2_to_1 = MagicMock(spec=Relationship)
+        rel_2_to_1.start_node = node2
+        rel_2_to_1.end_node = node1
+        
+        # Add self-referencing relationship for node1
+        rel_1_to_1 = MagicMock(spec=Relationship)
+        rel_1_to_1.start_node = node1
+        rel_1_to_1.end_node = node1
+        
+        self.graph.add_references_relationships([rel_1_to_2, rel_2_to_1, rel_1_to_1])
+        
+        # Filter to keep only node1
+        paths_to_keep = ["/keep/file1.py"]
+        filtered_graph = self.graph.filtered_graph_by_paths(paths_to_keep)
+        
+        # Verify only node1 is kept
+        self.assertIsNotNone(filtered_graph.get_node_by_id("node1"))
+        self.assertIsNone(filtered_graph.get_node_by_id("node2"))
+        
+        # Verify relationship filtering
+        filtered_relationships = filtered_graph.get_all_relationships()
+        
+        # Should keep all relationships because filtering logic keeps relationships 
+        # where EITHER start OR end node is in paths_to_keep:
+        # - node1 -> node1 (self-reference, both start and end kept)
+        # - node2 -> node1 (end node kept, even though start node discarded)  
+        # - node1 -> node2 (start node kept, even though end node discarded)
+        
+        self.assertEqual(len(filtered_relationships), 3)
+        self.assertIn(rel_1_to_1, filtered_relationships)  # self-reference
+        self.assertIn(rel_2_to_1, filtered_relationships)  # external -> kept
+        self.assertIn(rel_1_to_2, filtered_relationships)  # kept -> external
 
 
 if __name__ == '__main__':

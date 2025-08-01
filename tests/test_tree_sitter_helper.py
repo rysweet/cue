@@ -509,6 +509,45 @@ class TestTreeSitterHelper(unittest.TestCase):
         self.assertEqual(result.range.start.character, 0)
         self.assertEqual(result.range.end.line, 0)
         self.assertEqual(result.range.end.character, 0)
+    
+    def test_with_python_definitions(self):
+        """Test TreeSitterHelper with actual PythonDefinitions."""
+        # Test with actual PythonDefinitions instance
+        python_helper = TreeSitterHelper(PythonDefinitions)
+        
+        # Verify the parsers are set up correctly
+        self.assertIn(".py", python_helper.parsers)
+        self.assertEqual(python_helper.language_definitions, PythonDefinitions)
+        
+        # Test path validation works with actual definitions
+        self.assertTrue(python_helper._does_path_have_valid_extension("test.py"))
+        self.assertFalse(python_helper._does_path_have_valid_extension("test.txt"))
+    
+    def test_with_fallback_definitions(self):
+        """Test TreeSitterHelper behavior with FallbackDefinitions."""
+        fallback_helper = TreeSitterHelper(FallbackDefinitions)
+        
+        # Verify fallback behavior
+        self.assertEqual(fallback_helper.language_definitions, FallbackDefinitions)
+        self.assertFalse(fallback_helper._does_path_have_valid_extension("test.py"))
+        self.assertFalse(fallback_helper._does_path_have_valid_extension("test.js"))
+    
+    def test_language_definitions_integration(self):
+        """Test integration between TreeSitterHelper and language definitions."""
+        with patch.object(self.helper, 'language_definitions') as mock_lang_def:
+            mock_lang_def.get_language_file_extensions.return_value = [".py", ".pyi"]
+            mock_lang_def.should_create_node.return_value = True
+            mock_lang_def.get_node_label_from_type.return_value = NodeLabels.CLASS
+            
+            # Test that helper properly delegates to language definitions
+            self.assertTrue(self.helper._does_path_have_valid_extension("test.py"))
+            
+            mock_ts_node = MagicMock()
+            mock_ts_node.type = "class_definition"
+            
+            result = self.helper._get_label_from_node(mock_ts_node)
+            self.assertEqual(result, NodeLabels.CLASS)
+            mock_lang_def.get_node_label_from_type.assert_called_with("class_definition")
 
 
 if __name__ == '__main__':
