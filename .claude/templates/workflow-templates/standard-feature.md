@@ -102,6 +102,8 @@ gh pr create --base main --title "feat: [feature description]" --body "$(cat <<'
 ## Related Issues
 Fixes #N
 
+*Note: This PR was created by an AI agent on behalf of the repository owner.*
+
 🤖 Generated with [Claude Code](https://claude.ai/code)
 EOF
 )"

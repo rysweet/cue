@@ -94,6 +94,8 @@ This PR fixes [bug description] by [fix approach].
 ## Related Issues
 Fixes #N
 
+*Note: This PR was created by an AI agent on behalf of the repository owner.*
+
 🤖 Generated with [Claude Code](https://claude.ai/code)
 EOF
 )"
