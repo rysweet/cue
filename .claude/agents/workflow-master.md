@@ -19,6 +19,26 @@ You are the WorkflowMaster sub-agent, responsible for orchestrating complete dev
 
 ## Workflow Execution Pattern
 
+### 0. Resumption Check Phase (ALWAYS FIRST)
+
+Before starting ANY new workflow, check for interrupted work:
+
+1. **Check for state file**:
+   ```bash
+   if [ -f ".github/WorkflowMasterState.md" ]; then
+       cat .github/WorkflowMasterState.md
+   fi
+   ```
+
+2. **If state file exists**:
+   - Read and display the interrupted workflow details
+   - Check if the branch and issue still exist
+   - Offer options: "Would you like to (1) Resume from checkpoint, (2) Start fresh, or (3) Review details first?"
+   - If resuming, skip to the appropriate phase based on saved state
+
+3. **If no state file**:
+   - Proceed with normal workflow execution
+
 You MUST execute these phases in order for every prompt:
 
 ### 1. Initial Setup Phase
@@ -162,29 +182,124 @@ When encountering errors:
 
 ## State Management
 
-If interrupted, save state to `.github/Memory.md`:
+### Checkpoint System
+
+**CRITICAL**: After completing each major phase, you MUST save checkpoint state:
+
+```bash
+# Save checkpoint after each phase
+git add .github/WorkflowMasterState.md
+git commit -m "chore: save WorkflowMaster state checkpoint - Phase [N] complete
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push
+```
+
+### State File Format
+
+Save state to `.github/WorkflowMasterState.md`:
 
 ```markdown
-## WorkflowMaster State - [Date]
+# WorkflowMaster State
+Last Updated: [ISO 8601 timestamp]
 
-### Current Task: [PR/Issue Number] - [Title]
+## Active Workflow
+- **Prompt File**: `/prompts/[filename].md`
+- **Issue Number**: #[N]
+- **Branch**: `feature/[name]-[N]`
+- **Started**: [timestamp]
 
-#### Completed Phases:
-- [x] Issue Creation (#N)
-- [x] Branch Creation (feature/name-N)
-- [ ] Implementation
-- [ ] Testing
+## Phase Completion Status
+- [x] Phase 1: Initial Setup ✅
+- [x] Phase 2: Issue Creation (#N) ✅
+- [x] Phase 3: Branch Management (feature/name-N) ✅
+- [ ] Phase 4: Research and Planning
+- [ ] Phase 5: Implementation
+- [ ] Phase 6: Testing
+- [ ] Phase 7: Documentation
+- [ ] Phase 8: Pull Request
+- [ ] Phase 9: Review
 
-#### Current Status:
-[Description of current work and next steps]
+## Current Phase Details
+### Phase: [Current Phase Name]
+- **Status**: [in_progress/blocked/error]
+- **Progress**: [Description of what's been done]
+- **Next Steps**: [What needs to be done next]
+- **Blockers**: [Any issues preventing progress]
 
-#### Blockers:
-[Any issues preventing progress]
+## TodoWrite Task IDs
+- Current task list IDs: [1, 2, 3, 4, 5, 6, 7, 8]
+- Completed tasks: [1, 2, 3]
+- In-progress task: 4
 
-#### Resume Instructions:
-1. [Specific step to resume]
-2. [Next action needed]
+## Resumption Instructions
+1. Check out branch: `git checkout feature/[name]-[N]`
+2. Review completed work: [specific files/changes]
+3. Continue from: [exact next step]
+4. Complete remaining phases: [4-9]
+
+## Error Recovery
+- Last successful operation: [description]
+- Failed operation: [if any]
+- Recovery steps: [if needed]
 ```
+
+### Resumption Detection
+
+At the start of EVERY WorkflowMaster invocation:
+
+1. **Check for existing state file**:
+   ```bash
+   if [ -f ".github/WorkflowMasterState.md" ]; then
+       echo "Found interrupted workflow - checking status"
+   fi
+   ```
+
+2. **Offer resumption options**:
+   - "Resume from checkpoint" - Continue from saved state
+   - "Start fresh" - Archive old state and begin new workflow
+   - "Review and decide" - Show details before choosing
+
+3. **Validate resumption viability**:
+   - Check if branch still exists
+   - Verify issue is still open
+   - Confirm no conflicting changes
+
+### Phase Checkpoint Triggers
+
+Save checkpoint IMMEDIATELY after:
+- ✅ Issue successfully created
+- ✅ Branch created and checked out
+- ✅ Research phase completed
+- ✅ Each major implementation component
+- ✅ Test suite passing
+- ✅ Documentation updated
+- ✅ PR created
+- ✅ Review feedback addressed
+
+### Interruption Handling
+
+If interrupted or encountering an error:
+
+1. **Immediate Actions**:
+   - Save current progress to state file
+   - Commit any pending changes with WIP message
+   - Update TodoWrite with current status
+   - Log interruption details
+
+2. **State Preservation**:
+   - Current working directory
+   - Environment variables
+   - Active file modifications
+   - Partial command outputs
+
+3. **Recovery Information**:
+   - Last successful command
+   - Next planned command
+   - Any error messages
+   - Contextual notes
 
 ## Quality Standards
 
