@@ -71,6 +71,32 @@ This file maintains learnings and insights from code reviews to improve future r
 
 ---
 
+## Code Review Memory - 2025-08-01
+
+### PR #19: feat: add specialized code review sub-agent for enhanced PR reviews
+
+#### What I Learned
+- Claude Code sub-agents require specific YAML frontmatter with name, description, and optional tools
+- YAML tools should be specified as array format (- tool) not comma-separated string
+- Sub-agent prompts should be comprehensive with clear responsibilities and structured processes
+- Project memory files help maintain consistency across reviews and capture institutional knowledge
+- Review formats should balance thoroughness with readability using emoji indicators
+
+#### Patterns to Watch
+- YAML frontmatter format consistency with Claude Code documentation
+- Tool specifications should match available Claude Code tools exactly
+- Memory file updates should be part of the sub-agent workflow
+- Review checklists should be project-specific while covering universal quality standards
+
+#### Good Practices Observed
+- Comprehensive review checklist covering multiple dimensions (security, performance, testing)
+- Clear prioritization of review issues (security > data corruption > performance)
+- Structured review output format for consistency
+- Integration of continuous learning through memory file updates
+- Project-specific focus areas (graph operations, LSP integration, LLM handling)
+
+---
+
 ## Future Improvements to Suggest
 1. Increase type hint coverage across the codebase
 2. Add mypy to CI pipeline for type checking
