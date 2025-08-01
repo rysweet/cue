@@ -19,25 +19,46 @@ You are the WorkflowMaster sub-agent, responsible for orchestrating complete dev
 
 ## Workflow Execution Pattern
 
-### 0. Resumption Check Phase (ALWAYS FIRST)
+### 0. Task Initialization & Resumption Check Phase (ALWAYS FIRST)
 
-Before starting ANY new workflow, check for interrupted work:
+Before starting ANY workflow:
 
-1. **Check for state file**:
+1. **Generate or receive task ID**:
    ```bash
-   if [ -f ".github/WorkflowMasterState.md" ]; then
-       cat .github/WorkflowMasterState.md
+   # Generate unique task ID if not provided
+   TASK_ID="${TASK_ID:-task-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)}"
+   echo "Task ID: $TASK_ID"
+   ```
+
+2. **Check for existing task state**:
+   ```bash
+   STATE_DIR=".github/workflow-states/$TASK_ID"
+   STATE_FILE="$STATE_DIR/state.md"
+   
+   if [ -f "$STATE_FILE" ]; then
+       echo "Found state for task $TASK_ID"
+       cat "$STATE_FILE"
    fi
    ```
 
-2. **If state file exists**:
+3. **Check for ANY interrupted workflows** (if no specific task ID):
+   ```bash
+   if [ -z "$TASK_ID" ] && [ -d ".github/workflow-states" ]; then
+       echo "Found interrupted workflows:"
+       ls -la .github/workflow-states/
+   fi
+   ```
+
+4. **If state exists for this task**:
    - Read and display the interrupted workflow details
    - Check if the branch and issue still exist
-   - Offer options: "Would you like to (1) Resume from checkpoint, (2) Start fresh, or (3) Review details first?"
+   - Offer options: "Would you like to (1) Resume task $TASK_ID, (2) Start fresh, or (3) Review details first?"
    - If resuming, skip to the appropriate phase based on saved state
 
-3. **If no state file**:
-   - Proceed with normal workflow execution
+5. **Initialize task state directory**:
+   ```bash
+   mkdir -p "$STATE_DIR"
+   ```
 
 You MUST execute these phases in order for every prompt:
 
@@ -188,28 +209,40 @@ When encountering errors:
 
 ```bash
 # Save checkpoint after each phase
-git add .github/WorkflowMasterState.md
-git commit -m "chore: save WorkflowMaster state checkpoint - Phase [N] complete
+STATE_DIR=".github/workflow-states/$TASK_ID"
+STATE_FILE="$STATE_DIR/state.md"
+
+# Update state file (not committed to git due to .gitignore)
+echo "State updated for task $TASK_ID - Phase [N] complete"
+
+# For major milestones, create committed checkpoint
+if [[ "$PHASE" == "8" || "$PHASE" == "9" ]]; then
+    cp "$STATE_FILE" ".github/workflow-checkpoints/completed/$TASK_ID-phase$PHASE.md"
+    git add ".github/workflow-checkpoints/completed/$TASK_ID-phase$PHASE.md"
+    git commit -m "chore: checkpoint for task $TASK_ID - Phase $PHASE complete
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
-git push
+fi
 ```
 
 ### State File Format
 
-Save state to `.github/WorkflowMasterState.md`:
+Save state to `.github/workflow-states/$TASK_ID/state.md`:
 
 ```markdown
 # WorkflowMaster State
+Task ID: $TASK_ID
 Last Updated: [ISO 8601 timestamp]
 
 ## Active Workflow
+- **Task ID**: $TASK_ID
 - **Prompt File**: `/prompts/[filename].md`
 - **Issue Number**: #[N]
 - **Branch**: `feature/[name]-[N]`
 - **Started**: [timestamp]
+- **Worktree**: `.worktrees/$TASK_ID` (if using OrchestratorAgent)
 
 ## Phase Completion Status
 - [x] Phase 1: Initial Setup ✅

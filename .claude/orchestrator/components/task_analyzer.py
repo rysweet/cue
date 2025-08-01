@@ -62,18 +62,38 @@ class TaskAnalyzer:
         self.dependency_graph: Dict[str, List[str]] = {}
         self.conflict_matrix: Dict[str, Set[str]] = {}
     
-    def analyze_all_prompts(self) -> List[TaskInfo]:
-        """Analyze all prompt files in the prompts directory"""
-        print("🔍 Analyzing all prompt files for parallel execution opportunities...")
+    def analyze_prompts(self, prompt_files: List[str]) -> List[TaskInfo]:
+        """Analyze specific prompt files for parallel execution
         
-        if not self.prompts_dir.exists():
-            raise FileNotFoundError(f"Prompts directory not found: {self.prompts_dir}")
+        Args:
+            prompt_files: List of prompt file paths to analyze (relative to prompts_dir or absolute)
         
-        prompt_files = list(self.prompts_dir.glob("*.md"))
-        print(f"Found {len(prompt_files)} prompt files")
+        Returns:
+            List of TaskInfo objects with dependency and conflict analysis
+        """
+        print(f"🔍 Analyzing {len(prompt_files)} prompt files for parallel execution opportunities...")
+        
+        if not prompt_files:
+            print("⚠️  No prompt files provided to analyze")
+            return []
         
         self.tasks = []
-        for prompt_file in prompt_files:
+        for prompt_file_path in prompt_files:
+            # Handle both relative and absolute paths
+            if os.path.isabs(prompt_file_path):
+                prompt_file = Path(prompt_file_path)
+            else:
+                prompt_file = self.prompts_dir / prompt_file_path
+            
+            if not prompt_file.exists():
+                print(f"⚠️  Prompt file not found: {prompt_file}")
+                continue
+                
+            # Skip already implemented prompts (based on markers or history)
+            if self._is_already_implemented(prompt_file):
+                print(f"⏭️  Skipping already implemented: {prompt_file.name}")
+                continue
+            
             try:
                 task_info = self._analyze_prompt_file(prompt_file)
                 if task_info:
@@ -89,6 +109,29 @@ class TaskAnalyzer:
         
         print(f"📊 Analysis complete: {len(self.tasks)} tasks analyzed")
         return self.tasks
+    
+    def _is_already_implemented(self, prompt_file: Path) -> bool:
+        """Check if a prompt has already been implemented
+        
+        This could check for:
+        - Completed marker in the prompt file
+        - Corresponding PR/issue closed
+        - Git history showing implementation
+        """
+        # Simple check: look for "IMPLEMENTED" marker in file
+        try:
+            with open(prompt_file, 'r', encoding='utf-8') as f:
+                first_line = f.readline().strip()
+                if "IMPLEMENTED" in first_line or "COMPLETED" in first_line:
+                    return True
+        except:
+            pass
+        
+        # Check for corresponding closed issue/PR (if pattern is predictable)
+        # Example: test-definition-node.md -> issue with "definition-node" in title
+        # This would require GitHub API access
+        
+        return False
     
     def _analyze_prompt_file(self, prompt_file: Path) -> Optional[TaskInfo]:
         """Analyze a single prompt file"""

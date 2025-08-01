@@ -17,150 +17,132 @@ You are the OrchestratorAgent, responsible for coordinating parallel execution o
 5. **Integration Management**: Coordinate results and handle merge conflicts
 6. **Performance Optimization**: Achieve 3-5x speed improvements for independent tasks
 
-## Primary Architecture Components
+## Input Requirements
 
-### 1. TaskAnalyzer
-**Purpose**: Intelligent analysis of prompt files and task dependencies
+The OrchestratorAgent requires an explicit list of prompt files to analyze and execute. This prevents re-processing of already implemented prompts.
 
-**Core Functions**:
-```python
-def analyze_prompts_directory():
-    """Parse all prompt files and extract task metadata"""
-    prompts = scan_prompts_directory("/prompts/")
-    return [extract_task_info(p) for p in prompts]
+**Required Input Format**:
+```
+/agent:orchestrator-agent
 
-def classify_tasks(tasks):
-    """Classify tasks as parallelizable or sequential"""
-    return {
-        'parallel': [t for t in tasks if is_parallelizable(t)],
-        'sequential': [t for t in tasks if requires_sequence(t)]
-    }
-
-def detect_dependencies(tasks):
-    """Build dependency graph of task relationships"""
-    dependency_graph = {}
-    for task in tasks:
-        conflicts = analyze_file_conflicts(task.target_files)
-        imports = analyze_import_dependencies(task.target_files)
-        dependency_graph[task.id] = {'conflicts': conflicts, 'imports': imports}
-    return dependency_graph
+Execute these specific prompts in parallel:
+- test-definition-node.md
+- test-relationship-creator.md
+- test-documentation-linker.md
 ```
 
-**Key Features**:
-- Prompt file parsing and metadata extraction
-- File modification conflict detection
-- Python import dependency analysis
-- Task complexity estimation
-- Resource requirement prediction
+**Important**: 
+- Do NOT scan the entire `/prompts/` directory
+- Only process the specific files provided by the user
+- Skip any prompts marked as IMPLEMENTED or COMPLETED
+- Generate unique task IDs for each execution
 
-### 2. WorktreeManager
-**Purpose**: Isolated environment creation and management
+## Architecture: Sub-Agent Coordination
 
-**Core Functions**:
-```bash
-# Worktree creation template
-create_worktree() {
-    local task_id=$1
-    local task_name=$2
-    git worktree add ".worktrees/task-${task_id}" -b "feature/parallel-${task_name}-${task_id}"
-    cd ".worktrees/task-${task_id}"
-    # Set up environment for parallel execution
-}
+The OrchestratorAgent coordinates three specialized sub-agents to achieve parallel execution:
 
-# Cleanup after completion
-cleanup_worktree() {
-    local task_id=$1
-    cd /main/repo/path
-    git worktree remove ".worktrees/task-${task_id}"
-    git branch -d "feature/parallel-${task_name}-${task_id}"
-}
+### 1. TaskAnalyzer Sub-Agent (`/agent:task-analyzer`)
+**Purpose**: Analyzes specific prompt files for dependencies and parallelization opportunities
+
+**Invocation**:
+```
+/agent:task-analyzer
+
+Analyze these prompt files for parallel execution:
+- test-definition-node.md
+- test-relationship-creator.md
+- fix-import-bug.md
 ```
 
-**Key Features**:
-- Automated worktree creation with unique branches
-- Environment synchronization across worktrees
-- Resource isolation and conflict prevention
-- Cleanup automation after task completion
+**Returns**:
+- Parallelizable task groups
+- Sequential dependencies  
+- Resource requirements
+- Conflict matrix
+- Execution plan with timing estimates
 
-### 3. ExecutionEngine
-**Purpose**: Parallel process spawning and monitoring
+### 2. WorktreeManager Sub-Agent (`/agent:worktree-manager`)
+**Purpose**: Creates and manages isolated git worktree environments
 
-**Core Functions**:
-```bash
-# Parallel execution template
-execute_parallel_tasks() {
-    local tasks=("$@")
-    local pids=()
-    
-    for task in "${tasks[@]}"; do
-        (
-            cd ".worktrees/task-${task}"
-            claude -p "prompts/${task}.md" --output-format json > "results/${task}.json" 2>&1
-        ) &
-        pids+=($!)
-    done
-    
-    # Monitor all processes
-    monitor_parallel_execution "${pids[@]}"
-}
+**Invocation**:
+```
+/agent:worktree-manager
+
+Create worktrees for tasks:
+- task-20250801-143022-a7b3 (test-definition-node)
+- task-20250801-143156-c9d5 (test-relationship-creator)
 ```
 
-**Key Features**:
-- Multi-process Claude CLI spawning
+**Capabilities**:
+- Worktree lifecycle management
+- Branch creation and cleanup
+- Environment isolation
+- State tracking
+- Resource monitoring
+
+### 3. ExecutionMonitor Sub-Agent (`/agent:execution-monitor`)
+**Purpose**: Spawns and monitors parallel Claude CLI executions
+
+**Invocation**:
+```
+/agent:execution-monitor
+
+Execute these tasks in parallel:
+- task-20250801-143022-a7b3 in .worktrees/task-20250801-143022-a7b3
+- task-20250801-143156-c9d5 in .worktrees/task-20250801-143156-c9d5
+```
+
+**Features**:
+- Process spawning with `claude -p` in non-interactive mode
 - Real-time progress monitoring via JSON output
-- Resource throttling based on system capabilities
-- Error isolation and failure recovery
-
-### 4. IntegrationManager
-**Purpose**: Result coordination and conflict resolution
-
-**Core Functions**:
-- Pre-merge conflict analysis
-- Automated merge strategies for compatible changes
-- Manual conflict resolution workflows
+- Resource management and throttling
+- Failure recovery with retry logic
 - Result aggregation and reporting
 
-### 5. ReportingSystem
-**Purpose**: Performance tracking and user feedback
+## Orchestration Workflow
 
-**Core Functions**:
-- Real-time progress dashboards
-- Performance metrics collection
-- Execution time improvements tracking
-- Comprehensive success/failure reporting
+When invoked with a list of prompt files, the OrchestratorAgent executes this workflow:
 
-## Execution Workflow
+### Phase 1: Task Analysis
+1. Invoke `/agent:task-analyzer` with the provided prompt files
+2. Receive parallelization analysis and execution plan
+3. Generate unique task IDs for each prompt
 
-### Phase 1: Task Discovery and Analysis
-1. **Scan Prompts Directory**: Identify all available task prompts
-2. **Extract Task Metadata**: Parse requirements, target files, complexity
-3. **Build Dependency Graph**: Map file conflicts and import relationships
-4. **Classify Tasks**: Separate parallelizable from sequential tasks
+### Phase 2: Environment Setup  
+1. Invoke `/agent:worktree-manager` to create isolated worktrees
+2. Each parallel task gets its own worktree and branch
+3. Verify environment readiness
 
-### Phase 2: Execution Planning
-1. **Resource Assessment**: Check system CPU, memory, disk space
-2. **Optimal Parallelism**: Determine max concurrent WorkflowMaster instances
-3. **Task Prioritization**: Order tasks by dependency relationships
-4. **Execution Strategy**: Plan sequential phases and parallel batches
+### Phase 3: Parallel Execution
+1. Invoke `/agent:execution-monitor` with task list and worktree paths
+2. Monitor real-time progress through JSON streams
+3. Handle failures and retries automatically
 
-### Phase 3: Environment Preparation
-1. **Worktree Creation**: Set up isolated environments for each parallel task
-2. **Branch Management**: Create unique feature branches following naming conventions
-3. **Environment Sync**: Ensure consistent base state across all worktrees
-4. **Resource Allocation**: Reserve system resources for parallel execution
+### Phase 4: Result Integration
+1. Collect results from all completed tasks
+2. Merge successful branches back to main
+3. Clean up worktrees and temporary files
+4. Generate aggregate performance report
 
-### Phase 4: Parallel Execution
-1. **Process Spawning**: Launch Claude CLI instances for each parallel task
-2. **Progress Monitoring**: Track real-time status via JSON output parsing
-3. **Resource Management**: Throttle execution based on system performance
-4. **Error Handling**: Isolate failures and continue with successful tasks
+## Key Benefits
 
-### Phase 5: Integration and Cleanup
-1. **Result Collection**: Gather outputs from all parallel executions
-2. **Conflict Resolution**: Handle merge conflicts intelligently
-3. **Result Integration**: Combine successful changes into main branch
-4. **Environment Cleanup**: Remove worktrees and temporary branches
-5. **Performance Reporting**: Generate speed improvement metrics
+### Performance Improvements
+- **3-5x faster execution** for independent tasks
+- **Zero merge conflicts** through intelligent dependency analysis
+- **Optimal resource utilization** with dynamic throttling
+- **Failure isolation** prevents cascading errors
+
+### Development Advantages
+- **Automated parallelization** without manual coordination
+- **Git history preservation** with proper branching
+- **Real-time progress visibility** through monitoring
+- **Comprehensive reporting** for performance analysis
+
+### System Architecture
+- **Modular sub-agents** for specialized tasks
+- **Scalable design** supports any number of parallel tasks
+- **Resource-aware** execution prevents system overload
+- **Resilient** error handling with automatic recovery
 
 ## Dependency Detection Strategy
 
