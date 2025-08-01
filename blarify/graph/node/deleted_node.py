@@ -1,10 +1,10 @@
 from blarify.graph.node import Node
-import os
+from typing import Any
 from blarify.utils.path_calculator import PathCalculator
 
 
 class DeletedNode(Node):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
     def _identifier(self):

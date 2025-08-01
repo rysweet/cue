@@ -1,16 +1,16 @@
 """
 Pytest configuration and shared fixtures for the test suite.
 """
-import os
 import tempfile
 import shutil
+from typing import Generator
 from unittest.mock import Mock, MagicMock
 import pytest
 from pathlib import Path
 
 
 @pytest.fixture
-def temp_dir():
+def temp_dir() -> Generator[str, None, None]:
     """Create a temporary directory for test files."""
     temp_path = tempfile.mkdtemp()
     yield temp_path
@@ -18,7 +18,7 @@ def temp_dir():
 
 
 @pytest.fixture
-def test_project_dir(temp_dir):
+def test_project_dir(temp_dir: str) -> str:
     """Create a test project structure."""
     # Create directories
     src_dir = Path(temp_dir) / "src"

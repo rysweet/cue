@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from blarify.llm_descriptions.llm_service import LLMService
 
 logger = logging.getLogger(__name__)

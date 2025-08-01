@@ -1,14 +1,10 @@
+from typing import Optional, Set, Dict
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from .language_definitions import LanguageDefinitions
 from blarify.graph.relationship import RelationshipType
-
+from blarify.graph.node import NodeLabels
 import tree_sitter_go as tsgo
-from tree_sitter import Language, Parser
-
-from typing import Optional, Set, Dict
-
-
-from tree_sitter import Node as TreeSitterNode
+from tree_sitter import Language, Parser, Node as TreeSitterNode
 
 
 
@@ -65,14 +61,16 @@ class GoDefinitions(LanguageDefinitions):
     @staticmethod
     def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
         relationship_types = GoDefinitions._get_relationship_types_by_label()
-        relevant_relationship_types = relationship_types.get(node_label, {})
+        # Convert string to NodeLabels enum
+        node_label_enum = NodeLabels(node_label)
+        relevant_relationship_types = relationship_types.get(node_label_enum, {})
 
         return LanguageDefinitions._traverse_and_find_relationships(
             node_in_point_reference, relevant_relationship_types
         )
 
     @staticmethod
-    def _get_relationship_types_by_label() -> dict[str, RelationshipType]:
+    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
         return {
             NodeLabels.CLASS: {
                 "import_declaration": RelationshipType.IMPORTS,

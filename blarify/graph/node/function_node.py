@@ -1,10 +1,11 @@
+from typing import Any
 from blarify.graph.node import NodeLabels
 from blarify.stats.complexity import CodeComplexityCalculator
 from .types.definition_node import DefinitionNode
 
 
 class FunctionNode(DefinitionNode):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(label=NodeLabels.FUNCTION, **kwargs)
 
     @property

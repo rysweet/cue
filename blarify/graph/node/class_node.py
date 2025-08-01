@@ -1,6 +1,5 @@
 from blarify.graph.node import NodeLabels, DefinitionNode
-
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from blarify.code_references.types import Reference
@@ -13,7 +12,7 @@ class ClassNode(DefinitionNode):
     code_text: str
     level: int
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(label=NodeLabels.CLASS, **kwargs)
 
     @property

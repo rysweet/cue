@@ -1,9 +1,9 @@
 from typing import Dict, Set, Optional
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
-from blarify.graph.node import Node as GraphNode, NodeLabels
+from blarify.graph.node import NodeLabels
 from blarify.graph.relationship import RelationshipType
 
-from tree_sitter import Parser, Node, Language
+from tree_sitter import Parser, Node as TreeSitterNode, Language
 import tree_sitter_ruby as tsruby
 from .language_definitions import LanguageDefinitions
 
@@ -39,6 +39,8 @@ class RubyDefinitions(LanguageDefinitions):
             return NodeLabels.FUNCTION
         if type == "singleton_method":
             return NodeLabels.FUNCTION
+        # If no match found, raise error instead of returning None
+        raise ValueError(f"Unknown node type: {type}")
 
     @staticmethod
     def get_relationship_type(node: TreeSitterNode, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
@@ -67,19 +69,22 @@ class RubyDefinitions(LanguageDefinitions):
             if named_parent.type == "assignment":
                 return FoundRelationshipScope(node_in_scope=named_parent, relationship_type=RelationshipType.ASSIGNS)
 
+            # Convert string to NodeLabels enum
+            node_label_enum = NodeLabels(node_label)
             found_relationship_scope = RubyDefinitions._get_relationship_type_for_node(
-                tree_sitter_node=named_parent, relationships_types=rel_types[node_label]
+                tree_sitter_node=named_parent, relationships_types=rel_types[node_label_enum]
             )
 
             named_parent = named_parent.parent
         return found_relationship_scope
 
     @staticmethod
-    def _is_call_method_indentifier_new(node: Node) -> bool:
-        return node.child_by_field_name("method").text == b"new"
+    def _is_call_method_indentifier_new(node: TreeSitterNode) -> bool:
+        method_node = node.child_by_field_name("method")
+        return method_node is not None and method_node.text == b"new"
 
     @staticmethod
-    def _get_relationship_types_by_label() -> Dict[str, Dict[str, RelationshipType]]:
+    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
         return {
             NodeLabels.CLASS: {"superclass": RelationshipType.INHERITS},
             NodeLabels.FUNCTION: {
@@ -87,6 +92,7 @@ class RubyDefinitions(LanguageDefinitions):
             },
         }
 
+    @staticmethod
     def _get_relationship_type_for_node(
         tree_sitter_node: TreeSitterNode, relationships_types: Dict[str, RelationshipType]
     ) -> Optional[FoundRelationshipScope]:

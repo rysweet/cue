@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union, TYPE_CHECKING, Dict
+from typing import List, Optional, Tuple, Union, TYPE_CHECKING, Dict, Any
 from blarify.graph.relationship import RelationshipCreator
 from blarify.graph.node.types.node import Node
 
@@ -27,8 +27,8 @@ class DefinitionNode(Node):
     extra_attributes = Dict[str, str]
 
     def __init__(
-        self, definition_range, node_range, code_text, body_node, tree_sitter_node: "TreeSitterNode", *args, **kwargs
-    ):
+        self, definition_range: "Reference", node_range: "Reference", code_text: str, body_node: Optional["TreeSitterNode"], tree_sitter_node: "TreeSitterNode", *args: Any, **kwargs: Any
+    ) -> None:
         self._defines: List[Union["ClassNode", "FunctionNode"]] = []
         self.definition_range = definition_range
         self.node_range = node_range

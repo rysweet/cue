@@ -37,7 +37,7 @@ class ProjectFilesIterator:
         
         # Initialize blarignore patterns
         self.blarignore_spec: Optional[pathspec.PathSpec] = None
-        blarignore_patterns = []
+        blarignore_patterns: List[str] = []
         
         # Load .blarignore if path provided
         if blarignore_path:

@@ -6,7 +6,7 @@ from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelatio
 
 if TYPE_CHECKING:
     from blarify.graph.relationship import RelationshipType
-    from blarify.graph.node import Node as GraphNode, NodeLabels
+    from blarify.graph.node import NodeLabels
 
 
 class BodyNodeNotFound(Exception):
@@ -76,7 +76,7 @@ class LanguageDefinitions(ABC):
         """This method should tell you how the node is being used in the node_in_point_reference"""
 
     @staticmethod
-    def _traverse_and_find_relationships(node: TreeSitterNode, relationship_mapping: dict) -> Optional[FoundRelationshipScope]:
+    def _traverse_and_find_relationships(node: TreeSitterNode, relationship_mapping: Dict[str, "RelationshipType"]) -> Optional[FoundRelationshipScope]:
         while node is not None:
             relationship_type = LanguageDefinitions._get_relationship_type_for_node(node, relationship_mapping)
             if relationship_type:
@@ -86,7 +86,7 @@ class LanguageDefinitions(ABC):
 
     @staticmethod
     def _get_relationship_type_for_node(
-        tree_sitter_node: TreeSitterNode, relationships_types: dict
+        tree_sitter_node: TreeSitterNode, relationships_types: Dict[str, "RelationshipType"]
     ) -> Optional["RelationshipType"]:
         if tree_sitter_node is None:
             return None

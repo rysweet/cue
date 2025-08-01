@@ -13,17 +13,17 @@ if TYPE_CHECKING:
     from blarify.graph.node import DefinitionNode, Node, FolderNode, FileNode
     from blarify.code_references.types import Reference
     from blarify.graph.graph_environment import GraphEnvironment
-    from .languages import LanguageDefinitions, BodyNodeNotFound, FallbackDefinitions
+    from .languages import LanguageDefinitions
 
 
 class TreeSitterHelper:
     def __init__(
         self, language_definitions: "LanguageDefinitions", graph_environment: Optional["GraphEnvironment"] = None
-    ):
+    ) -> None:
         # Import at runtime to avoid circular imports
         from .languages import LanguageDefinitions
         
-        self.language_definitions: LanguageDefinitions = language_definitions
+        self.language_definitions: "LanguageDefinitions" = language_definitions
         self.parsers: Dict[str, Any] = self.language_definitions.get_parsers_for_extensions()
         self.graph_environment: Optional["GraphEnvironment"] = graph_environment
         self.parser: Optional[Parser] = None
@@ -62,7 +62,7 @@ class TreeSitterHelper:
 
         return found_relationship_scope
 
-    def _get_node_in_point_reference(self, node: "DefinitionNode", reference: "Reference") -> "TreeSitterNode":
+    def _get_node_in_point_reference(self, node: "DefinitionNode", reference: "Reference") -> Optional["TreeSitterNode"]:
         # Get the tree-sitter node for the reference
         start_point = (reference.range.start.line, reference.range.start.character)
         end_point = (reference.range.end.line, reference.range.end.character)
@@ -123,8 +123,8 @@ class TreeSitterHelper:
 
     def _get_content_from_file(self, file: File) -> str:
         try:
-            with open(file.path, "r") as file:
-                return file.read()
+            with open(file.path, "r") as f:
+                return f.read()
         except UnicodeDecodeError:
             # if content cannot be read, return empty string
             return ""
@@ -180,7 +180,7 @@ class TreeSitterHelper:
         identifier_name = self._get_identifier_name(identifier_node=identifier_node)
         return identifier_name, identifier_reference
 
-    def _get_identifier_name(self, identifier_node: str) -> str:
+    def _get_identifier_name(self, identifier_node: "TreeSitterNode") -> str:
         identifier_name = identifier_node.text.decode("utf-8")
         return identifier_name
 

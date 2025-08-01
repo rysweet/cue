@@ -1,3 +1,4 @@
+from typing import Optional, List, Any
 from blarify.project_graph_creator import ProjectGraphCreator
 from blarify.project_file_explorer import ProjectFilesIterator
 from blarify.project_file_explorer import ProjectFileStats
@@ -10,7 +11,6 @@ from blarify.utils.file_remover import FileRemover
 
 import dotenv
 import os
-
 import logging
 
 URI = os.getenv("NEO4J_URI")
@@ -18,7 +18,7 @@ USER = os.getenv("NEO4J_USERNAME")
 PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 
-def main(root_path: str = None, blarignore_path: str = None):
+def main(root_path: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
     lsp_query_helper = LspQueryHelper(root_uri=root_path)
 
     lsp_query_helper.start()
@@ -49,7 +49,7 @@ def main(root_path: str = None, blarignore_path: str = None):
     lsp_query_helper.shutdown_exit_close()
 
 
-def main_diff(file_diffs: list, root_uri: str = None, blarignore_path: str = None):
+def main_diff(file_diffs: List[Any], root_uri: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 

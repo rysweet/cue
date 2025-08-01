@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING, Dict, Any
+from typing import List, TYPE_CHECKING, Dict, Any, Optional
 from hashlib import md5
 from blarify.format_verifier import FormatVerifier
 import os
@@ -16,8 +16,8 @@ class Node:
     path: str
     name: str
     level: int
-    parent: "Node"
-    graph_environment: "GraphEnvironment"
+    parent: Optional["Node"]
+    graph_environment: Optional["GraphEnvironment"]
 
     def __init__(
         self,
@@ -25,9 +25,9 @@ class Node:
         path: str,
         name: str,
         level: int,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
-    ):
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
+    ) -> None:
         self.label = label
         self.path = path
         self.name = name

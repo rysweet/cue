@@ -43,7 +43,7 @@ class DocumentationParser:
         Returns:
             List of absolute paths to documentation files
         """
-        doc_files = []
+        doc_files: List[str] = []
         
         for root, dirs, files in os.walk(self.root_path):
             # Skip hidden directories and common non-doc directories

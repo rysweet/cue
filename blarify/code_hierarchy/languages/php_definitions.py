@@ -1,12 +1,10 @@
 from typing import Dict, Optional, Set
-from tree_sitter import Language, Parser
-from tree_sitter import Node as TreeSitterNode
+from tree_sitter import Language, Parser, Node as TreeSitterNode
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
 from blarify.code_hierarchy.languages.language_definitions import LanguageDefinitions
+from blarify.graph.node import NodeLabels
+from blarify.graph.relationship import RelationshipType
 import tree_sitter_php as tsphp
-
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship.relationship_type import RelationshipType
 
 
 class PhpDefinitions(LanguageDefinitions):
@@ -64,14 +62,16 @@ class PhpDefinitions(LanguageDefinitions):
     @staticmethod
     def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
         relationship_types = PhpDefinitions._get_relationship_types_by_label()
-        relevant_relationship_types = relationship_types.get(node_label, {})
+        # Convert string to NodeLabels enum
+        node_label_enum = NodeLabels(node_label)
+        relevant_relationship_types = relationship_types.get(node_label_enum, {})
 
         return LanguageDefinitions._traverse_and_find_relationships(
             node_in_point_reference, relevant_relationship_types
         )
 
     @staticmethod
-    def _get_relationship_types_by_label() -> dict[str, RelationshipType]:
+    def _get_relationship_types_by_label() -> Dict[NodeLabels, Dict[str, RelationshipType]]:
         return {
             NodeLabels.CLASS: {
                 "namespace_use_declaration": RelationshipType.IMPORTS,

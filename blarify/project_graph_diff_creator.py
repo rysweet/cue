@@ -38,11 +38,11 @@ class PreviousNodeState:
     code_text: str
 
     @property
-    def relative_id(self):
+    def relative_id(self) -> str:
         return RelativeIdCalculator.calculate(self.node_path)
 
     @property
-    def hashed_id(self):
+    def hashed_id(self) -> str:
         return IdCalculator.hash_id(self.node_path)
 
 
@@ -122,12 +122,12 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         return GraphUpdate(self.graph, self.external_relationship_store)
 
-    def create_relationships_from_previous_node_states(self, previous_node_states: List[PreviousNodeState]):
+    def create_relationships_from_previous_node_states(self, previous_node_states: List[PreviousNodeState]) -> None:
         self._create_modified_relationships(previous_node_states)
         self._mark_new_nodes_with_label(previous_node_states)
         self._mark_deleted_nodes_with_label(previous_node_states)
 
-    def _create_modified_relationships(self, previous_node_states: List[PreviousNodeState]):
+    def _create_modified_relationships(self, previous_node_states: List[PreviousNodeState]) -> None:
         for previous_node in previous_node_states:
             equivalent_node: DefinitionNode = self.graph.get_node_by_relative_id(previous_node.relative_id)
 
@@ -188,8 +188,8 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         self.graph = self.graph.filtered_graph_by_paths(paths_to_keep)
 
-    def get_parent_paths_from_paths(self, paths):
-        parent_paths = []
+    def get_parent_paths_from_paths(self, paths: List[str]) -> List[str]:
+        parent_paths: List[str] = []
         for path in paths:
             parent_paths.extend(self.get_parent_paths_from_path(path))
 
@@ -222,7 +222,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
         file_nodes.extend(self.get_file_nodes_from_path_list(paths))
         self._create_relationship_from_references(file_nodes=file_nodes)
 
-    def get_paths_referenced_by_file_nodes(self, file_nodes):
+    def get_paths_referenced_by_file_nodes(self, file_nodes: List[FileNode]) -> List[str]:
         paths = set()
         for file in file_nodes:
             if self.is_file_node_raw(file):
@@ -233,10 +233,10 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         return paths
 
-    def is_file_node_raw(self, file_node: FileNode):
+    def is_file_node_raw(self, file_node: FileNode) -> bool:
         return not file_node.has_tree_sitter_node()
 
-    def mark_file_nodes_as_diff(self, file_nodes: List[FileNode]):
+    def mark_file_nodes_as_diff(self, file_nodes: List[FileNode]) -> None:
         for file_node in file_nodes:
             diff = self.get_file_diff_for_path(file_node.path)
             file_node.add_extra_label_to_self_and_children("DIFF")
@@ -251,7 +251,7 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
 
         raise ValueError(f"Path {path} not found in file diffs")
 
-    def remove_paths_to_create_from_paths_referenced(self, paths_referenced):
+    def remove_paths_to_create_from_paths_referenced(self, paths_referenced: List[str]) -> List[str]:
         return [path for path in paths_referenced if path not in self.added_and_modified_paths]
 
     def get_paths_referenced_by_file_node(self, file_node: FileNode) -> set:
@@ -265,8 +265,8 @@ class ProjectGraphDiffCreator(ProjectGraphCreator):
     def remove_definitions_from_identifiers(self, definitions, identifiers):
         return [identifier for identifier in identifiers if identifier not in definitions]
 
-    def get_file_nodes_from_path_list(self, paths):
-        file_nodes = []
+    def get_file_nodes_from_path_list(self, paths: List[str]) -> List[FileNode]:
+        file_nodes: List[FileNode] = []
         for path in paths:
             file_node = self.graph.get_file_node_by_path(path)
 

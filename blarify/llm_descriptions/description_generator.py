@@ -137,7 +137,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
             NodeLabels.METHOD, NodeLabels.MODULE
         }
         
-        eligible_nodes = []
+        eligible_nodes: List["Node"] = []
         for label in eligible_labels:
             nodes = graph.get_nodes_by_label(label)
             eligible_nodes.extend(nodes)
