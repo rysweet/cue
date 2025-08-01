@@ -3,7 +3,7 @@ from blarify.graph.relationship import Relationship, RelationshipType
 
 if TYPE_CHECKING:
     from blarify.graph.graph import Graph
-    from blarify.graph.node import Node, NodeLabels
+    from blarify.graph.node import Node
     from blarify.code_hierarchy.tree_sitter_helper import TreeSitterHelper
     from blarify.code_references.types import Reference
 
