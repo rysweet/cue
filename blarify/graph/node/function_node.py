@@ -1,9 +1,6 @@
-from typing import Any, Dict, TYPE_CHECKING
+from typing import Any, Dict
 from blarify.graph.node import NodeLabels
 from .types.definition_node import DefinitionNode
-
-if TYPE_CHECKING:
-    from blarify.stats.complexity import CodeComplexityCalculator
 
 
 class FunctionNode(DefinitionNode):

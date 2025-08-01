@@ -4,9 +4,7 @@ from .fallback_definitions import FallbackDefinitions
 # Public API exports
 __all__ = [
     'LanguageDefinitions', 'BodyNodeNotFound', 'IdentifierNodeNotFound', 'FallbackDefinitions',
-    'get_available_languages', 'get_language_definition',
-    'PythonDefinitions', 'JavascriptDefinitions', 'TypescriptDefinitions', 'RubyDefinitions',
-    'CsharpDefinitions', 'GoDefinitions', 'PhpDefinitions', 'JavaDefinitions'
+    'get_available_languages', 'get_language_definition'
 ]
 
 # Import language-specific definitions conditionally to avoid failures

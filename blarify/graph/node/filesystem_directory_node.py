@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional, List, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship import RelationshipCreator, Relationship
+from blarify.graph.relationship import Relationship
 
 if TYPE_CHECKING:
     from blarify.graph.graph_environment import GraphEnvironment
@@ -61,7 +61,6 @@ class FilesystemDirectoryNode(Node):
     
     def get_relationships(self) -> List["Relationship"]:
         """Get FILESYSTEM_CONTAINS relationships for children."""
-        from blarify.graph.relationship import Relationship
         from blarify.graph.relationship.relationship_type import RelationshipType
         
         relationships = []

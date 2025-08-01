@@ -2,7 +2,7 @@ import os
 import logging
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from blarify.graph.node import (
-    DocumentationFileNode, ConceptNode, DocumentedEntityNode, Node
+    DocumentationFileNode, ConceptNode, DocumentedEntityNode
 )
 from blarify.graph.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType
