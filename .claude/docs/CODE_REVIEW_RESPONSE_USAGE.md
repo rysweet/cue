@@ -166,20 +166,40 @@ When feedback is ambiguous:
 ## Troubleshooting
 
 ### "Cannot implement suggestion"
-- Explain technical limitation
-- Suggest alternative
-- Document for future
+- Explain technical limitation clearly
+- Suggest alternative approach if possible  
+- Document for future enhancement
+- Thank reviewer for the valuable input
 
 ### "Tests failing after changes"
-- Debug implementation
-- May need to adjust approach
-- Communicate status
+- Debug implementation thoroughly
+- May need to adjust approach or revert
+- Communicate status in PR comment
+- Ask for guidance if needed
 
 ### "Reviewer disagrees with response"
-- Remain professional
-- Provide additional context
-- Offer to discuss synchronously
-- Seek compromise
+- Remain professional and respectful
+- Provide additional technical context
+- Offer to discuss synchronously (call/meeting)
+- Seek compromise solution
+
+### "GitHub API issues"
+- Check PR permissions and access
+- Verify GitHub CLI authentication
+- Retry with error handling
+- Fall back to manual posting if needed
+
+### "Large PR with overwhelming feedback"
+- Prioritize critical issues first
+- Break responses into manageable chunks
+- Use TodoWrite to track progress
+- Communicate timeline expectations
+
+### "Malformed review feedback"
+- Parse what's possible to understand
+- Ask for clarification on unclear points
+- Provide structured summary of understanding
+- Use best judgment for ambiguous feedback
 
 ## Success Indicators
 
