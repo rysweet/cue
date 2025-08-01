@@ -229,7 +229,9 @@ suite('BlarifyIntegration Test Suite', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         configManager = new ConfigurationManager();
-        blarifyIntegration = new BlarifyIntegration(configManager, path.resolve(__dirname, '..', '..', '..'));
+        const extensionPath = path.resolve(__dirname, '..', '..', '..');
+        const neo4jManager = new Neo4jManager(configManager, extensionPath);
+        blarifyIntegration = new BlarifyIntegration(configManager, extensionPath, neo4jManager);
     });
     
     teardown(() => {
@@ -264,6 +266,75 @@ suite('BlarifyIntegration Test Suite', () => {
         // The checkBlarifyInstalled method should return true for bundled Blarify
         const isInstalled = await blarifyIntegration.checkBlarifyInstalled();
         assert.ok(isInstalled, 'Blarify should be detected as installed (bundled)');
+    });
+    
+    test('Should build environment variables correctly', async () => {
+        const childProcess = require('child_process');
+        const spawnStub = sandbox.stub(childProcess, 'spawn');
+        
+        // Mock configuration
+        sandbox.stub(configManager, 'getExcludePatterns').returns(['node_modules', '.git']);
+        sandbox.stub(configManager, 'getAzureOpenAIConfig').returns({
+            apiKey: 'test-key',
+            endpoint: 'https://test.openai.azure.com',
+            deploymentName: 'gpt-4'
+        });
+        sandbox.stub(configManager, 'getNeo4jPassword').returns('test-password');
+        
+        // Mock the Neo4j manager to avoid connection attempts
+        const extensionPath = path.resolve(__dirname, '..', '..', '..');
+        const mockNeo4jManager = new Neo4jManager(configManager, extensionPath);
+        sandbox.stub(mockNeo4jManager, 'ensureRunning').resolves();
+        
+        // Create new BlarifyIntegration instance with mocked Neo4j manager
+        const testBlarifyIntegration = new BlarifyIntegration(configManager, extensionPath, mockNeo4jManager);
+        
+        // Create mock process and progress
+        const mockProcess = {
+            stdout: { on: sandbox.stub() },
+            stderr: { on: sandbox.stub() },
+            on: sandbox.stub().callsArgWith(1, 0), // Simulate successful exit
+            kill: sandbox.stub()
+        };
+        spawnStub.returns(mockProcess);
+        
+        const progress = { report: sandbox.stub() };
+        const token = { 
+            isCancellationRequested: false,
+            onCancellationRequested: sandbox.stub()
+        };
+        
+        try {
+            await testBlarifyIntegration.analyzeWorkspace('/test/workspace', progress as any, token as any);
+        } catch (error) {
+            // Ignore JSON parsing errors, we just want to verify spawn was called correctly
+        }
+        
+        // Verify spawn was called with correct arguments
+        assert.ok(spawnStub.calledOnce, 'spawn should be called once');
+        const spawnCall = spawnStub.getCall(0);
+        
+        // Check arguments: should only have main.py path, no 'ingest' command
+        const args = spawnCall.args[1];
+        assert.ok(args.length === 1, `Expected 1 argument, got ${args.length}: ${JSON.stringify(args)}`);
+        assert.ok(args[0].endsWith('main.py'), 'Should call main.py directly');
+        assert.ok(!args.includes('ingest'), 'Should not include ingest command');
+        
+        // Check environment variables
+        const options = spawnCall.args[2];
+        const env = options.env;
+        
+        assert.strictEqual(env.ROOT_PATH, '/test/workspace', 'ROOT_PATH should be set');
+        assert.strictEqual(env.NEO4J_URI, 'bolt://localhost:7957', 'NEO4J_URI should be set');
+        assert.strictEqual(env.NEO4J_USER, 'neo4j', 'NEO4J_USER should be set');
+        assert.strictEqual(env.NEO4J_PASSWORD, 'test-password', 'NEO4J_PASSWORD should be set');
+        assert.strictEqual(env.ENABLE_DOCUMENTATION_NODES, 'true', 'ENABLE_DOCUMENTATION_NODES should be true');
+        assert.strictEqual(env.ENABLE_LLM_DESCRIPTIONS, 'true', 'ENABLE_LLM_DESCRIPTIONS should be true');
+        assert.strictEqual(env.AZURE_API_KEY, 'test-key', 'AZURE_API_KEY should be set');
+        assert.strictEqual(env.AZURE_ENDPOINT, 'https://test.openai.azure.com', 'AZURE_ENDPOINT should be set');
+        assert.strictEqual(env.AZURE_DEPLOYMENT, 'gpt-4', 'AZURE_DEPLOYMENT should be set');
+        assert.strictEqual(env.NAMES_TO_SKIP, 'node_modules,.git', 'NAMES_TO_SKIP should be comma-separated');
+        assert.ok(env.PYTHONPATH?.includes('bundled'), 'PYTHONPATH should include bundled directory');
     });
 });
 

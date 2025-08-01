@@ -223,3 +223,92 @@ This file maintains learnings and insights from code reviews to improve future r
 - **Repository Validation**: Includes URL validation and repository access verification
 - **Agent Validation**: Implements file format validation and integrity checks
 - **Permission Management**: Uses existing Claude Code permission system for tool access
+## Code Review Memory - 2025-08-01
+
+### PR #46: Fix Blarify tree_sitter_ruby ModuleNotFoundError
+
+#### What I Learned
+- **Dynamic Import Patterns**: The `importlib` + try-catch pattern for conditional imports is excellent for optional dependencies
+- **Graceful Degradation Architecture**: Building language dictionaries dynamically from successful imports provides robust fallback behavior
+- **Error Message Quality**: Clear, actionable error messages that show available alternatives significantly improve user experience
+- **Documentation Impact**: Comprehensive documentation (like LANGUAGE_SUPPORT.md) greatly enhances the value of a technical solution
+- **Backward Compatibility Strategy**: Using `globals()` assignment maintains module-level access while implementing dynamic loading
+
+#### Patterns to Watch
+- **Conditional Imports**: This pattern should be adopted for other optional features (LLM services, database backends)
+- **Warning vs Exception Strategy**: Using warnings for missing optional components while raising exceptions for critical errors
+- **Dynamic Dictionary Building**: Pattern of building configuration dictionaries based on successful imports/initializations
+- **Integration Testing**: Testing actual import behavior rather than just mocking provides better coverage
+
+#### Technical Insights
+- **Tree-sitter Integration**: Language parsers are loaded at import time, so failure must be handled early in the import chain
+- **Project Architecture**: The language definitions flow through: `__init__.py` → `ProjectGraphCreator` → `LspQueryHelper` → actual usage
+- **Extension Mapping**: File extensions map to language names, which map to definition classes - this three-layer mapping provides flexibility
+- **Fallback Behavior**: `FallbackDefinitions` provides a safe default when language-specific parsers aren't available
+
+#### Best Practices Observed
+- **Comprehensive Testing**: Integration tests that verify real behavior, not just mocked behavior
+- **Clear Documentation**: Step-by-step troubleshooting guides with actual command examples
+- **Organized Dependencies**: Clear separation and commenting of core vs optional dependencies in pyproject.toml
+- **User Experience Focus**: Transforming crashes into graceful degradation with helpful messages
+
+#### Future Review Focus Areas for Blarify
+- Look for similar optional dependency patterns that could benefit from conditional loading
+- Ensure new language support follows the established conditional import pattern
+- Verify that error messages provide actionable guidance to users
+- Check that integration tests cover real behavior, not just unit test mocks
+- Validate that documentation updates accompany significant architectural changes
+
+
+---
+
+## Code Review Memory - 2025-08-01
+
+### PR #51: Fix VS Code Extension Setup Failure - Missing README.md and Setup/Ingestion Synchronization
+
+#### What I Learned
+- **Extension Bundling Complexity**: VS Code extensions with Python dependencies require careful bundling to ensure all referenced files are included
+- **Setup/Ingestion Race Conditions**: User-initiated actions can occur before background setup completes, requiring proper synchronization mechanisms
+- **Multi-layered Error Handling**: Production extensions need error handling at bundling, setup, and runtime levels with specific user-friendly messages
+- **State Tracking Patterns**: Setup completion state must be tracked and used to gate dependent operations like workspace analysis
+- **Comprehensive Testing Strategy**: Extension testing requires validation of bundled files, setup flows, error scenarios, and integration behavior
+
+#### Patterns to Watch
+- **Bundling Scripts Must Handle Missing Files**: Auto-generation of required files (README.md) when source isn't available prevents packaging failures
+- **Retry Logic for Transient Failures**: Network issues, permission problems, and other transient failures should have retry mechanisms with exponential backoff
+- **Progress Reporting During Long Operations**: User feedback during setup prevents perception of hanging/freezing
+- **Timeout Protection**: Long-running operations need maximum time limits to prevent indefinite blocking
+- **Graceful Degradation**: Setup failures shouldn't crash the extension but allow manual retry
+
+#### Technical Architecture Insights
+- **VS Code Extension Lifecycle**: Extension activation should be non-blocking, with heavy setup tasks running asynchronously
+- **Python Virtual Environment Management**: Extensions should create isolated environments to avoid conflicts with user's Python setup
+- **TypeScript/Node.js Integration**: Spawning Python processes from TypeScript requires careful error handling and output parsing
+- **Test Environment Considerations**: Heavy integration tests (Python setup, Docker operations) should be appropriately skipped in CI
+
+#### Best Practices Observed
+- **Comprehensive Problem Analysis**: Root cause analysis that identifies both immediate and systemic issues
+- **Self-Healing Setup Scripts**: Auto-recovery logic that can resolve common packaging issues automatically
+- **Progressive Enhancement**: Core functionality works even if optional components fail
+- **Detailed Documentation**: Troubleshooting guides with specific error scenarios and solutions
+- **Comprehensive Test Coverage**: Tests validate both positive flows and error conditions
+
+#### VS Code Extension Development Insights
+- **Bundling Requirements**: pyproject.toml references must be satisfied or pip install will fail
+- **Output Channels**: Comprehensive logging through VS Code output channels essential for debugging
+- **Command Registration**: All extension commands must be registered during activation
+- **Extension Lifecycle**: Setup tasks should integrate with VS Code's progress reporting system
+- **Test Structure**: Extension tests need special setup for VS Code testing framework
+
+#### Future Review Focus Areas for VS Code Extensions
+- Ensure bundling scripts include all required files and handle missing dependencies
+- Verify setup operations have proper timeout and retry logic
+- Check that long-running operations provide user feedback through progress indicators
+- Validate that extension activation is non-blocking and handles setup failures gracefully
+- Confirm comprehensive testing covers bundling, setup, error scenarios, and integration flows
+- Ensure troubleshooting documentation is updated when setup/installation changes
+
+---
+
+Last Updated: 2025-08-01T21:25:00Z
+

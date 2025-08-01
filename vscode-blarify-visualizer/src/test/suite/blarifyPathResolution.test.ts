@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { BlarifyIntegration } from '../../blarifyIntegration';
+import { Neo4jManager } from '../../neo4jManager';
+import { ConfigurationManager } from '../../configurationManager';
 
 suite('Blarify Path Resolution Test Suite', () => {
     let blarifyIntegration: BlarifyIntegration;
@@ -19,7 +21,10 @@ suite('Blarify Path Resolution Test Suite', () => {
             })
         };
         
-        blarifyIntegration = new BlarifyIntegration(configManager, path.resolve(__dirname, '..', '..', '..'));
+        const extensionPath = path.resolve(__dirname, '..', '..', '..');
+        const realConfigManager = new ConfigurationManager();
+        const neo4jManager = new Neo4jManager(realConfigManager, extensionPath);
+        blarifyIntegration = new BlarifyIntegration(configManager, extensionPath, neo4jManager);
     });
     
     test('Should find Blarify in workspace parent directory', async function() {

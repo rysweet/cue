@@ -2,14 +2,21 @@ This repo introduces a method to represent a local code repository as a graph st
 
 # Supported Languages
 
+Blarify supports the following languages out of the box:
+
+**Core Languages** (most popular, always included):
 - Python
 - JavaScript
 - TypeScript
-- Ruby
+- Java
 - Go
+
+**Additional Languages** (included by default):
+- Ruby
 - C#
 - PHP
-- Java
+
+**Note**: Blarify is designed to be robust. If a language parser is not installed or fails to load, Blarify will continue to work for other supported languages, displaying a warning for the missing language support. See [Language Support Documentation](blarify/LANGUAGE_SUPPORT.md) for more details.
 
 # Example
 

@@ -39,34 +39,37 @@ class LspQueryHelper:
 
     @staticmethod
     def get_language_definition_for_extension(extension: str) -> Type["LanguageDefinitions"]:
-        # Import here to avoid circular dependencies
-        from blarify.code_hierarchy.languages.python_definitions import PythonDefinitions
-        from blarify.code_hierarchy.languages.javascript_definitions import JavascriptDefinitions
-        from blarify.code_hierarchy.languages.ruby_definitions import RubyDefinitions
-        from blarify.code_hierarchy.languages.typescript_definitions import TypescriptDefinitions
-        from blarify.code_hierarchy.languages.csharp_definitions import CsharpDefinitions
-        from blarify.code_hierarchy.languages.go_definitions import GoDefinitions
-        from blarify.code_hierarchy.languages.php_definitions import PhpDefinitions
-        from blarify.code_hierarchy.languages.java_definitions import JavaDefinitions
-
-        if extension in PythonDefinitions.get_language_file_extensions():
-            return PythonDefinitions
-        elif extension in JavascriptDefinitions.get_language_file_extensions():
-            return JavascriptDefinitions
-        elif extension in TypescriptDefinitions.get_language_file_extensions():
-            return TypescriptDefinitions
-        elif extension in RubyDefinitions.get_language_file_extensions():
-            return RubyDefinitions
-        elif extension in CsharpDefinitions.get_language_file_extensions():
-            return CsharpDefinitions
-        elif extension in GoDefinitions.get_language_file_extensions():
-            return GoDefinitions
-        elif extension in PhpDefinitions.get_language_file_extensions():
-            return PhpDefinitions
-        elif extension in JavaDefinitions.get_language_file_extensions():
-            return JavaDefinitions
-        else:
-            raise FileExtensionNotSupported(f'File extension "{extension}" is not supported)')
+        from blarify.code_hierarchy.languages import get_language_definition, get_available_languages
+        
+        # Map of file extensions to language names
+        extension_to_language = {
+            '.py': 'python',
+            '.js': 'javascript',
+            '.jsx': 'javascript',
+            '.ts': 'typescript', 
+            '.tsx': 'typescript',
+            '.rb': 'ruby',
+            '.cs': 'csharp',
+            '.go': 'go',
+            '.php': 'php',
+            '.java': 'java',
+        }
+        
+        # Get the language name for this extension
+        language_name = extension_to_language.get(extension)
+        if not language_name:
+            raise FileExtensionNotSupported(f'File extension "{extension}" is not supported')
+        
+        # Get the language definition if available
+        definition_class = get_language_definition(language_name)
+        if not definition_class:
+            available = get_available_languages()
+            raise FileExtensionNotSupported(
+                f'Language support for {language_name} ({extension}) is not available. '
+                f'Available languages: {", ".join(available)}'
+            )
+        
+        return definition_class
 
     def _create_lsp_server(self, language_definitions: "LanguageDefinitions", timeout: int = 15) -> SyncLanguageServer:
         language = language_definitions.get_language_name()

@@ -81,7 +81,7 @@ async function activate(context) {
         // This might happen if bundled module fails to load, but we still want commands to work
     }
     try {
-        blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager, context.extensionPath);
+        blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager, context.extensionPath, neo4jManager);
         outputChannel.appendLine('Blarify integration initialized');
     }
     catch (error) {
@@ -100,11 +100,18 @@ async function activate(context) {
     if (!isTestMode) {
         // Start background tasks asynchronously to not block activation
         setTimeout(async () => {
-            // Run all setup tasks (including Neo4j)
-            await runSetupTasks();
-            // Only show prompt when setup is complete
-            if (setupState.canPromptForAnalysis()) {
-                await promptForInitialAnalysis();
+            try {
+                // Run all setup tasks (including Python and Neo4j)
+                await runSetupTasks();
+                // Only show prompt when setup is complete
+                if (setupState.canPromptForAnalysis()) {
+                    await promptForInitialAnalysis();
+                }
+            }
+            catch (error) {
+                outputChannel.appendLine(`Background setup failed: ${error}`);
+                // Don't show error to user here as it's handled within runSetupTasks
+                // Setup can be retried when user tries to use ingestion command
             }
         }, 1000); // Delay to ensure extension is fully activated
     }
@@ -116,6 +123,23 @@ async function activate(context) {
                 const configured = await configManager.promptForConfiguration();
                 if (!configured) {
                     vscode.window.showInformationMessage('Some features may be limited without Azure OpenAI configuration. You can configure it later in settings.');
+                }
+            }
+            // Set up Python environment (including Blarify dependencies)
+            outputChannel.appendLine('Setting up Python environment...');
+            if (blarifyIntegration && statusBarManager) {
+                statusBarManager.setStatus('Setting up Python...', 'sync~spin');
+                try {
+                    // This will trigger the Python environment setup including pip install
+                    const pythonEnv = blarifyIntegration.pythonEnv;
+                    await pythonEnv.ensureSetup();
+                    outputChannel.appendLine('Python environment setup completed');
+                }
+                catch (error) {
+                    statusBarManager.setStatus('Python setup failed', 'error');
+                    outputChannel.appendLine(`Failed to set up Python environment: ${error}`);
+                    vscode.window.showErrorMessage(`Blarify setup failed: ${error}. Please check the output channel for details.`);
+                    throw new Error(`Python environment setup failed: ${error}`);
                 }
             }
             // Start Neo4j as part of setup
@@ -130,17 +154,23 @@ async function activate(context) {
                 catch (error) {
                     statusBarManager.setStatus('Neo4j offline', 'warning');
                     outputChannel.appendLine(`Failed to start Neo4j: ${error}`);
-                    throw new Error(`Neo4j startup failed: ${error}`);
+                    // Don't throw error for Neo4j - it can be started later
+                    vscode.window.showWarningMessage('Neo4j failed to start automatically. You can restart it manually using the "Restart Neo4j" command.');
                 }
             }
-            // Add any other setup tasks here
-            // e.g., checking Python, installing dependencies, etc.
             setupState.isSetupComplete = true;
-            outputChannel.appendLine('Setup tasks completed');
+            outputChannel.appendLine('Setup tasks completed successfully');
+            if (statusBarManager) {
+                statusBarManager.setStatus('Ready', 'check');
+            }
         }
         catch (error) {
             outputChannel.appendLine(`Error during setup: ${error}`);
             setupState.isSetupComplete = false;
+            if (statusBarManager) {
+                statusBarManager.setStatus('Setup failed', 'error');
+            }
+            throw error; // Re-throw to be handled by caller
         }
     }
     async function promptForInitialAnalysis() {
@@ -155,7 +185,46 @@ async function activate(context) {
     try {
         const showVisualizationCommand = vscode.commands.registerCommand('blarifyVisualizer.showVisualization', () => showVisualization(context));
         outputChannel.appendLine('  - showVisualization registered');
-        const ingestWorkspaceCommand = vscode.commands.registerCommand('blarifyVisualizer.ingestWorkspace', ingestWorkspace);
+        const ingestWorkspaceCommand = vscode.commands.registerCommand('blarifyVisualizer.ingestWorkspace', async () => {
+            outputChannel.appendLine('Command: ingestWorkspace invoked');
+            outputChannel.appendLine(`  neo4jManager: ${neo4jManager ? 'initialized' : 'NOT INITIALIZED'}`);
+            outputChannel.appendLine(`  blarifyIntegration: ${blarifyIntegration ? 'initialized' : 'NOT INITIALIZED'}`);
+            outputChannel.appendLine(`  setupState.isSetupComplete: ${setupState.isSetupComplete}`);
+            if (!neo4jManager || !blarifyIntegration) {
+                const message = 'Extension components not fully initialized. Please reload the window.';
+                outputChannel.appendLine(`ERROR: ${message}`);
+                vscode.window.showErrorMessage(message);
+                return;
+            }
+            // Ensure setup is complete before allowing ingestion
+            if (!setupState.isSetupComplete) {
+                outputChannel.appendLine('Setup not complete, waiting for setup to finish...');
+                statusBarManager?.setStatus('Waiting for setup...', 'sync~spin');
+                // Wait for setup with progress indication
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: "Waiting for Blarify setup to complete",
+                    cancellable: false
+                }, async (progress) => {
+                    progress.report({ message: "Setting up Blarify environment..." });
+                    // Poll for setup completion with timeout
+                    const maxWaitTime = 300000; // 5 minutes
+                    const pollInterval = 1000; // 1 second
+                    let elapsed = 0;
+                    while (!setupState.isSetupComplete && elapsed < maxWaitTime) {
+                        await new Promise(resolve => setTimeout(resolve, pollInterval));
+                        elapsed += pollInterval;
+                        progress.report({
+                            message: `Setting up Blarify environment... (${Math.floor(elapsed / 1000)}s)`
+                        });
+                    }
+                    if (!setupState.isSetupComplete) {
+                        throw new Error('Setup timeout: Blarify setup did not complete within 5 minutes');
+                    }
+                });
+            }
+            await ingestWorkspace();
+        });
         outputChannel.appendLine('  - ingestWorkspace registered');
         const updateGraphCommand = vscode.commands.registerCommand('blarifyVisualizer.updateGraph', updateGraph);
         outputChannel.appendLine('  - updateGraph registered');
