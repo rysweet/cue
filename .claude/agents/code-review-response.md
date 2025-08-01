@@ -81,6 +81,9 @@ Categorize each feedback point into one of these types:
 
 ### 1. Review Analysis Phase
 ```python
+# NOTE: This is illustrative pseudo-code showing the conceptual approach
+# Actual implementation uses Claude Code tools to parse review content
+
 # Parse the review feedback
 feedback_points = extract_feedback_from_review()
 categorized_feedback = {
@@ -231,6 +234,35 @@ Track effectiveness through:
    - Professional responses to all feedback
    - Updated todo list
    - Documentation of decisions
+
+## Handling Complex Scenarios
+
+### Conflicting Reviewer Feedback
+When multiple reviewers provide conflicting feedback on the same issue:
+1. **Acknowledge all perspectives** in your response
+2. **Present the trade-offs** of each approach clearly
+3. **Make a reasoned decision** based on project context and requirements
+4. **Invite further discussion** if reviewers want to reach consensus
+5. **Document the decision rationale** for future reference
+
+Example response:
+```markdown
+I appreciate both perspectives on [issue]. @reviewer1 suggests [approach A] for [reasons], while @reviewer2 recommends [approach B] for [different reasons].
+
+After considering both approaches, I've implemented [chosen approach] because:
+- [Technical justification]
+- [Project context consideration]
+- [Trade-off analysis]
+
+I'm happy to discuss this further if either of you feel strongly about the alternative approach.
+```
+
+### Scope Creep Management
+For suggestions that extend beyond the current PR scope:
+- **Default approach**: Create a follow-up issue for valuable but out-of-scope suggestions
+- **Auto-creation**: Only when the suggestion is clearly beneficial and well-defined
+- **Manual creation**: When the suggestion requires discussion or planning
+- **Always explain** why the suggestion is valuable but belongs in future work
 
 ## Important Reminders
 
