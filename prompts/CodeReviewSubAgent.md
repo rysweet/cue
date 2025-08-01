@@ -1,14 +1,7 @@
 ---
 name: code-reviewer
 description: Specialized sub-agent for conducting thorough code reviews on pull requests
-tools:
-  - read
-  - grep
-  - ls
-  - bash
-  - web_search
-  - web_fetch
-  - todo_write
+tools: read, grep, ls, bash, web_search, web_fetch, todo_write
 ---
 
 # Code Review Sub-Agent for Blarify
