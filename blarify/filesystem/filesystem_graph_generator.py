@@ -181,7 +181,7 @@ class FilesystemGraphGenerator:
         graph: "Graph"
     ) -> List[Relationship]:
         """Create IMPLEMENTS relationships between filesystem files and code nodes."""
-        implements_relationships = []
+        implements_relationships: List[Relationship] = []
         
         # For each file node, find corresponding code nodes
         for file_path, fs_file_node in self._file_nodes.items():
@@ -212,13 +212,13 @@ class FilesystemGraphGenerator:
         graph: "Graph"
     ) -> List[Relationship]:
         """Create REFERENCED_BY_DESCRIPTION relationships for file paths mentioned in descriptions."""
-        referenced_relationships = []
+        referenced_relationships: List[Relationship] = []
         
         # Get all description nodes
         description_nodes = graph.get_nodes_by_label(NodeLabels.DESCRIPTION)
         
         for desc_node in description_nodes:
-            if hasattr(desc_node, 'description_text'):
+            if hasattr(desc_node, 'description_text') and desc_node.description_text:
                 # Look for file paths in the description
                 for file_path, fs_node in self._file_nodes.items():
                     relative_path = os.path.relpath(file_path, self.root_path)

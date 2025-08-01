@@ -116,7 +116,7 @@ def mock_llm_service():
 
 
 @pytest.fixture(autouse=True)
-def setup_test_env(monkeypatch):
+def setup_test_env(monkeypatch: pytest.MonkeyPatch):
     """Set up test environment variables."""
     # Mock Azure OpenAI configuration to prevent errors
     monkeypatch.setenv("AZURE_OPENAI_KEY", "test-key")

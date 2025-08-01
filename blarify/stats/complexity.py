@@ -39,7 +39,7 @@ class CodeComplexityCalculator:
 
     @staticmethod
     def __get_nesting_levels(node: Node, language_definitions: "LanguageDefinitions") -> list[int]:
-        depths = []
+        depths: list[int] = []
 
         for child in node.named_children:
             if not language_definitions.should_create_node(child):
@@ -52,7 +52,7 @@ class CodeComplexityCalculator:
         consequence_statements = language_definitions.CONSEQUENCE_STATEMENTS
         control_flow_statements = language_definitions.CONTROL_FLOW_STATEMENTS
 
-        depths = []
+        depths: list[int] = []
         depth = 0
         for child in node.named_children:
             if language_definitions.should_create_node(child):
