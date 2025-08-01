@@ -61,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
     
     try {
-        blarifyIntegration = new BlarifyIntegration(configManager, context.extensionPath);
+        blarifyIntegration = new BlarifyIntegration(configManager, context.extensionPath, neo4jManager);
         outputChannel.appendLine('Blarify integration initialized');
     } catch (error) {
         outputChannel.appendLine(`ERROR initializing Blarify integration: ${error}`);
