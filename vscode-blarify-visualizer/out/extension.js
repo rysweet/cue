@@ -81,7 +81,7 @@ async function activate(context) {
         // This might happen if bundled module fails to load, but we still want commands to work
     }
     try {
-        blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager, context.extensionPath);
+        blarifyIntegration = new blarifyIntegration_1.BlarifyIntegration(configManager, context.extensionPath, neo4jManager);
         outputChannel.appendLine('Blarify integration initialized');
     }
     catch (error) {
