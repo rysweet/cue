@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { spawn } from 'child_process';
 import { ConfigurationManager } from './configurationManager';
+import { PythonEnvironment } from './pythonEnvironment';
 
 export interface BlarifyResult {
     nodes: any[];
@@ -11,15 +12,34 @@ export interface BlarifyResult {
 
 export class BlarifyIntegration {
     private lastAnalysis?: number;
+    private pythonEnv: PythonEnvironment;
     
-    constructor(private configManager: ConfigurationManager) {}
+    constructor(
+        private configManager: ConfigurationManager,
+        private extensionPath: string
+    ) {
+        this.pythonEnv = new PythonEnvironment(extensionPath);
+    }
     
     async analyzeWorkspace(
         workspacePath: string,
         progress: vscode.Progress<{ message?: string; increment?: number }>,
         token: vscode.CancellationToken
     ): Promise<BlarifyResult> {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            console.log(`BlarifyIntegration: Analyzing workspace at: ${workspacePath}`);
+            console.log(`Extension path: ${this.extensionPath}`);
+            
+            // Ensure Python environment is set up
+            let pythonPath: string;
+            try {
+                pythonPath = await this.pythonEnv.ensureSetup();
+                console.log(`Using Python from: ${pythonPath}`);
+            } catch (error) {
+                reject(new Error(`Failed to set up Python environment: ${error}`));
+                return;
+            }
+            
             // Prepare Blarify command
             const excludePatterns = this.configManager.getExcludePatterns();
             const args = ['ingest', workspacePath, '--json'];
@@ -43,50 +63,18 @@ export class BlarifyIntegration {
             // Always enable documentation nodes
             args.push('--enable-documentation-nodes');
             
-            // Try to find Blarify in different locations
-            const possiblePaths = [
-                // Development: extension in repo
-                path.resolve(__dirname, '..', '..', 'blarify', '__main__.py'),
-                // Installed: look for blarify in the workspace
-                path.resolve(workspacePath, 'blarify', '__main__.py'),
-                // Installed: look for blarify in parent of workspace
-                path.resolve(workspacePath, '..', 'blarify', '__main__.py'),
-            ];
+            // Use bundled Blarify
+            const bundledBlarifyPath = path.join(this.extensionPath, 'bundled', 'blarify');
+            console.log(`Using bundled Blarify from: ${bundledBlarifyPath}`);
             
-            let blarifyScript: string | null = null;
-            let pythonPath: string | null = null;
-            
-            for (const testPath of possiblePaths) {
-                if (fs.existsSync(testPath)) {
-                    blarifyScript = testPath;
-                    pythonPath = path.dirname(path.dirname(testPath));
-                    break;
-                }
-            }
-            
-            if (!blarifyScript) {
-                // Try using global blarify command
-                this.checkBlarifyInstalled().then(hasBlarifyCommand => {
-                    if (!hasBlarifyCommand) {
-                        reject(new Error('Blarify not found. Please ensure Blarify is installed or available in your workspace.'));
-                        return;
-                    }
-                    // Continue with global blarify
-                    this.runBlarifyProcess(null, null, args, workspacePath, progress, token, resolve, reject);
-                }).catch(err => {
-                    reject(new Error('Failed to check Blarify installation: ' + err));
-                });
-                return;
-            }
-            
-            // Run with local blarify
-            this.runBlarifyProcess(blarifyScript, pythonPath, args, workspacePath, progress, token, resolve, reject);
+            // Run with bundled Python environment
+            this.runBlarifyProcess(pythonPath, bundledBlarifyPath, args, workspacePath, progress, token, resolve, reject);
         });
     }
     
     private runBlarifyProcess(
-        blarifyScript: string | null,
-        pythonPath: string | null,
+        pythonPath: string,
+        blarifyPath: string,
         args: string[],
         workspacePath: string,
         progress: vscode.Progress<{ message?: string; increment?: number }>,
@@ -94,25 +82,16 @@ export class BlarifyIntegration {
         resolve: (value: any) => void,
         reject: (reason?: any) => void
     ): void {
-        // Spawn Blarify process
-        let blarify: any;
-        if (blarifyScript) {
-            // Use local blarify with PYTHONPATH
-            const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
-            blarify = spawn(pythonExecutable, ['-m', 'blarify', ...args], {
-                cwd: workspacePath,
-                env: { 
-                    ...process.env,
-                    PYTHONPATH: pythonPath!
-                }
-            });
-        } else {
-            // Use global blarify command
-            blarify = spawn('blarify', args, {
-                cwd: workspacePath,
-                env: process.env
-            });
-        }
+        // Spawn Blarify process using bundled Python
+        // We need to run blarify's main.py directly since it's not installed as a package
+        const blarifyMainPath = path.join(this.extensionPath, 'bundled', 'blarify', 'main.py');
+        const blarify = spawn(pythonPath, [blarifyMainPath, ...args], {
+            cwd: workspacePath,
+            env: { 
+                ...process.env,
+                PYTHONPATH: path.join(this.extensionPath, 'bundled')
+            }
+        });
         
         let output = '';
         let errorOutput = '';
@@ -169,32 +148,9 @@ export class BlarifyIntegration {
     }
     
     async checkBlarifyInstalled(): Promise<boolean> {
-        // First check if Python is available
-        const pythonAvailable = await new Promise<boolean>((resolve) => {
-            const pythonExecutable = process.platform === 'win32' ? 'python' : 'python3';
-            const check = spawn(pythonExecutable, ['--version']);
-            check.on('close', (code) => {
-                resolve(code === 0);
-            });
-            check.on('error', () => {
-                resolve(false);
-            });
-        });
-        
-        if (!pythonAvailable) {
-            return false;
-        }
-        
-        // Check if blarify is installed globally
-        return new Promise((resolve) => {
-            const check = spawn('blarify', ['--version']);
-            check.on('close', (code) => {
-                resolve(code === 0);
-            });
-            check.on('error', () => {
-                resolve(false);
-            });
-        });
+        // With bundled Blarify, we just need to check if the bundled directory exists
+        const bundledBlarifyPath = path.join(this.extensionPath, 'bundled', 'blarify', 'main.py');
+        return fs.existsSync(bundledBlarifyPath);
     }
     
     getLastAnalysis(): number | undefined {

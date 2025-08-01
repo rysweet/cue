@@ -11,3 +11,6 @@ vsc-extension-quickstart.md
 **/*.ts
 test-extension.js
 debug-extension.js
+debug-neo4j.js
+test-bundled.js
+test-commands.js

@@ -7,7 +7,7 @@ class GraphDataProvider {
         this.configManager = configManager;
     }
     async getGraphData(options = {}) {
-        const driver = this.neo4jManager.getDriver();
+        const driver = await this.neo4jManager.getDriver();
         if (!driver) {
             throw new Error('Neo4j driver not connected');
         }
@@ -39,7 +39,7 @@ class GraphDataProvider {
             const edges = [];
             const nodeMap = new Map();
             const edgeSet = new Set();
-            result.records.forEach(record => {
+            result.records.forEach((record) => {
                 // Process nodes
                 if (record.has('nodes')) {
                     const nodesData = record.get('nodes');
@@ -159,7 +159,7 @@ class GraphDataProvider {
         return { nodeTypes };
     }
     async getNodeDetails(nodeId) {
-        const driver = this.neo4jManager.getDriver();
+        const driver = await this.neo4jManager.getDriver();
         if (!driver) {
             return null;
         }

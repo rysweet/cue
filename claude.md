@@ -277,8 +277,9 @@ New specialized agents can be added to `.github/agents/` following the existing 
 ## Extension Management Memories
 
 - Command sequence for uninstalling and reinstalling the extension: 
-  - Uninstall: `code --uninstall-extension <extension-id>`
-  - Reinstall: `code --install-extension <extension-id>`
+  - Uninstall: `code-insiders --uninstall-extension <extension-id>`
+  - Reinstall: `code-insiders --install-extension <extension-id>`
+  - Note: Use `code-insiders` (not `code`) as VS Code Insiders is installed
 
 ## CI Management
 
