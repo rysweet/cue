@@ -256,6 +256,99 @@ class TestLLMService(unittest.TestCase):
             self.assertIsNone(results["node1"])
             self.assertIsNone(results["node2"])
     
+    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    def test_generate_batch_descriptions_complex_mixed_scenarios(self, mock_azure_openai):
+        """Test batch generation with complex mixed success/failure/retry scenarios."""
+        mock_client = MagicMock()
+        mock_azure_openai.return_value = mock_client
+        
+        # Success response
+        mock_success_response = MagicMock()
+        mock_success_response.choices[0].message.content = "Success description"
+        
+        # Set up complex scenario:
+        # - prompt1: succeeds immediately
+        # - prompt2: fails twice, succeeds on retry
+        # - prompt3: fails permanently (all retries exhausted)
+        # - prompt4: succeeds immediately  
+        mock_client.chat.completions.create.side_effect = [
+            mock_success_response,                    # prompt1: immediate success
+            Exception("Temporary API Error"),        # prompt2: first failure
+            Exception("Temporary API Error"),        # prompt2: second failure  
+            mock_success_response,                    # prompt2: success on retry
+            Exception("Permanent API Error"),        # prompt3: first failure
+            Exception("Permanent API Error"),        # prompt3: second failure
+            Exception("Permanent API Error"),        # prompt3: third failure (exhausted)
+            mock_success_response,                    # prompt4: immediate success
+        ]
+        
+        service = LLMService()
+        prompts = [
+            {"id": "node1", "prompt": "Prompt 1"},
+            {"id": "node2", "prompt": "Prompt 2"}, 
+            {"id": "node3", "prompt": "Prompt 3"},
+            {"id": "node4", "prompt": "Prompt 4"}
+        ]
+        
+        with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+            results = service.generate_batch_descriptions(prompts, batch_size=1)
+        
+        # Verify results
+        self.assertEqual(len(results), 4)
+        self.assertEqual(results["node1"], "Success description")  # immediate success
+        self.assertEqual(results["node2"], "Success description")  # success after retries
+        self.assertIsNone(results["node3"])                       # permanent failure
+        self.assertEqual(results["node4"], "Success description")  # immediate success
+        
+        # Verify API was called the expected number of times
+        # node1: 1 call, node2: 3 calls, node3: 3 calls, node4: 1 call = 8 total
+        self.assertEqual(mock_client.chat.completions.create.call_count, 8)
+    
+    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    def test_generate_batch_descriptions_partial_success_with_retries(self, mock_azure_openai):
+        """Test batch processing where some succeed after retries and some fail permanently."""
+        mock_client = MagicMock()
+        mock_azure_openai.return_value = mock_client
+        
+        success_response = MagicMock()
+        success_response.choices[0].message.content = "Retry success"
+        
+        # Scenario: 5 prompts with different retry patterns
+        mock_client.chat.completions.create.side_effect = [
+            success_response,                         # prompt1: immediate success
+            Exception("Rate limit"),                  # prompt2: fails twice, then succeeds
+            Exception("Rate limit"),                  
+            success_response,                         
+            Exception("Server error"),                # prompt3: fails all 3 attempts
+            Exception("Server error"),                
+            Exception("Server error"),                
+            Exception("Timeout"),                     # prompt4: fails once, then succeeds
+            success_response,                         
+            success_response,                         # prompt5: immediate success
+        ]
+        
+        service = LLMService()
+        prompts = [
+            {"id": "immediate_success", "prompt": "Prompt 1"},
+            {"id": "retry_success", "prompt": "Prompt 2"},
+            {"id": "permanent_failure", "prompt": "Prompt 3"},
+            {"id": "single_retry_success", "prompt": "Prompt 4"},
+            {"id": "another_immediate", "prompt": "Prompt 5"}
+        ]
+        
+        with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+            results = service.generate_batch_descriptions(prompts, batch_size=2)
+        
+        # Verify results match expected patterns
+        self.assertEqual(results["immediate_success"], "Retry success")
+        self.assertEqual(results["retry_success"], "Retry success")
+        self.assertIsNone(results["permanent_failure"])
+        self.assertEqual(results["single_retry_success"], "Retry success")
+        self.assertEqual(results["another_immediate"], "Retry success")
+        
+        # Total calls: 1 + 3 + 3 + 2 + 1 = 10
+        self.assertEqual(mock_client.chat.completions.create.call_count, 10)
+    
     def test_is_enabled(self):
         """Test is_enabled method."""
         with patch('blarify.llm_descriptions.llm_service.AzureOpenAI'):
