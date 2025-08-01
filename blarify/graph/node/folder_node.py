@@ -1,6 +1,6 @@
 from blarify.graph.node import Node, NodeLabels
 from blarify.graph.node.file_node import FileNode
-from typing import Union, List
+from typing import Union, List, Any
 from blarify.graph.relationship import RelationshipCreator, Relationship
 
 
@@ -10,7 +10,7 @@ class FolderNode(Node):
     level: int
     _contains: List[Union[FileNode, "FolderNode"]]
 
-    def __init__(self, path: str, name: str, level: int, *args, **kwargs):
+    def __init__(self, path: str, name: str, level: int, *args: Any, **kwargs: Any):
         self._contains: List[Union[FileNode, "FolderNode"]] = []
         super().__init__(NodeLabels.FOLDER, path, name, level, *args, **kwargs)
 

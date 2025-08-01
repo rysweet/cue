@@ -183,6 +183,9 @@ class LspQueryHelper:
         process = self.language_to_lsp_server[language].language_server.server.process
 
         # Kill running processes
+        if process is None:
+            return
+            
         try:
             if psutil.pid_exists(process.pid):
                 for child in psutil.Process(process.pid).children(recursive=True):
@@ -219,7 +222,7 @@ class LspQueryHelper:
 
         # Stop the loop
         # It is important to stop the loop before exiting the context otherwise there will be threads running indefinitely
-        if loop.is_running():
+        if loop is not None and loop.is_running():
             loop.call_soon_threadsafe(loop.stop)
 
     def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
