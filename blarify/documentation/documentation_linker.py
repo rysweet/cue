@@ -35,7 +35,7 @@ class DocumentationLinker:
         """
         matches: List["Node"] = []
         entity_name = doc_entity.get("name", "")
-        entity_type = doc_entity.get("type", "")
+        _entity_type = doc_entity.get("type", "")  # Future use for type-specific matching
         
         if not entity_name:
             return matches
@@ -124,7 +124,7 @@ class DocumentationLinker:
         """
         matches: List["Node"] = []
         concept_name = concept.get("name", "").lower()
-        concept_desc = concept.get("description", "").lower()
+        _concept_desc = concept.get("description", "").lower()  # Future use for description-based matching
         
         # Keywords that suggest implementation
         implementation_keywords = [
