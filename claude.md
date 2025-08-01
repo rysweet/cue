@@ -273,3 +273,8 @@ New specialized agents can be added to `.github/agents/` following the existing 
 - [Neo4j Documentation](https://neo4j.com/docs/)
 - [D3.js Documentation](https://d3js.org/)
 - [Playwright Documentation](https://playwright.dev/docs/intro)
+
+## Git Guidelines
+
+### Git Workflow Rules
+- **Never commit directly to main**
