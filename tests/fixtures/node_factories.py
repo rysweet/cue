@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, List
 """
 Factory functions for creating test nodes.
 """
@@ -209,9 +209,9 @@ def create_description_node(target_node_id: str, description: str = "Test descri
     )
 
 
-def create_sample_project_nodes():
+def create_sample_project_nodes() -> List:
     """Create a set of nodes representing a sample project structure."""
-    nodes = []
+    nodes: List = []
     
     # Root folder
     root = create_folder_node("project", "file:///test/project", 0)
