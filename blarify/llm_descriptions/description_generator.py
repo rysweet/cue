@@ -179,8 +179,8 @@ Please provide a concise description (2-3 sentences) of what this module contain
             context["function_name"] = node.name
             context["method_name"] = node.name
             # Get code snippet if available
-            if hasattr(node, 'code_text'):
-                context["code_snippet"] = node.code_text[:1000]  # Limit snippet length
+            if hasattr(node, 'code_text') and node.code_text:
+                context["code_snippet"] = str(node.code_text)[:1000]  # Limit snippet length
             else:
                 context["code_snippet"] = "# Code snippet not available"
             
@@ -190,8 +190,8 @@ Please provide a concise description (2-3 sentences) of what this module contain
                 
         elif node.label == NodeLabels.CLASS:
             context["class_name"] = node.name
-            if hasattr(node, 'code_text'):
-                context["code_snippet"] = node.code_text[:1000]
+            if hasattr(node, 'code_text') and node.code_text:
+                context["code_snippet"] = str(node.code_text)[:1000]
             else:
                 context["code_snippet"] = "# Code snippet not available"
                 
@@ -266,7 +266,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
     
     def _extract_referenced_nodes(self, description: str, graph: "Graph") -> List["Node"]:
         """Extract nodes that are referenced in the description text."""
-        referenced_nodes = []
+        referenced_nodes: List["Node"] = []
         
         # Look for function/class/method names in backticks or quotes
         patterns = [

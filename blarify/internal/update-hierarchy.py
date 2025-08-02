@@ -3,7 +3,7 @@ from blarify.project_graph_updater import ProjectGraphUpdater, UpdatedFile
 from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.code_references import LspQueryHelper
 from blarify.graph.graph_environment import GraphEnvironment
-from typing import List
+from typing import List, Optional
 
 import dotenv
 import os
@@ -36,7 +36,7 @@ NAMES_TO_SKIP = [
     "versions",
 ]
 
-def update(updated_files: List[UpdatedFile], root_uri: str, blarignore_path: str = None):
+def update(updated_files: List[UpdatedFile], root_uri: str, blarignore_path: Optional[str] = None):
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 

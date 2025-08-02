@@ -3,22 +3,23 @@ from blarify.graph.graph import Graph
 from blarify.graph.graph_environment import GraphEnvironment
 from blarify.project_file_explorer.project_files_iterator import ProjectFilesIterator
 from blarify.project_graph_creator import ProjectGraphCreator
+from typing import Optional, List
 
 
 class GraphBuilder:
     def __init__(
         self,
         root_path: str,
-        extensions_to_skip: list[str] = None,
-        names_to_skip: list[str] = None,
+        extensions_to_skip: Optional[List[str]] = None,
+        names_to_skip: Optional[List[str]] = None,
         only_hierarchy: bool = False,
-        graph_environment: GraphEnvironment = None,
-        enable_llm_descriptions: bool = None,
-        enable_filesystem_nodes: bool = None,
+        graph_environment: Optional[GraphEnvironment] = None,
+        enable_llm_descriptions: Optional[bool] = None,
+        enable_filesystem_nodes: Optional[bool] = None,
         use_gitignore: bool = True,
-        blarignore_path: str = None,
-        enable_documentation_nodes: bool = None,
-        documentation_patterns: list[str] = None,
+        blarignore_path: Optional[str] = None,
+        enable_documentation_nodes: Optional[bool] = None,
+        documentation_patterns: Optional[List[str]] = None,
         max_llm_calls_per_doc: int = 5,
     ):
         """
