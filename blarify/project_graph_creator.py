@@ -41,10 +41,10 @@ class ProjectGraphCreator:
         root_path: str,
         lsp_query_helper: LspQueryHelper,
         project_files_iterator: ProjectFilesIterator,
-        graph_environment: "GraphEnvironment" = None,
-        enable_llm_descriptions: bool = None,
-        enable_filesystem_nodes: bool = None,
-        enable_documentation_nodes: bool = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
+        enable_llm_descriptions: Optional[bool] = None,
+        enable_filesystem_nodes: Optional[bool] = None,
+        enable_documentation_nodes: Optional[bool] = None,
         documentation_patterns: Optional[List[str]] = None,
         max_llm_calls_per_doc: int = 5,
     ):
@@ -238,7 +238,7 @@ class ProjectGraphCreator:
     def _get_language_definition(self, file_extension: str):
         return self.languages.get(file_extension, FallbackDefinitions)
 
-    def _get_file_node_from_file_nodes(self, file_nodes) -> "FileNode":
+    def _get_file_node_from_file_nodes(self, file_nodes: List["Node"]) -> "FileNode":
         # File node should always be the first node in the list
         for node in file_nodes:
             if node.label == NodeLabels.FILE:

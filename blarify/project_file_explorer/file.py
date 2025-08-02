@@ -26,7 +26,7 @@ class File:
     def __str__(self) -> str:
         return self.path
     
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, File):
             return False
         return self.path == other.path

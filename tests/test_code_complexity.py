@@ -4,13 +4,16 @@ Tests for code complexity calculation.
 import unittest
 from unittest.mock import Mock, patch
 import tree_sitter_python as tspython
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser, Node as TreeSitterNode
 
 from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
 
 
 class TestCodeComplexityCalculator(unittest.TestCase):
     """Test code complexity calculations."""
+    calculator: CodeComplexityCalculator
+    PY_LANGUAGE: Language
+    parser: Parser
     
     def setUp(self):
         """Set up test fixtures."""
@@ -19,7 +22,7 @@ class TestCodeComplexityCalculator(unittest.TestCase):
         self.PY_LANGUAGE = Language(tspython.language())
         self.parser = Parser(self.PY_LANGUAGE)
         
-    def parse_code(self, code):
+    def parse_code(self, code: str):
         """Parse Python code and return tree."""
         return self.parser.parse(bytes(code, "utf8")).root_node
         
@@ -108,7 +111,7 @@ def no_params():
         self.assertEqual(param_count, 0)
         
         
-    def find_node_by_type(self, node, node_type):
+    def find_node_by_type(self, node: TreeSitterNode, node_type: str):
         """Helper to find first node of given type."""
         if node.type == node_type:
             return node
@@ -123,6 +126,7 @@ def no_params():
 
 class TestComplexityMetrics(unittest.TestCase):
     """Test various complexity metric calculations."""
+    calculator: CodeComplexityCalculator
     
     def setUp(self):
         """Set up test fixtures."""

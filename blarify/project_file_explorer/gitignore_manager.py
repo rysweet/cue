@@ -1,6 +1,5 @@
 import os
-from typing import List, Set, Optional, Dict
-from pathlib import Path
+from typing import List, Dict
 import pathspec
 import logging
 
@@ -31,7 +30,7 @@ class GitignoreManager:
     def _load_gitignore_patterns(self) -> None:
         """Find and load all .gitignore files in the project."""
         # Find all .gitignore files
-        for dirpath, dirnames, filenames in os.walk(self.root_path):
+        for dirpath, _, filenames in os.walk(self.root_path):
             if '.gitignore' in filenames:
                 gitignore_path = os.path.join(dirpath, '.gitignore')
                 self._gitignore_files.append(gitignore_path)
@@ -47,7 +46,7 @@ class GitignoreManager:
         try:
             with open(gitignore_path, 'r', encoding='utf-8') as f:
                 # Read lines and filter out comments and empty lines
-                lines = []
+                lines: List[str] = []
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith('#'):
@@ -111,7 +110,7 @@ class GitignoreManager:
         Returns:
             List of all patterns from all .gitignore files
         """
-        all_patterns = []
+        all_patterns: List[str] = []
         for gitignore_path in self._gitignore_files:
             try:
                 with open(gitignore_path, 'r', encoding='utf-8') as f:

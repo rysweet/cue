@@ -16,10 +16,10 @@ class ProjectFilesIterator:
     def __init__(
         self,
         root_path: str,
-        paths_to_skip: List[str] = None,
-        names_to_skip: List[str] = None,
-        extensions_to_skip: List[str] = None,
-        blarignore_path: str = None,
+        paths_to_skip: Optional[List[str]] = None,
+        names_to_skip: Optional[List[str]] = None,
+        extensions_to_skip: Optional[List[str]] = None,
+        blarignore_path: Optional[str] = None,
         max_file_size_mb: int = 0.8,
         use_gitignore: bool = True,
     ):
@@ -37,7 +37,7 @@ class ProjectFilesIterator:
         
         # Initialize blarignore patterns
         self.blarignore_spec: Optional[pathspec.PathSpec] = None
-        blarignore_patterns = []
+        blarignore_patterns: List[str] = []
         
         # Load .blarignore if path provided
         if blarignore_path:
@@ -82,7 +82,7 @@ class ProjectFilesIterator:
         dirs = [dir for dir in dirs if not self._should_skip_directory(os.path.join(root, dir))]
         return dirs
 
-    def get_path_level_relative_to_root(self, path) -> int:
+    def get_path_level_relative_to_root(self, path: str) -> int:
         level = path.count(os.sep) - self.root_path.count(os.sep)
         return level
 
@@ -91,7 +91,7 @@ class ProjectFilesIterator:
 
         return [File(name=file, root_path=root, level=level) for file in files]
 
-    def empty_folders_from_dirs(self, root: str, dirs: List[str], level) -> List[Folder]:
+    def empty_folders_from_dirs(self, root: str, dirs: List[str], level: int) -> List[Folder]:
         return [
             Folder(
                 name=dir,

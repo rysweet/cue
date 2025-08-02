@@ -20,6 +20,7 @@ easy/
 
 !blarify/vendor/**/*.json
 !.claude/settings.json
+!pyrightconfig.json
 
 # Workflow state management
 # Temporary workflow states (ignored to reduce git noise)

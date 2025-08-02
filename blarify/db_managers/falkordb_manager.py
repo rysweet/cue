@@ -1,47 +1,48 @@
 import os
-import time
-from typing import Any, List
+from typing import Any, List, Optional
 import logging
 
 from dotenv import load_dotenv
-from falkordb import FalkorDB, exceptions
+from falkordb import FalkorDB
+
+from .db_manager import AbstractDbManager
 
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 
-class FalkorDBManager:
+class FalkorDBManager(AbstractDbManager):
     entity_id: str
     repo_id: str
     db: FalkorDB
 
     def __init__(
         self,
-        repo_id: str = None,
-        entity_id: str = None,
-        uri: str = None,
-        user: str = None,
-        password: str = None,
+        repo_id: Optional[str] = None,
+        entity_id: Optional[str] = None,
+        uri: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
     ):
         host = uri or os.getenv("FALKORDB_URI", "localhost")
-        port = int(os.getenv("FALKORDB_PORT", 6379))
-        user = user or os.getenv("FALKORDB_USERNAME")
-        password = password or os.getenv("FALKORDB_PASSWORD")
+        port = int(os.getenv("FALKORDB_PORT", "6379"))
+        username = user or os.getenv("FALKORDB_USERNAME", "")
+        pwd = password or os.getenv("FALKORDB_PASSWORD", "")
 
-        self.db = FalkorDB(host=host, port=port, username=user, password=password)
+        self.db = FalkorDB(host=host, port=port, username=username, password=pwd)
 
         self.repo_id = repo_id if repo_id is not None else "default_repo"
         self.entity_id = entity_id if entity_id is not None else "default_user"
 
-    def close(self):
+    def close(self) -> None:
         pass
 
-    def save_graph(self, nodes: List[Any], edges: List[Any]):
+    def save_graph(self, nodes: List[Any], edges: List[Any]) -> None:
         self.create_nodes(nodes)
         self.create_edges(edges)
 
-    def create_nodes(self, nodeList: List[dict]):
+    def create_nodes(self, nodeList: List[Any]) -> None:
         graph = self.db.select_graph(self.repo_id)
         cypher_query = """
         UNWIND $nodes AS node
@@ -57,7 +58,7 @@ class FalkorDBManager:
             params={"nodes": nodeList},
         )
 
-    def create_edges(self, edgesList: List[dict]):
+    def create_edges(self, edgesList: List[Any]) -> None:
         graph = self.db.select_graph(self.repo_id)
         cypher_query = """
         UNWIND $edges AS edge
@@ -69,8 +70,7 @@ class FalkorDBManager:
             params={"edges": edgesList},
         )
 
-    def detach_delete_nodes_with_path(self, path: str):
+    def detatch_delete_nodes_with_path(self, path: str) -> None:
         graph = self.db.select_graph(self.repo_id)
         cypher_query = "MATCH (n {path: $path}) DETACH DELETE n"
-        result = graph.query(cypher_query, params={"path": path})
-        return result.result_set
+        graph.query(cypher_query, params={"path": path})

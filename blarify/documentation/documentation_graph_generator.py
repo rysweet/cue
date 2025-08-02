@@ -55,9 +55,9 @@ class DocumentationGraphGenerator:
         self.max_llm_calls_per_doc = max_llm_calls_per_doc
         
         # Track created nodes
-        self._doc_file_nodes = {}
-        self._concept_nodes = {}
-        self._entity_nodes = {}
+        self._doc_file_nodes: Dict[str, DocumentationFileNode] = {}
+        self._concept_nodes: Dict[str, ConceptNode] = {}
+        self._entity_nodes: Dict[str, DocumentedEntityNode] = {}
     
     def generate_documentation_nodes(self, graph: "Graph") -> None:
         """

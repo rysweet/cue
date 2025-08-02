@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 
@@ -20,8 +20,8 @@ class DocumentedEntityNode(Node):
         description: str,
         source_file: str,
         level: int = 0,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         # For documented entities, use a file-like path format
         # Sanitize the name and type to create a valid path
@@ -46,7 +46,7 @@ class DocumentedEntityNode(Node):
     def node_repr_for_identifier(self) -> str:
         return f"/DOCUMENTED_ENTITY[{self.entity_type}:{self.name}]"
     
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"].update({
             "entity_type": self.entity_type,

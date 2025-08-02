@@ -104,6 +104,7 @@ class TestDescriptionNodes(unittest.TestCase):
         prompt_data = generator._create_prompt_for_node(mock_node, mock_graph)
         
         self.assertIsNotNone(prompt_data)
+        assert prompt_data is not None  # Type narrowing for pyright
         self.assertEqual(prompt_data['id'], "func_123")
         self.assertIn("function", prompt_data['prompt'].lower())
         self.assertIn("calculate_average", prompt_data['prompt'])

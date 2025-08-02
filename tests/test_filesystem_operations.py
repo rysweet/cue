@@ -18,6 +18,9 @@ from blarify.graph.graph_environment import GraphEnvironment
 
 class TestFilesystemGraphGenerator(unittest.TestCase):
     """Test filesystem graph generation."""
+    temp_dir: str
+    generator: FilesystemGraphGenerator
+    graph: Graph
     
     def setUp(self):
         """Set up test fixtures."""
@@ -317,6 +320,8 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
 
 class TestGitignoreManager(unittest.TestCase):
     """Test gitignore file handling."""
+    temp_dir: str
+    manager: GitignoreManager
     
     def setUp(self):
         """Set up test fixtures."""

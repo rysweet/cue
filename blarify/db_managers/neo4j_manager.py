@@ -1,38 +1,40 @@
 import os
 import time
-from typing import Any, List
+from typing import Any, List, Optional
 
 from dotenv import load_dotenv
 from neo4j import Driver, GraphDatabase, exceptions
 import logging
+
+from .db_manager import AbstractDbManager
 
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 
-class Neo4jManager:
+class Neo4jManager(AbstractDbManager):
     entity_id: str
     repo_id: str
     driver: Driver
 
     def __init__(
         self,
-        repo_id: str = None,
-        entity_id: str = None,
+        repo_id: Optional[str] = None,
+        entity_id: Optional[str] = None,
         max_connections: int = 50,
-        uri: str = None,
-        user: str = None,
-        password: str = None,
+        uri: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
     ):
-        uri = uri or os.getenv("NEO4J_URI")
-        user = user or os.getenv("NEO4J_USERNAME")
-        password = password or os.getenv("NEO4J_PASSWORD")
+        connection_uri = uri or os.getenv("NEO4J_URI", "bolt://localhost:7687")
+        username = user or os.getenv("NEO4J_USERNAME", "neo4j")
+        pwd = password or os.getenv("NEO4J_PASSWORD", "password")
 
         retries = 3
         for attempt in range(retries):
             try:
-                self.driver = GraphDatabase.driver(uri, auth=(user, password), max_connection_pool_size=max_connections)
+                self.driver = GraphDatabase.driver(connection_uri, auth=(username, pwd), max_connection_pool_size=max_connections)
                 break
             except exceptions.ServiceUnavailable as e:
                 if attempt < retries - 1:
@@ -43,28 +45,28 @@ class Neo4jManager:
         self.repo_id = repo_id if repo_id is not None else "default_repo"
         self.entity_id = entity_id if entity_id is not None else "default_user"
 
-    def close(self):
+    def close(self) -> None:
         # Close the connection to the database
         self.driver.close()
 
-    def save_graph(self, nodes: List[Any], edges: List[Any]):
+    def save_graph(self, nodes: List[Any], edges: List[Any]) -> None:
         self.create_nodes(nodes)
         self.create_edges(edges)
 
-    def create_nodes(self, nodeList: List[Any]):
+    def create_nodes(self, nodeList: List[Any]) -> None:
         # Function to create nodes in the Neo4j database
         with self.driver.session() as session:
-            session.write_transaction(
+            session.execute_write(
                 self._create_nodes_txn, nodeList, 100, repoId=self.repo_id, entityId=self.entity_id
             )
 
-    def create_edges(self, edgesList: List[Any]):
+    def create_edges(self, edgesList: List[Any]) -> None:
         # Function to create edges between nodes in the Neo4j database
         with self.driver.session() as session:
-            session.write_transaction(self._create_edges_txn, edgesList, 100, entityId=self.entity_id)
+            session.execute_write(self._create_edges_txn, edgesList, 100, entityId=self.entity_id)
 
     @staticmethod
-    def _create_nodes_txn(tx, nodeList: List[Any], batch_size: int, repoId: str, entityId: str):
+    def _create_nodes_txn(tx: Any, nodeList: List[Any], batch_size: int, repoId: str, entityId: str) -> None:
         node_creation_query = """
         CALL apoc.periodic.iterate(
             "UNWIND $nodeList AS node RETURN node",
@@ -89,7 +91,7 @@ class Neo4jManager:
             print(record)
 
     @staticmethod
-    def _create_edges_txn(tx, edgesList: List[Any], batch_size: int, entityId: str):
+    def _create_edges_txn(tx: Any, edgesList: List[Any], batch_size: int, entityId: str) -> None:
         # Cypher query using apoc.periodic.iterate for creating edges
         edge_creation_query = """
         CALL apoc.periodic.iterate(
@@ -117,13 +119,12 @@ class Neo4jManager:
         for record in result:
             logger.info(f"Created {record['total']} edges")
 
-    def detatch_delete_nodes_with_path(self, path: str):
+    def detatch_delete_nodes_with_path(self, path: str) -> None:
         with self.driver.session() as session:
-            result = session.run(
+            session.run(
                 """
                 MATCH (n {path: $path})
                 DETACH DELETE n
                 """,
                 path=path,
             )
-            return result.data()

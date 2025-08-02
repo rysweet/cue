@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 
@@ -21,8 +21,8 @@ class DescriptionNode(Node):
         description_text: str,
         target_node_id: str,
         llm_model: str = "gpt-4",
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(
             label=NodeLabels.DESCRIPTION,
@@ -40,7 +40,7 @@ class DescriptionNode(Node):
     def node_repr_for_identifier(self) -> str:
         return f"/DESCRIPTION[{self.target_node_id}]"
     
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"].update({
             "description_text": self.description_text,

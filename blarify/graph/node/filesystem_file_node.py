@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 
@@ -25,8 +25,8 @@ class FilesystemFileNode(Node):
         extension: str,
         last_modified: float,
         permissions: Optional[str] = None,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(
             label=NodeLabels.FILESYSTEM_FILE,
@@ -46,7 +46,7 @@ class FilesystemFileNode(Node):
     def node_repr_for_identifier(self) -> str:
         return f"/FILESYSTEM_FILE[{self.relative_path}]"
     
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"].update({
             "relative_path": self.relative_path,

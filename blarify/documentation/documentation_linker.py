@@ -1,7 +1,6 @@
 import os
-import re
 import logging
-from typing import List, Dict, Any, Optional, TYPE_CHECKING
+from typing import List, Dict, Any, TYPE_CHECKING
 from difflib import SequenceMatcher
 
 if TYPE_CHECKING:
@@ -34,9 +33,9 @@ class DocumentationLinker:
         Returns:
             List of matching code nodes
         """
-        matches = []
+        matches: List["Node"] = []
         entity_name = doc_entity.get("name", "")
-        entity_type = doc_entity.get("type", "")
+        _entity_type = doc_entity.get("type", "")  # Future use for type-specific matching
         
         if not entity_name:
             return matches
@@ -82,7 +81,7 @@ class DocumentationLinker:
         Returns:
             List of matching code nodes
         """
-        matches = []
+        matches: List["Node"] = []
         ref_text = code_ref.get("text", "")
         ref_type = code_ref.get("type", "")
         
@@ -123,9 +122,9 @@ class DocumentationLinker:
         Returns:
             List of code nodes that might implement the concept
         """
-        matches = []
+        matches: List["Node"] = []
         concept_name = concept.get("name", "").lower()
-        concept_desc = concept.get("description", "").lower()
+        _concept_desc = concept.get("description", "").lower()  # Future use for description-based matching
         
         # Keywords that suggest implementation
         implementation_keywords = [
@@ -160,7 +159,7 @@ class DocumentationLinker:
     
     def _find_nodes_by_path(self, path_ref: str, nodes: List["Node"]) -> List["Node"]:
         """Find nodes that match a file path reference."""
-        matches = []
+        matches: List["Node"] = []
         
         # Normalize path separators
         path_ref = path_ref.replace('\\', '/')
@@ -181,7 +180,7 @@ class DocumentationLinker:
     
     def _find_nodes_by_class_name(self, class_name: str, nodes: List["Node"]) -> List["Node"]:
         """Find class nodes by name."""
-        matches = []
+        matches: List["Node"] = []
         
         for node in nodes:
             if hasattr(node, 'label') and node.label.value == 'CLASS':
@@ -192,7 +191,7 @@ class DocumentationLinker:
     
     def _find_nodes_by_method_name(self, method_name: str, nodes: List["Node"]) -> List["Node"]:
         """Find method or function nodes by name."""
-        matches = []
+        matches: List["Node"] = []
         
         # Remove parentheses if present
         method_name = method_name.replace('()', '').strip()
@@ -206,7 +205,7 @@ class DocumentationLinker:
     
     def _find_nodes_by_class_and_method(self, class_name: str, method_name: str, nodes: List["Node"]) -> List["Node"]:
         """Find method nodes within a specific class."""
-        matches = []
+        matches: List["Node"] = []
         
         # First find the class
         class_nodes = self._find_nodes_by_class_name(class_name, nodes)
@@ -224,7 +223,7 @@ class DocumentationLinker:
     
     def _find_nodes_by_name(self, name: str, nodes: List["Node"]) -> List["Node"]:
         """Find nodes by name regardless of type."""
-        matches = []
+        matches: List["Node"] = []
         
         for node in nodes:
             if node.name == name or node.name.lower() == name.lower():

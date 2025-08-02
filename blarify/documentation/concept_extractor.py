@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from blarify.llm_descriptions.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
@@ -147,18 +147,21 @@ Return ONLY valid JSON in this format:
                 response = response[:-3]
             
             # Parse JSON
-            result = json.loads(response.strip())
+            parsed_result = json.loads(response.strip())
             
             # Validate structure
-            if not isinstance(result, dict):
+            if not isinstance(parsed_result, dict):
                 raise ValueError("Response is not a dictionary")
             
-            # Ensure all required keys exist
+            # Ensure all required keys exist and build typed result
+            result: Dict[str, Any] = {}
             for key in ["concepts", "entities", "relationships", "code_references"]:
-                if key not in result:
+                if key not in parsed_result:
                     result[key] = []
-                elif not isinstance(result[key], list):
+                elif not isinstance(parsed_result[key], list):
                     result[key] = []
+                else:
+                    result[key] = parsed_result[key]
             
             return result
             

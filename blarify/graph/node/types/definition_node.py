@@ -1,10 +1,7 @@
-from typing import List, Optional, Tuple, Union, TYPE_CHECKING, Dict
-from blarify.graph.relationship import RelationshipCreator
+from typing import List, Optional, Tuple, Union, TYPE_CHECKING, Dict, Any
 from blarify.graph.node.types.node import Node
 
 import re
-
-from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
 
 if TYPE_CHECKING:
     from ..class_node import ClassNode
@@ -13,6 +10,7 @@ if TYPE_CHECKING:
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
     from blarify.graph.graph_environment import GraphEnvironment
+    from blarify.stats.complexity import NestingStats
 
 
 class DefinitionNode(Node):
@@ -23,25 +21,34 @@ class DefinitionNode(Node):
     body_node: Optional["TreeSitterNode"]
     _tree_sitter_node: "TreeSitterNode"
     _is_diff: bool
-    extra_labels = List[str]
-    extra_attributes = Dict[str, str]
+    extra_labels: List[str]
+    extra_attributes: Dict[str, str]
 
     def __init__(
-        self, definition_range, node_range, code_text, body_node, tree_sitter_node: "TreeSitterNode", *args, **kwargs
-    ):
+        self, definition_range: "Reference", node_range: "Reference", code_text: str, body_node: Optional["TreeSitterNode"], tree_sitter_node: "TreeSitterNode", *args: Any, **kwargs: Any
+    ) -> None:
         self._defines: List[Union["ClassNode", "FunctionNode"]] = []
         self.definition_range = definition_range
         self.node_range = node_range
         self.code_text = code_text
         self.body_node = body_node
         self._tree_sitter_node = tree_sitter_node
+        self._is_diff = False  # Initialize the missing instance variable
         self.extra_labels = []
         self.extra_attributes = {}
 
         super().__init__(*args, **kwargs)
 
     @property
+    def tree_sitter_node(self) -> "TreeSitterNode":
+        """Public access to the tree-sitter node."""
+        return self._tree_sitter_node
+
+    @property
     def stats(self) -> "NestingStats":
+        # Import at runtime to avoid circular dependencies
+        from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
+        
         if self.body_node is None:
             return NestingStats(0, 0, 0, 0)
         return CodeComplexityCalculator.calculate_nesting_stats(self.body_node, extension=self.extension)
@@ -53,7 +60,10 @@ class DefinitionNode(Node):
         self._defines.extend(nodes)
 
     def get_relationships(self) -> List["Relationship"]:
-        relationships = []
+        # Import here to avoid circular dependencies
+        from blarify.graph.relationship import RelationshipCreator
+        
+        relationships: List["Relationship"] = []
         for node in self._defines:
             relationships.append(RelationshipCreator.create_defines_relationship(self, node))
 
@@ -91,11 +101,12 @@ class DefinitionNode(Node):
         return reference_end < scope_start
 
     def skeletonize(self) -> None:
-        if self._tree_sitter_node is None:
-            return
-
+        # tree_sitter_node is never None based on constructor, but check for safety
         parent_node = self._tree_sitter_node
         text_bytes = parent_node.text
+        if text_bytes is None:
+            return
+        
         bytes_offset = -self._tree_sitter_node.start_byte - 1
         for node in self._defines:
             if node.body_node is None:
@@ -115,14 +126,19 @@ class DefinitionNode(Node):
         return len(self._get_text_for_skeleton()) - (end_byte - start_byte)
 
     def get_start_text_bytes(self, parent_text_bytes: bytes, bytes_offset: int) -> Tuple[bytes, int]:
+        if self.body_node is None:
+            raise ValueError("body_node is None")
         start_byte = self.body_node.start_byte + bytes_offset - 1
         return parent_text_bytes[:start_byte], start_byte
 
     def get_end_text_bytes(self, parent_text_bytes: bytes, bytes_offset: int) -> Tuple[bytes, int]:
+        if self.body_node is None:
+            raise ValueError("body_node is None")
         end_byte = self.body_node.end_byte + bytes_offset + 1
-        return self.remove_line_break_if_present(text=parent_text_bytes[end_byte:]), end_byte
+        cleaned_text = self.remove_line_break_if_present(text=parent_text_bytes[end_byte:])
+        return cleaned_text, end_byte
 
-    def remove_line_break_if_present(self, text: bytes) -> Tuple[bytes, int]:
+    def remove_line_break_if_present(self, text: bytes) -> bytes:
         if text[0:1] == b"\n":
             return text[1:]
         return text
@@ -185,10 +201,10 @@ class DefinitionNode(Node):
         }
         return obj
 
-    def filter_children_by_path(self, paths_to_keep: List[str]) -> None:
-        self._defines = [node for node in self._defines if node.path in paths_to_keep]
+    def filter_children_by_path(self, paths: List[str]) -> None:
+        self._defines = [node for node in self._defines if node.path in paths]
         for node in self._defines:
-            node.filter_children_by_path(paths_to_keep)
+            node.filter_children_by_path(paths)
 
-    def has_tree_sitter_node(self):
-        return self._tree_sitter_node is not None
+    def has_tree_sitter_node(self) -> bool:
+        return True  # tree_sitter_node is always present per constructor requirements

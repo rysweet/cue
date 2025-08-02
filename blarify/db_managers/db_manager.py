@@ -1,20 +1,29 @@
-class AbstractDbManager:
-    def close(self):
+from typing import List, Any
+from abc import ABC, abstractmethod
+
+
+class AbstractDbManager(ABC):
+    @abstractmethod
+    def close(self) -> None:
         """Close the connection to the database."""
         raise NotImplementedError
 
-    def save_graph(self, nodes, edges):
+    @abstractmethod
+    def save_graph(self, nodes: List[Any], edges: List[Any]) -> None:
         """Save nodes and edges to the database."""
         raise NotImplementedError
 
-    def create_nodes(self, nodeList):
+    @abstractmethod
+    def create_nodes(self, nodeList: List[Any]) -> None:
         """Create nodes in the database."""
         raise NotImplementedError
 
-    def create_edges(self, edgesList):
+    @abstractmethod
+    def create_edges(self, edgesList: List[Any]) -> None:
         """Create edges between nodes in the database."""
         raise NotImplementedError
 
-    def detatch_delete_nodes_with_path(self, path):
+    @abstractmethod
+    def detatch_delete_nodes_with_path(self, path: str) -> None:
         """Detach and delete nodes matching the given path."""
         raise NotImplementedError

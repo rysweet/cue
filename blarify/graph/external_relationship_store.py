@@ -1,10 +1,11 @@
+from typing import List, Dict, Any
 from blarify.graph.relationship.external_relationship import ExternalRelationship
 from blarify.graph.relationship.relationship_type import RelationshipType
 
 
 class ExternalRelationshipStore:
     def __init__(self):
-        self.relationships = []
+        self.relationships: List[ExternalRelationship] = []
 
     def add_relationship(self, relationship: ExternalRelationship):
         self.relationships.append(relationship)
@@ -13,5 +14,5 @@ class ExternalRelationshipStore:
         relationship = ExternalRelationship(start_node_id, end_node_id, rel_type)
         self.add_relationship(relationship)
 
-    def get_relationships_as_objects(self):
+    def get_relationships_as_objects(self) -> List[Dict[str, Any]]:
         return [relationship.as_object() for relationship in self.relationships]

@@ -15,4 +15,4 @@ class GraphEnvironment:
 
 
 if __name__ == "__main__":
-    logger.info(GraphEnvironment("dev", None))
+    logger.info(GraphEnvironment("dev", "main", "/tmp"))
