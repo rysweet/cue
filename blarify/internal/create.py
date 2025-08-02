@@ -2,7 +2,6 @@ from typing import List, Dict, Any, Tuple
 from blarify.graph.graph_environment import GraphEnvironment
 from blarify.prebuilt.graph_builder import GraphBuilder
 from blarify.db_managers.neo4j_manager import Neo4jManager
-import json
 import logging
 
 import dotenv

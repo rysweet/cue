@@ -1,12 +1,8 @@
-from blarify.project_graph_creator import ProjectGraphCreator
 from blarify.project_file_explorer import ProjectFilesIterator
-from blarify.project_file_explorer import ProjectFileStats
 from blarify.project_graph_updater import ProjectGraphUpdater, UpdatedFile
-from blarify.project_graph_diff_creator import PreviousNodeState, ProjectGraphDiffCreator, FileDiff, ChangeType
 from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.code_references import LspQueryHelper
 from blarify.graph.graph_environment import GraphEnvironment
-from blarify.utils.file_remover import FileRemover
 from typing import List
 
 import dotenv
@@ -40,7 +36,7 @@ NAMES_TO_SKIP = [
     "versions",
 ]
 
-def update(updated_files: list, root_uri: str = None, blarignore_path: str = None):
+def update(updated_files: List[UpdatedFile], root_uri: str, blarignore_path: str = None):
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
@@ -56,8 +52,11 @@ def update(updated_files: list, root_uri: str = None, blarignore_path: str = Non
 
     delete_updated_files_from_neo4j(updated_files, graph_manager)
 
+    # updated_files is already a list of UpdatedFile objects
+    updated_file_objects = updated_files
+    
     graph_diff_creator = ProjectGraphUpdater(
-        updated_files=updated_files,
+        updated_files=updated_file_objects,
         root_path=root_uri,
         lsp_query_helper=lsp_query_helper,
         project_files_iterator=project_files_iterator,

@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Dict, Optional, TYPE_CHECKING, Any
+from typing import List, Dict, Optional, TYPE_CHECKING, Any, Set
 
 if TYPE_CHECKING:
     from blarify.graph.graph import Graph
@@ -179,8 +179,8 @@ Please provide a concise description (2-3 sentences) of what this module contain
             context["function_name"] = node.name
             context["method_name"] = node.name
             # Get code snippet if available
-            if hasattr(node, 'text'):
-                context["code_snippet"] = node.text[:1000]  # Limit snippet length
+            if hasattr(node, 'code_text'):
+                context["code_snippet"] = node.code_text[:1000]  # Limit snippet length
             else:
                 context["code_snippet"] = "# Code snippet not available"
             
@@ -190,8 +190,8 @@ Please provide a concise description (2-3 sentences) of what this module contain
                 
         elif node.label == NodeLabels.CLASS:
             context["class_name"] = node.name
-            if hasattr(node, 'text'):
-                context["code_snippet"] = node.text[:1000]
+            if hasattr(node, 'code_text'):
+                context["code_snippet"] = node.code_text[:1000]
             else:
                 context["code_snippet"] = "# Code snippet not available"
                 
@@ -275,7 +275,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
             r"'([a-zA-Z_][a-zA-Z0-9_]*)'",  # Single quotes
         ]
         
-        potential_references = set()
+        potential_references: Set[str] = set()
         for pattern in patterns:
             matches = re.findall(pattern, description)
             potential_references.update(matches)

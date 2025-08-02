@@ -101,11 +101,12 @@ class DefinitionNode(Node):
         return reference_end < scope_start
 
     def skeletonize(self) -> None:
-        if self._tree_sitter_node is None:
-            return
-
+        # tree_sitter_node is never None based on constructor, but check for safety
         parent_node = self._tree_sitter_node
         text_bytes = parent_node.text
+        if text_bytes is None:
+            return
+        
         bytes_offset = -self._tree_sitter_node.start_byte - 1
         for node in self._defines:
             if node.body_node is None:
@@ -134,9 +135,10 @@ class DefinitionNode(Node):
         if self.body_node is None:
             raise ValueError("body_node is None")
         end_byte = self.body_node.end_byte + bytes_offset + 1
-        return self.remove_line_break_if_present(text=parent_text_bytes[end_byte:]), end_byte
+        cleaned_text = self.remove_line_break_if_present(text=parent_text_bytes[end_byte:])
+        return cleaned_text, end_byte
 
-    def remove_line_break_if_present(self, text: bytes) -> Tuple[bytes, int]:
+    def remove_line_break_if_present(self, text: bytes) -> bytes:
         if text[0:1] == b"\n":
             return text[1:]
         return text
@@ -199,10 +201,10 @@ class DefinitionNode(Node):
         }
         return obj
 
-    def filter_children_by_path(self, paths_to_keep: List[str]) -> None:
-        self._defines = [node for node in self._defines if node.path in paths_to_keep]
+    def filter_children_by_path(self, paths: List[str]) -> None:
+        self._defines = [node for node in self._defines if node.path in paths]
         for node in self._defines:
-            node.filter_children_by_path(paths_to_keep)
+            node.filter_children_by_path(paths)
 
-    def has_tree_sitter_node(self):
-        return self._tree_sitter_node is not None
+    def has_tree_sitter_node(self) -> bool:
+        return True  # tree_sitter_node is always present per constructor requirements

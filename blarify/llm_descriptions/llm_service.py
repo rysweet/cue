@@ -67,7 +67,7 @@ class LLMService:
             )
         
         # Extract base endpoint from full URL if needed
-        if "/openai/deployments/" in self.endpoint:
+        if self.endpoint and "/openai/deployments/" in self.endpoint:
             self.endpoint = self.endpoint.split("/openai/deployments/")[0] + "/"
         
         self.client = AzureOpenAI(

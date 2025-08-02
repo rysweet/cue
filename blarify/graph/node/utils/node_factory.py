@@ -66,7 +66,7 @@ class NodeFactory:
         body_node: Optional["TreeSitterNode"],
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Optional[Union[FileNode, ClassNode, FunctionNode]] = None,
+        parent: Optional[Union["DefinitionNode", FileNode, ClassNode, FunctionNode]] = None,
         graph_environment: Optional["GraphEnvironment"] = None,
     ) -> ClassNode:
         return ClassNode(
@@ -92,7 +92,7 @@ class NodeFactory:
         body_node: Optional["TreeSitterNode"],
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Optional[Union[FileNode, ClassNode, FunctionNode]] = None,
+        parent: Optional[Union["DefinitionNode", FileNode, ClassNode, FunctionNode]] = None,
         graph_environment: Optional["GraphEnvironment"] = None,
     ) -> FunctionNode:
         return FunctionNode(

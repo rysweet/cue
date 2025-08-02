@@ -63,7 +63,7 @@ class FilesystemDirectoryNode(Node):
         """Get FILESYSTEM_CONTAINS relationships for children."""
         from blarify.graph.relationship.relationship_type import RelationshipType
         
-        relationships = []
+        relationships: List["Relationship"] = []
         for child in self._contains:
             rel = Relationship(
                 start_node=self,

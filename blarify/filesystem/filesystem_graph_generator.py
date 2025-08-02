@@ -218,19 +218,21 @@ class FilesystemGraphGenerator:
         description_nodes = graph.get_nodes_by_label(NodeLabels.DESCRIPTION)
         
         for desc_node in description_nodes:
-            if hasattr(desc_node, 'description_text') and desc_node.description_text:
-                # Look for file paths in the description
-                for file_path, fs_node in self._file_nodes.items():
-                    relative_path = os.path.relpath(file_path, self.root_path)
-                    
-                    # Check if relative path is mentioned in description
-                    if relative_path in desc_node.description_text:
-                        rel = Relationship(
-                            start_node=desc_node,
-                            end_node=fs_node,
-                            rel_type=RelationshipType.REFERENCED_BY_DESCRIPTION
-                        )
-                        referenced_relationships.append(rel)
+            if hasattr(desc_node, 'description_text'):
+                description_text: str = getattr(desc_node, 'description_text', '')
+                if description_text:
+                    # Look for file paths in the description
+                    for file_path, fs_node in self._file_nodes.items():
+                        relative_path = os.path.relpath(file_path, self.root_path)
+                        
+                        # Check if relative path is mentioned in description
+                        if relative_path in description_text:
+                            rel = Relationship(
+                                start_node=desc_node,
+                                end_node=fs_node,
+                                rel_type=RelationshipType.REFERENCED_BY_DESCRIPTION
+                            )
+                            referenced_relationships.append(rel)
         
         logger.info(f"Created {len(referenced_relationships)} REFERENCED_BY_DESCRIPTION relationships")
         return referenced_relationships

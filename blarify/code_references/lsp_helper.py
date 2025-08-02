@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Type, List
+from typing import TYPE_CHECKING, Optional, Type, List, Dict, Any
 import psutil
 from blarify.vendor.multilspy import SyncLanguageServer
 from blarify.utils.path_calculator import PathCalculator
@@ -6,7 +6,6 @@ from .types.Reference import Reference
 from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 from blarify.vendor.multilspy.lsp_protocol_handler.server import Error
-from blarify.vendor.multilspy.lsp_protocol_handler.lsp_types import Location
 
 if TYPE_CHECKING:
     from blarify.graph.node import DefinitionNode
@@ -29,13 +28,14 @@ class FileExtensionNotSupported(Exception):
 
 class LspQueryHelper:
     root_uri: str
-    language_to_lsp_server: dict[str, SyncLanguageServer]
+    language_to_lsp_server: Dict[str, SyncLanguageServer]
+    entered_lsp_servers: Dict[str, Any]
     LSP_USAGES = 0
 
     def __init__(self, root_uri: str, host: Optional[str] = None, port: Optional[int] = None):
         self.root_uri = root_uri
-        self.entered_lsp_servers = {}
-        self.language_to_lsp_server = {}
+        self.entered_lsp_servers: Dict[str, Any] = {}
+        self.language_to_lsp_server: Dict[str, SyncLanguageServer] = {}
 
     @staticmethod
     def get_language_definition_for_extension(extension: str) -> Type["LanguageDefinitions"]:
@@ -73,7 +73,8 @@ class LspQueryHelper:
 
     def _create_lsp_server(self, language_definitions: "LanguageDefinitions", timeout: int = 15) -> SyncLanguageServer:
         language = language_definitions.get_language_name()
-        config = MultilspyConfig.from_dict({"code_language": language})
+        # Suppress type checking for external library method
+        config = MultilspyConfig.from_dict({"code_language": language})  # type: ignore
         logger = MultilspyLogger()
         lsp = SyncLanguageServer.create(config, logger, PathCalculator.uri_to_path(self.root_uri), timeout=timeout)
         return lsp
@@ -84,7 +85,8 @@ class LspQueryHelper:
         """
 
     def _get_or_create_lsp_server(self, extension: str, timeout: int = 15) -> SyncLanguageServer:
-        language_definitions = self.get_language_definition_for_extension(extension)
+        language_definition_class = self.get_language_definition_for_extension(extension)
+        language_definitions = language_definition_class()
         language = language_definitions.get_language_name()
 
         if language in self.language_to_lsp_server:
@@ -96,7 +98,7 @@ class LspQueryHelper:
             return new_lsp
 
     def _initialize_lsp_server(self, language: str, lsp: SyncLanguageServer) -> None:
-        context = lsp.start_server()
+        context: Any = lsp.start_server()
         context.__enter__()
         self.entered_lsp_servers[language] = context
 
@@ -105,12 +107,12 @@ class LspQueryHelper:
         DEPRECATED, LSP servers are started on demand
         """
 
-    def get_paths_where_node_is_referenced(self, node: "DefinitionNode") -> list[Reference]:
+    def get_paths_where_node_is_referenced(self, node: "DefinitionNode") -> List[Reference]:
         server = self._get_or_create_lsp_server(node.extension)
         references = self._request_references_with_exponential_backoff(node, server)
-        return [Reference(reference) for reference in references]
+        return [Reference(reference=reference) for reference in references]
 
-    def _request_references_with_exponential_backoff(self, node: "DefinitionNode", lsp: SyncLanguageServer) -> List[Location]:
+    def _request_references_with_exponential_backoff(self, node: "DefinitionNode", lsp: SyncLanguageServer) -> List[Dict[str, Any]]:
         timeout = 10
         for _ in range(1, 3):
             try:
@@ -119,7 +121,8 @@ class LspQueryHelper:
                     line=node.definition_range.start_dict["line"],
                     column=node.definition_range.start_dict["character"],
                 )
-                return references
+                # Convert to the expected Location type
+                return [dict(ref) for ref in references]
 
             except (TimeoutError, ConnectionResetError, Error):
                 timeout = timeout * 2
@@ -133,7 +136,8 @@ class LspQueryHelper:
         return []
 
     def _restart_lsp_for_extension(self, extension: str) -> None:
-        language_definitions = self.get_language_definition_for_extension(extension)
+        language_definition_class = self.get_language_definition_for_extension(extension)
+        language_definitions = language_definition_class()
         language_name = language_definitions.get_language_name()
         self.exit_lsp_server(language_name)
         new_lsp = self._create_lsp_server(language_definitions)
@@ -149,7 +153,7 @@ class LspQueryHelper:
     def exit_lsp_server(self, language: str) -> None:
         # First try to properly exit the context manager if it exists
         if language in self.entered_lsp_servers:
-            context = self.entered_lsp_servers[language]
+            context: Any = self.entered_lsp_servers[language]
             try:
                 # Try to exit context manager with timeout, this is to ensure that we don't hang indefinitely
                 # It happens sometimes especially with c#
@@ -199,7 +203,7 @@ class LspQueryHelper:
             logger.error(f"Error killing process: {e}")
 
         # Cancel all tasks in the loop
-        loop = self.language_to_lsp_server[language].loop
+        loop: Optional[Any] = self.language_to_lsp_server[language].loop
         try:
             tasks = asyncio.all_tasks(loop=loop)
             if tasks:
@@ -214,11 +218,12 @@ class LspQueryHelper:
                         pass  # Ignore exceptions from cancelled tasks
 
                 # Run the cleanup coroutine in the loop
-                future = asyncio.run_coroutine_threadsafe(wait_for_cancelled_tasks(), loop)
-                try:
-                    future.result(timeout=5)  # Wait up to 5 seconds for cleanup
-                except Exception:
-                    pass  # If cleanup times out, continue anyway
+                if loop is not None:
+                    future = asyncio.run_coroutine_threadsafe(wait_for_cancelled_tasks(), loop)
+                    try:
+                        future.result(timeout=5)  # Wait up to 5 seconds for cleanup
+                    except Exception:
+                        pass  # If cleanup times out, continue anyway
 
             logger.info("Tasks cancelled")
         except Exception as e:
@@ -231,14 +236,14 @@ class LspQueryHelper:
 
     def get_definition_path_for_reference(self, reference: Reference, extension: str) -> str:
         lsp_caller = self._get_or_create_lsp_server(extension)
-        definitions = self._request_definition_with_exponential_backoff(reference, lsp_caller, extension)
+        definitions: List[Dict[str, Any]] = self._request_definition_with_exponential_backoff(reference, lsp_caller, extension)
 
         if not definitions:
             return ""
 
         return definitions[0]["uri"]
 
-    def _request_definition_with_exponential_backoff(self, reference: Reference, lsp: SyncLanguageServer, extension: str):
+    def _request_definition_with_exponential_backoff(self, reference: Reference, lsp: SyncLanguageServer, extension: str) -> List[Dict[str, Any]]:
         timeout = 10
         for _ in range(1, 3):
             try:
@@ -247,7 +252,8 @@ class LspQueryHelper:
                     line=reference.range.start.line,
                     column=reference.range.start.character,
                 )
-                return definitions
+                # Convert to the expected Location type
+                return [dict(defn) for defn in definitions]
 
             except (TimeoutError, ConnectionResetError, Error):
                 timeout = timeout * 2

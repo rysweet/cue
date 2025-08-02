@@ -80,7 +80,7 @@ class Node:
                 "name": self.name,
                 "level": self.level,
                 "hashed_id": self.hashed_id,
-                "diff_identifier": self.graph_environment.diff_identifier,
+                "diff_identifier": self.graph_environment.diff_identifier if self.graph_environment else None,
             },
         }
 

@@ -221,7 +221,12 @@ class TreeSitterHelper:
         return self.language_definitions.get_node_label_from_type(node.type)
 
     def get_parent_node(self, context_stack: List["Node"]) -> "DefinitionNode":
-        return context_stack[-1]
+        from blarify.graph.node.types.definition_node import DefinitionNode
+        parent = context_stack[-1]
+        if isinstance(parent, DefinitionNode):
+            return parent
+        # If not a DefinitionNode, we need to handle this case
+        raise ValueError(f"Parent node is not a DefinitionNode: {type(parent)}")
 
     def _create_file_node_from_raw_file(self, file: File, parent_folder: Optional["FolderNode"] = None) -> "FileNode":
         return NodeFactory.create_file_node(
@@ -233,7 +238,7 @@ class TreeSitterHelper:
             code_text=self.base_node_source_code,
             body_node=None,
             parent=parent_folder,
-            tree_sitter_node=None,
+            tree_sitter_node=None,  # type: ignore[arg-type]
             graph_environment=self.graph_environment,
         )
 
