@@ -1,12 +1,16 @@
 import logging
 import re
-from typing import List, Dict, Optional, TYPE_CHECKING, Any, Set
+from typing import List, Dict, Optional, TYPE_CHECKING, Any, Set, Union
 
 if TYPE_CHECKING:
     from blarify.graph.graph import Graph
     from blarify.graph.graph_environment import GraphEnvironment
     from blarify.graph.node import Node
     from blarify.graph.relationship import Relationship
+    # Import specific node types that have code_text
+    from blarify.graph.node.types.definition_node import DefinitionNode
+    from blarify.graph.node.class_node import ClassNode
+    from blarify.graph.node.function_node import FunctionNode
 
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship.relationship_type import RelationshipType
@@ -178,11 +182,13 @@ Please provide a concise description (2-3 sentences) of what this module contain
         elif node.label in [NodeLabels.FUNCTION, NodeLabels.METHOD]:
             context["function_name"] = node.name
             context["method_name"] = node.name
-            # Get code snippet if available
-            if hasattr(node, 'code_text') and node.code_text:
-                context["code_snippet"] = str(node.code_text)[:1000]  # Limit snippet length
-            else:
-                context["code_snippet"] = "# Code snippet not available"
+            # Get code snippet if available - cast to specific node type that has code_text
+            code_snippet = "# Code snippet not available"
+            if hasattr(node, 'code_text'):
+                code_text = getattr(node, 'code_text', None)
+                if code_text:
+                    code_snippet = str(code_text)[:1000]  # Limit snippet length
+            context["code_snippet"] = code_snippet
             
             # Add class context for methods
             if node.label == NodeLabels.METHOD and node.parent:
@@ -190,10 +196,13 @@ Please provide a concise description (2-3 sentences) of what this module contain
                 
         elif node.label == NodeLabels.CLASS:
             context["class_name"] = node.name
-            if hasattr(node, 'code_text') and node.code_text:
-                context["code_snippet"] = str(node.code_text)[:1000]
-            else:
-                context["code_snippet"] = "# Code snippet not available"
+            # Get code snippet if available - use getattr to avoid type checker issues
+            code_snippet = "# Code snippet not available"
+            if hasattr(node, 'code_text'):
+                code_text = getattr(node, 'code_text', None)
+                if code_text:
+                    code_snippet = str(code_text)[:1000]
+            context["code_snippet"] = code_snippet
                 
         elif node.label == NodeLabels.MODULE:
             context["module_path"] = node.path

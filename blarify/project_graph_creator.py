@@ -42,9 +42,9 @@ class ProjectGraphCreator:
         lsp_query_helper: LspQueryHelper,
         project_files_iterator: ProjectFilesIterator,
         graph_environment: Optional["GraphEnvironment"] = None,
-        enable_llm_descriptions: bool = None,
-        enable_filesystem_nodes: bool = None,
-        enable_documentation_nodes: bool = None,
+        enable_llm_descriptions: Optional[bool] = None,
+        enable_filesystem_nodes: Optional[bool] = None,
+        enable_documentation_nodes: Optional[bool] = None,
         documentation_patterns: Optional[List[str]] = None,
         max_llm_calls_per_doc: int = 5,
     ):

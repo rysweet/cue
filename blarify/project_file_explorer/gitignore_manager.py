@@ -46,7 +46,7 @@ class GitignoreManager:
         try:
             with open(gitignore_path, 'r', encoding='utf-8') as f:
                 # Read lines and filter out comments and empty lines
-                lines = []
+                lines: List[str] = []
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith('#'):
@@ -110,7 +110,7 @@ class GitignoreManager:
         Returns:
             List of all patterns from all .gitignore files
         """
-        all_patterns = []
+        all_patterns: List[str] = []
         for gitignore_path in self._gitignore_files:
             try:
                 with open(gitignore_path, 'r', encoding='utf-8') as f:

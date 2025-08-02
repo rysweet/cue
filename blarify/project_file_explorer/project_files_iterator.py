@@ -16,10 +16,10 @@ class ProjectFilesIterator:
     def __init__(
         self,
         root_path: str,
-        paths_to_skip: List[str] = None,
-        names_to_skip: List[str] = None,
-        extensions_to_skip: List[str] = None,
-        blarignore_path: str = None,
+        paths_to_skip: Optional[List[str]] = None,
+        names_to_skip: Optional[List[str]] = None,
+        extensions_to_skip: Optional[List[str]] = None,
+        blarignore_path: Optional[str] = None,
         max_file_size_mb: int = 0.8,
         use_gitignore: bool = True,
     ):
