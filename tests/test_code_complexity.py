@@ -6,7 +6,7 @@ from typing import Optional
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Node as TreeSitterNode
 
-from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
+from cue.stats.complexity import CodeComplexityCalculator, NestingStats
 
 
 class TestCodeComplexityCalculator(unittest.TestCase):

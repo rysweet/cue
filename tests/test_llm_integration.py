@@ -4,11 +4,11 @@ Tests for LLM service and description generation.
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import os
-from blarify.llm_descriptions.llm_service import LLMService
-from blarify.llm_descriptions.description_generator import DescriptionGenerator
-from blarify.graph.graph import Graph
-from blarify.graph.node.description_node import DescriptionNode
-from blarify.graph.node.types.node_labels import NodeLabels
+from cue.llm_descriptions.llm_service import LLMService
+from cue.llm_descriptions.description_generator import DescriptionGenerator
+from cue.graph.graph import Graph
+from cue.graph.node.description_node import DescriptionNode
+from cue.graph.node.types.node_labels import NodeLabels
 from tests.fixtures.node_factories import (
     create_class_node, create_function_node, create_file_node, create_folder_node
 )
@@ -56,7 +56,7 @@ class TestLLMService(unittest.TestCase):
             
         self.assertIn("Azure OpenAI configuration is incomplete", str(context.exception))
         
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_success(self, mock_openai_class: Mock) -> None:
         """Test successful description generation."""
         # Mock OpenAI client
@@ -87,7 +87,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(description, "This class manages users")
         mock_client.chat.completions.create.assert_called_once()
         
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_with_retry(self, mock_openai_class: Mock) -> None:
         """Test description generation with retry on failure."""
         mock_client = MagicMock()
@@ -114,7 +114,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(description, "Success")
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
         
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_all_retries_fail(self, mock_openai_class: Mock) -> None:
         """Test description generation when all retries fail."""
         mock_client = MagicMock()
@@ -369,7 +369,7 @@ class TestDescriptionNodeIntegration(unittest.TestCase):
         
     def test_description_node_serialization(self):
         """Test serializing description node to object."""
-        from blarify.graph.graph_environment import GraphEnvironment
+        from cue.graph.graph_environment import GraphEnvironment
         
         desc_node = DescriptionNode(
             path="file:///test/math.py",

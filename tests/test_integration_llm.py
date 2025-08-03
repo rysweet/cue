@@ -3,7 +3,7 @@ import tempfile
 import shutil
 import os
 from unittest.mock import patch, MagicMock
-from blarify.prebuilt.graph_builder import GraphBuilder
+from cue.prebuilt.graph_builder import GraphBuilder
 
 
 class TestLLMIntegration(unittest.TestCase):
@@ -63,7 +63,7 @@ def validate_input(value):
         'AZURE_OPENAI_DEPLOYMENT_NAME': 'test-deployment',
         'ENABLE_LLM_DESCRIPTIONS': 'true'
     })
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_graph_with_llm_descriptions(self, mock_azure_openai: MagicMock) -> None:
         # Mock the OpenAI client
         mock_client = MagicMock()

@@ -1,0 +1,107 @@
+from typing import Optional, Set, Dict, TYPE_CHECKING
+from cue.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
+from .language_definitions import LanguageDefinitions
+import tree_sitter_java as tsjava
+from tree_sitter import Language, Parser, Node as TreeSitterNode
+
+if TYPE_CHECKING:
+    from cue.graph.relationship import RelationshipType
+    from cue.graph.node import NodeLabels
+
+
+
+class JavaDefinitions(LanguageDefinitions):
+    CONTROL_FLOW_STATEMENTS = []
+    CONSEQUENCE_STATEMENTS = []
+
+    @staticmethod
+    def get_language_name() -> str:
+        return "java"
+
+    @staticmethod
+    def get_parsers_for_extensions() -> Dict[str, Parser]:
+        return {
+            ".java": Parser(Language(tsjava.language())),
+        }
+
+    @staticmethod
+    def should_create_node(node: TreeSitterNode) -> bool:
+        return LanguageDefinitions._should_create_node_base_implementation(
+            node,
+            [
+                "method_declaration",
+                "class_declaration",
+                "interface_declaration",
+                "constructor_declaration",
+                "record_declaration",
+            ],
+        )
+
+    @staticmethod
+    def get_identifier_node(node: TreeSitterNode) -> TreeSitterNode:
+        return LanguageDefinitions._get_identifier_node_base_implementation(node)
+
+    @staticmethod
+    def get_body_node(node: TreeSitterNode) -> TreeSitterNode:
+        return LanguageDefinitions._get_body_node_base_implementation(node)
+
+    @staticmethod
+    def get_relationship_type(node: TreeSitterNode, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
+        return JavaDefinitions._find_relationship_type(
+            node_label=node.type,
+            node_in_point_reference=node_in_point_reference,
+        )
+
+    @staticmethod
+    def get_node_label_from_type(type: str) -> "NodeLabels":
+        from cue.graph.node import NodeLabels
+        return {
+            "class_declaration": NodeLabels.CLASS,
+            "method_declaration": NodeLabels.FUNCTION,
+            "interface_declaration": NodeLabels.CLASS,
+            "constructor_declaration": NodeLabels.FUNCTION,
+            "record_declaration": NodeLabels.CLASS,
+        }[type]
+
+    @staticmethod
+    def get_language_file_extensions() -> Set[str]:
+        return {".java"}
+
+    @staticmethod
+    def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
+        relationship_types = JavaDefinitions._get_relationship_types_by_label()
+        # Convert string to NodeLabels enum
+        node_label_enum = NodeLabels(node_label)
+        relevant_relationship_types = relationship_types.get(node_label_enum, {})
+
+        return LanguageDefinitions._traverse_and_find_relationships(
+            node_in_point_reference, relevant_relationship_types
+        )
+
+    @staticmethod
+    def _get_relationship_types_by_label() -> Dict["NodeLabels", Dict[str, "RelationshipType"]]:
+        from cue.graph.relationship import RelationshipType
+        from cue.graph.node import NodeLabels
+        return {
+            NodeLabels.CLASS: {
+                "object_creation_expression": RelationshipType.INSTANTIATES,
+                "using_directive": RelationshipType.IMPORTS,
+                "variable_declaration": RelationshipType.TYPES,
+                "parameter": RelationshipType.TYPES,
+                "base_list": RelationshipType.INHERITS,
+                "import_specifier": RelationshipType.IMPORTS,
+                "import_declaration": RelationshipType.IMPORTS,
+                "import_clause": RelationshipType.IMPORTS,
+                "new_expression": RelationshipType.INSTANTIATES,
+                "class_heritage": RelationshipType.INHERITS,
+                "variable_declarator": RelationshipType.ASSIGNS,
+                "type_annotation": RelationshipType.TYPES,
+                "annotation_argument_list": RelationshipType.TYPES,
+                "formal_parameter": RelationshipType.TYPES,
+                "field_declaration": RelationshipType.TYPES,
+            },
+            NodeLabels.FUNCTION: {
+                "invocation_expression": RelationshipType.CALLS,
+                "method_invocation": RelationshipType.CALLS,
+            },
+        }
