@@ -77,7 +77,7 @@ class BlarifyIntegration {
             await this.neo4jManager.ensureRunning();
             // Get the instance details - we need to access the private instance
             // For now, use the default pattern from test files
-            const containerName = 'blarify-visualizer-development';
+            const containerName = BlarifyIntegration.DEFAULT_CONTAINER_NAME;
             const savedPassword = this.configManager.getNeo4jPassword(containerName);
             return {
                 uri: 'bolt://localhost:7957',
@@ -86,7 +86,8 @@ class BlarifyIntegration {
             };
         }
         catch (error) {
-            console.warn('Failed to get Neo4j connection details, using defaults:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.warn(`Failed to get Neo4j connection details: ${errorMessage}. Using default connection settings (bolt://localhost:7957).`);
             return {
                 uri: 'bolt://localhost:7957',
                 user: 'neo4j',
@@ -214,4 +215,5 @@ class BlarifyIntegration {
     }
 }
 exports.BlarifyIntegration = BlarifyIntegration;
+BlarifyIntegration.DEFAULT_CONTAINER_NAME = 'blarify-visualizer-development';
 //# sourceMappingURL=blarifyIntegration.js.map
