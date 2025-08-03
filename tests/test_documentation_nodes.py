@@ -3,10 +3,10 @@ import tempfile
 import shutil
 from pathlib import Path
 from unittest.mock import Mock, patch
-from blarify.prebuilt.graph_builder import GraphBuilder
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship.relationship_type import RelationshipType
-from blarify.documentation import DocumentationParser, ConceptExtractor, DocumentationLinker
+from cue.prebuilt.graph_builder import GraphBuilder
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.relationship.relationship_type import RelationshipType
+from cue.documentation import DocumentationParser, ConceptExtractor, DocumentationLinker
 
 
 class TestDocumentationNodes:
@@ -242,7 +242,7 @@ class TokenManager:
             ]
         }
         
-        with patch('blarify.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
+        with patch('cue.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
             mock_extract.return_value = mock_llm_response
             
             extractor = ConceptExtractor()
@@ -266,7 +266,7 @@ class TokenManager:
 
         # Patch skeletonize to avoid AttributeError on _tree_sitter_node
         from unittest.mock import patch as patch_func
-        with patch_func("blarify.graph.node.file_node.FileNode.skeletonize", lambda self: None):
+        with patch_func("cue.graph.node.file_node.FileNode.skeletonize", lambda self: None):
             # Mock the concept extractor to return parsed data directly
             mock_extract_result = {
                 "concepts": [
@@ -279,7 +279,7 @@ class TokenManager:
                 "code_references": [{"text": "auth_controller.py", "type": "file"}]
             }
 
-            with patch('blarify.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
+            with patch('cue.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
                 mock_extract.return_value = mock_extract_result
 
                 # Build graph with documentation nodes enabled
@@ -356,7 +356,7 @@ class TokenManager:
         self.create_test_project()
 
         from unittest.mock import patch as patch_func
-        with patch_func("blarify.graph.node.file_node.FileNode.skeletonize", lambda self: None):
+        with patch_func("cue.graph.node.file_node.FileNode.skeletonize", lambda self: None):
             # Mock the concept extractor to return parsed data directly
             mock_extract_result = {
                 "concepts": [{"name": "MVC Pattern", "description": "Model-View-Controller pattern"}],
@@ -367,7 +367,7 @@ class TokenManager:
                 "code_references": [{"text": "controllers/auth_controller.py", "type": "file"}]
             }
 
-            with patch('blarify.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
+            with patch('cue.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
                 mock_extract.return_value = mock_extract_result
 
                 graph_builder = GraphBuilder(
@@ -390,7 +390,7 @@ class TokenManager:
         self.create_test_project()
 
         from unittest.mock import patch as patch_func
-        with patch_func("blarify.graph.node.file_node.FileNode.skeletonize", lambda self: None):
+        with patch_func("cue.graph.node.file_node.FileNode.skeletonize", lambda self: None):
             # Build graph with documentation nodes disabled
             graph_builder = GraphBuilder(
                 root_path=self.test_dir,
@@ -426,7 +426,7 @@ class TokenManager:
         """Test that LLM errors are handled gracefully."""
         self.create_test_project()
         
-        with patch('blarify.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
+        with patch('cue.documentation.concept_extractor.ConceptExtractor.extract_from_content') as mock_extract:
             # Simulate LLM error
             mock_extract.side_effect = Exception("LLM API error")
             

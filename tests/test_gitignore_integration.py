@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import List, Any
 import pytest
-from blarify.project_file_explorer import ProjectFilesIterator
+from cue.project_file_explorer import ProjectFilesIterator
 
 
 class TestGitignoreIntegration:

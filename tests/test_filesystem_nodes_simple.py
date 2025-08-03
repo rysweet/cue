@@ -1,6 +1,6 @@
 import unittest
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship.relationship_type import RelationshipType
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.relationship.relationship_type import RelationshipType
 
 
 class TestFilesystemNodeTypes(unittest.TestCase):

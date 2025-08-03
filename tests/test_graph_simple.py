@@ -3,10 +3,10 @@ Simple tests for graph operations that work with current structure.
 """
 import unittest
 from unittest.mock import Mock
-from blarify.graph.graph import Graph
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship.relationship import Relationship
-from blarify.graph.relationship.relationship_type import RelationshipType
+from cue.graph.graph import Graph
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.relationship.relationship import Relationship
+from cue.graph.relationship.relationship_type import RelationshipType
 
 
 class TestGraphSimple(unittest.TestCase):

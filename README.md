@@ -2,7 +2,7 @@ This repo introduces a method to represent a local code repository as a graph st
 
 # Supported Languages
 
-Blarify supports the following languages out of the box:
+cue supports the following languages out of the box:
 
 **Core Languages** (most popular, always included):
 - Python
@@ -16,18 +16,18 @@ Blarify supports the following languages out of the box:
 - C#
 - PHP
 
-**Note**: Blarify is designed to be robust. If a language parser is not installed or fails to load, Blarify will continue to work for other supported languages, displaying a warning for the missing language support. See [Language Support Documentation](blarify/LANGUAGE_SUPPORT.md) for more details.
+**Note**: cue is designed to be robust. If a language parser is not installed or fails to load, cue will continue to work for other supported languages, displaying a warning for the missing language support. See [Language Support Documentation](cue/LANGUAGE_SUPPORT.md) for more details.
 
 # Example
 
-<img src="https://raw.githubusercontent.com/blarApp/blarify/refs/heads/main/docs/visualisation.png"></img>
+<img src="https://raw.githubusercontent.com/blarApp/cue/refs/heads/main/docs/visualisation.png"></img>
 This graph was generated from the code in this repository.
 
 # Quickstart
 
-Get started with blarify by following our quickstart guide:
+Get started with cue by following our quickstart guide:
 
-[➡️ Quickstart Guide](https://github.com/blarApp/blarify/blob/main/docs/quickstart.md)
+[➡️ Quickstart Guide](https://github.com/blarApp/cue/blob/main/docs/quickstart.md)
 
 # Article
 
@@ -47,7 +47,7 @@ Read our article on Medium to learn more about the motivation behind this projec
 
 # LLM Description Generation
 
-Blarify can generate natural language descriptions for your code elements using Azure OpenAI's GPT-4. This feature helps developers quickly understand the purpose and functionality of code components. **This feature is enabled by default.**
+cue can generate natural language descriptions for your code elements using Azure OpenAI's GPT-4. This feature helps developers quickly understand the purpose and functionality of code components. **This feature is enabled by default.**
 
 ## Setup
 
@@ -70,12 +70,12 @@ graph = graph_builder.build()
 
 # File Exclusion and Gitignore Support
 
-Blarify now automatically respects your `.gitignore` patterns, ensuring that version control ignored files (like `node_modules`, `.env`, build artifacts) are excluded from the graph analysis.
+cue now automatically respects your `.gitignore` patterns, ensuring that version control ignored files (like `node_modules`, `.env`, build artifacts) are excluded from the graph analysis.
 
 ## How it works
 
 - **Automatic `.gitignore` support**: All patterns in `.gitignore` files are automatically applied
-- **`.blarignore` for additional exclusions**: Create a `.blarignore` file for Blarify-specific exclusions
+- **`.blarignore` for additional exclusions**: Create a `.blarignore` file for cue-specific exclusions
 - **Nested `.gitignore` files**: Supports `.gitignore` files in subdirectories
 - **Full pattern syntax**: Supports all gitignore patterns including globs, directory markers, and comments
 
@@ -119,7 +119,7 @@ data/*.csv
 
 # Documentation Knowledge Graph
 
-Blarify can parse your documentation files to create a knowledge graph of concepts, entities, and their relationships. This feature uses LLM to intelligently extract information from your docs and automatically links them to relevant code elements. **This feature is enabled by default.**
+cue can parse your documentation files to create a knowledge graph of concepts, entities, and their relationships. This feature uses LLM to intelligently extract information from your docs and automatically links them to relevant code elements. **This feature is enabled by default.**
 
 ## Features
 

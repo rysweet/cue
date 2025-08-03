@@ -7,11 +7,11 @@ import tempfile
 import time
 from pathlib import Path
 
-from blarify.graph.node.filesystem_file_node import FilesystemFileNode
-from blarify.graph.node.filesystem_directory_node import FilesystemDirectoryNode
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.graph import Graph
-from blarify.filesystem.filesystem_graph_generator import FilesystemGraphGenerator
+from cue.graph.node.filesystem_file_node import FilesystemFileNode
+from cue.graph.node.filesystem_directory_node import FilesystemDirectoryNode
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.graph import Graph
+from cue.filesystem.filesystem_graph_generator import FilesystemGraphGenerator
 
 
 class TestFilesystemFileNode(unittest.TestCase):
@@ -241,7 +241,7 @@ class TestFilesystemRelationships(unittest.TestCase):
     
     def test_filesystem_relationship_types(self):
         """Test that filesystem relationship types exist."""
-        from blarify.graph.relationship.relationship_type import RelationshipType
+        from cue.graph.relationship.relationship_type import RelationshipType
         
         # Verify filesystem relationship types
         self.assertEqual(RelationshipType.FILESYSTEM_CONTAINS.value, "FILESYSTEM_CONTAINS")
@@ -251,7 +251,7 @@ class TestFilesystemRelationships(unittest.TestCase):
     def test_implements_relationship(self):
         """Test IMPLEMENTS relationship between filesystem and code nodes."""
         # This tests that the relationship type exists and has correct value
-        from blarify.graph.relationship.relationship_type import RelationshipType
+        from cue.graph.relationship.relationship_type import RelationshipType
         
         impl_rel = RelationshipType.IMPLEMENTS
         self.assertEqual(impl_rel.value, "IMPLEMENTS")

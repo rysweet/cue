@@ -6,11 +6,11 @@ import os
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from blarify.llm_descriptions.description_generator import DescriptionGenerator
-from blarify.llm_descriptions.llm_service import LLMService
-from blarify.graph.graph import Graph
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.graph_environment import GraphEnvironment
+from cue.llm_descriptions.description_generator import DescriptionGenerator
+from cue.llm_descriptions.llm_service import LLMService
+from cue.graph.graph import Graph
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.graph_environment import GraphEnvironment
 
 
 class TestDescriptionGenerator(unittest.TestCase):
@@ -105,7 +105,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         self.assertEqual(result, {})
         self.mock_llm_service.generate_batch_descriptions.assert_not_called()
     
-    @patch('blarify.llm_descriptions.description_generator.logger')
+    @patch('cue.llm_descriptions.description_generator.logger')
     def test_generate_descriptions_for_graph(self, mock_logger: MagicMock):
         # Create test nodes
         file_node = MagicMock()

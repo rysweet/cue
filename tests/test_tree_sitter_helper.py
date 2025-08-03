@@ -1,17 +1,17 @@
 import unittest
 from unittest.mock import MagicMock, patch, mock_open
-from blarify.code_hierarchy.tree_sitter_helper import TreeSitterHelper
-from blarify.code_hierarchy.languages import (
+from cue.code_hierarchy.tree_sitter_helper import TreeSitterHelper
+from cue.code_hierarchy.languages import (
     LanguageDefinitions,
     PythonDefinitions,
     FallbackDefinitions,
     BodyNodeNotFound
 )
-from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
-from blarify.graph.node import NodeLabels
-from blarify.graph.relationship import RelationshipType
-from blarify.code_references.types import Reference
-from blarify.project_file_explorer import File
+from cue.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
+from cue.graph.node import NodeLabels
+from cue.graph.relationship import RelationshipType
+from cue.code_references.types import Reference
+from cue.project_file_explorer import File
 
 
 class TestTreeSitterHelper(unittest.TestCase):
@@ -235,7 +235,7 @@ class TestTreeSitterHelper(unittest.TestCase):
         self.mock_parser.parse.assert_called_once_with(b"test code")
         self.assertEqual(result, mock_tree)
         
-    @patch('blarify.code_hierarchy.tree_sitter_helper.NodeFactory')
+    @patch('cue.code_hierarchy.tree_sitter_helper.NodeFactory')
     def test_create_file_node_from_module_node(self, mock_factory: MagicMock) -> None:
         """Test creating file node from module node."""
         mock_module_node = MagicMock()
@@ -318,7 +318,7 @@ class TestTreeSitterHelper(unittest.TestCase):
         self.assertEqual(self.helper.created_nodes, [])
         self.assertEqual(len(context_stack), initial_len)
         
-    @patch('blarify.code_hierarchy.tree_sitter_helper.NodeFactory')
+    @patch('cue.code_hierarchy.tree_sitter_helper.NodeFactory')
     def test_handle_definition_node(self, mock_factory: MagicMock) -> None:
         """Test handling definition nodes."""
         mock_ts_node = MagicMock()
@@ -473,7 +473,7 @@ class TestTreeSitterHelper(unittest.TestCase):
         mock_parent = MagicMock()
         context_stack = [MagicMock(), MagicMock(), mock_parent]
         # Patch DefinitionNode to always return True for isinstance
-        import blarify.graph.node.types.definition_node as defnode_mod
+        import cue.graph.node.types.definition_node as defnode_mod
         orig_isinstance = isinstance
         def fake_isinstance(obj, typ):
             if typ is defnode_mod.DefinitionNode:
@@ -487,7 +487,7 @@ class TestTreeSitterHelper(unittest.TestCase):
             builtins.isinstance = old_isinstance
         self.assertEqual(result, mock_parent)
         
-    @patch('blarify.code_hierarchy.tree_sitter_helper.NodeFactory')
+    @patch('cue.code_hierarchy.tree_sitter_helper.NodeFactory')
     def test_create_file_node_from_raw_file(self, mock_factory: MagicMock) -> None:
         """Test creating file node from raw file."""
         mock_file = MagicMock()

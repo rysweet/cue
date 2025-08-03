@@ -3,10 +3,10 @@ Tests for LLM description node functionality.
 """
 import unittest
 from unittest.mock import Mock
-from blarify.graph.node.description_node import DescriptionNode
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.llm_descriptions.description_generator import DescriptionGenerator
-from blarify.graph.graph import Graph
+from cue.graph.node.description_node import DescriptionNode
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.llm_descriptions.description_generator import DescriptionGenerator
+from cue.graph.graph import Graph
 
 
 class TestDescriptionNodes(unittest.TestCase):
@@ -193,21 +193,21 @@ class TestDescriptionRelationships(unittest.TestCase):
     
     def test_has_description_relationship(self):
         """Test HAS_DESCRIPTION relationship type."""
-        from blarify.graph.relationship.relationship_type import RelationshipType
+        from cue.graph.relationship.relationship_type import RelationshipType
         
         # Verify the relationship type exists
         self.assertEqual(RelationshipType.HAS_DESCRIPTION.value, "HAS_DESCRIPTION")
         
     def test_references_in_description_relationship(self):
         """Test REFERENCES_IN_DESCRIPTION relationship type."""
-        from blarify.graph.relationship.relationship_type import RelationshipType
+        from cue.graph.relationship.relationship_type import RelationshipType
         
         # Verify the relationship type exists  
         self.assertEqual(RelationshipType.REFERENCES_IN_DESCRIPTION.value, "REFERENCES_IN_DESCRIPTION")
         
     def test_referenced_by_description_relationship(self):
         """Test REFERENCED_BY_DESCRIPTION relationship type."""
-        from blarify.graph.relationship.relationship_type import RelationshipType
+        from cue.graph.relationship.relationship_type import RelationshipType
         
         # Verify the relationship type exists
         self.assertEqual(RelationshipType.REFERENCED_BY_DESCRIPTION.value, "REFERENCED_BY_DESCRIPTION")

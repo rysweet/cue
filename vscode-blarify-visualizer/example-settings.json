@@ -1,8 +1,0 @@
-{
-  "blarifyVisualizer.azureOpenAI.apiKey": "your-api-key-here",
-  "blarifyVisualizer.azureOpenAI.endpoint": "https://your-resource.openai.azure.com/",
-  "blarifyVisualizer.azureOpenAI.deploymentName": "gpt-4",
-  "blarifyVisualizer.neo4j.uri": "bolt://localhost:7687",
-  "blarifyVisualizer.neo4j.username": "neo4j",
-  "blarifyVisualizer.neo4j.password": ""
-}

@@ -3,17 +3,17 @@ from typing import Optional, List, Any
 Factory functions for creating test nodes.
 """
 import time
-from blarify.graph.node.file_node import FileNode
-from blarify.graph.node.folder_node import FolderNode
-from blarify.graph.node.class_node import ClassNode
-from blarify.graph.node.function_node import FunctionNode
-from blarify.graph.node.filesystem_file_node import FilesystemFileNode
-from blarify.graph.node.filesystem_directory_node import FilesystemDirectoryNode
-from blarify.graph.node.documentation_file_node import DocumentationFileNode
-from blarify.graph.node.concept_node import ConceptNode
-from blarify.graph.node.documented_entity_node import DocumentedEntityNode
-from blarify.graph.node.description_node import DescriptionNode
-from blarify.graph.graph_environment import GraphEnvironment
+from cue.graph.node.file_node import FileNode
+from cue.graph.node.folder_node import FolderNode
+from cue.graph.node.class_node import ClassNode
+from cue.graph.node.function_node import FunctionNode
+from cue.graph.node.filesystem_file_node import FilesystemFileNode
+from cue.graph.node.filesystem_directory_node import FilesystemDirectoryNode
+from cue.graph.node.documentation_file_node import DocumentationFileNode
+from cue.graph.node.concept_node import ConceptNode
+from cue.graph.node.documented_entity_node import DocumentedEntityNode
+from cue.graph.node.description_node import DescriptionNode
+from cue.graph.graph_environment import GraphEnvironment
 
 
 def get_test_graph_environment():

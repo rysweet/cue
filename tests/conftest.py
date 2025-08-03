@@ -82,7 +82,7 @@ The main application class.
 @pytest.fixture
 def mock_graph():
     """Create a mock graph for testing."""
-    from blarify.graph.graph import Graph
+    from cue.graph.graph import Graph
     graph = Graph()
     return graph
 
@@ -133,7 +133,7 @@ def setup_test_env(monkeypatch: pytest.MonkeyPatch):
 @pytest.fixture
 def sample_file_node():
     """Create a sample file node for testing."""
-    from blarify.graph.node.file_node import FileNode
+    from cue.graph.node.file_node import FileNode
     return FileNode(
         path="file:///test/main.py",
         name="main.py",
@@ -144,7 +144,7 @@ def sample_file_node():
 @pytest.fixture
 def sample_class_node():
     """Create a sample class node for testing."""
-    from blarify.graph.node.class_node import ClassNode
+    from cue.graph.node.class_node import ClassNode
     return ClassNode(
         id="test_class_123",
         name="TestClass",
@@ -158,7 +158,7 @@ def sample_class_node():
 @pytest.fixture
 def sample_function_node():
     """Create a sample function node for testing."""
-    from blarify.graph.node.function_node import FunctionNode
+    from cue.graph.node.function_node import FunctionNode
     return FunctionNode(
         id="test_func_456",
         name="test_function",
