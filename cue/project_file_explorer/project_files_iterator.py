@@ -19,7 +19,7 @@ class ProjectFilesIterator:
         paths_to_skip: Optional[List[str]] = None,
         names_to_skip: Optional[List[str]] = None,
         extensions_to_skip: Optional[List[str]] = None,
-        blarignore_path: Optional[str] = None,
+        cueignore_path: Optional[str] = None,
         max_file_size_mb: float = 0.8,
         use_gitignore: bool = True,
     ):
@@ -35,23 +35,23 @@ class ProjectFilesIterator:
         if self.use_gitignore:
             self.gitignore_manager = GitignoreManager(root_path)
         
-        # Initialize blarignore patterns
-        self.blarignore_spec: Optional[pathspec.PathSpec] = None
-        blarignore_patterns: List[str] = []
+        # Initialize cueignore patterns
+        self.cueignore_spec: Optional[pathspec.PathSpec] = None
+        cueignore_patterns: List[str] = []
         
-        # Load .blarignore if path provided
-        if blarignore_path:
-            self.names_to_skip.extend(self.get_ignore_files(blarignore_path))
-            blarignore_patterns.extend(self.get_ignore_files(blarignore_path))
-        # Otherwise, try to load .blarignore from root
-        elif os.path.exists(os.path.join(root_path, ".blarignore")):
-            default_blarignore = os.path.join(root_path, ".blarignore")
-            self.names_to_skip.extend(self.get_ignore_files(default_blarignore))
-            blarignore_patterns.extend(self.get_ignore_files(default_blarignore))
+        # Load .cueignore if path provided
+        if cueignore_path:
+            self.names_to_skip.extend(self.get_ignore_files(cueignore_path))
+            cueignore_patterns.extend(self.get_ignore_files(cueignore_path))
+        # Otherwise, try to load .cueignore from root
+        elif os.path.exists(os.path.join(root_path, ".cueignore")):
+            default_cueignore = os.path.join(root_path, ".cueignore")
+            self.names_to_skip.extend(self.get_ignore_files(default_cueignore))
+            cueignore_patterns.extend(self.get_ignore_files(default_cueignore))
         
-        # Create pathspec for blarignore patterns if any exist
-        if blarignore_patterns:
-            self.blarignore_spec = pathspec.PathSpec.from_lines('gitwildmatch', blarignore_patterns)
+        # Create pathspec for cueignore patterns if any exist
+        if cueignore_patterns:
+            self.cueignore_spec = pathspec.PathSpec.from_lines('gitwildmatch', cueignore_patterns)
 
     def get_ignore_files(self, gitignore_path: str) -> List[str]:
         with open(gitignore_path, "r") as f:
@@ -118,9 +118,9 @@ class ProjectFilesIterator:
             # The pathspec library should handle this correctly when checking individual files
             pass
         
-        # Check blarignore patterns - similar consideration
-        if self.blarignore_spec:
-            # Don't skip directories based on blarignore patterns alone
+        # Check cueignore patterns - similar consideration
+        if self.cueignore_spec:
+            # Don't skip directories based on cueignore patterns alone
             pass
         
         # Apply other skip rules (these are safe to apply to directories)
@@ -136,10 +136,10 @@ class ProjectFilesIterator:
             if self.gitignore_manager.should_ignore(path):
                 return True
         
-        # Check blarignore patterns
-        if self.blarignore_spec:
+        # Check cueignore patterns
+        if self.cueignore_spec:
             rel_path = os.path.relpath(path, self.root_path)
-            if self.blarignore_spec.match_file(rel_path):
+            if self.cueignore_spec.match_file(rel_path):
                 return True
         
         # Then check other skip patterns

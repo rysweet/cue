@@ -20,7 +20,7 @@ class TestGitignoreIntegration:
             shutil.rmtree(self.test_dir)
     
     def create_test_structure(self):
-        """Create a test directory structure with .gitignore and .blarignore files."""
+        """Create a test directory structure with .gitignore and .cueignore files."""
         # Create directories
         os.makedirs(os.path.join(self.test_dir, "src"))
         os.makedirs(os.path.join(self.test_dir, "node_modules"))
@@ -61,13 +61,13 @@ venv/
 """
         Path(os.path.join(self.test_dir, ".gitignore")).write_text(gitignore_content.strip())
         
-        # Create .blarignore with additional exclusions
-        blarignore_content = """
+        # Create .cueignore with additional exclusions
+        cueignore_content = """
 # Test files
 test_*.py
 *_test.py
 """
-        Path(os.path.join(self.test_dir, ".blarignore")).write_text(blarignore_content.strip())
+        Path(os.path.join(self.test_dir, ".cueignore")).write_text(cueignore_content.strip())
     
     def test_gitignore_files_are_excluded(self):
         """Test that files matching .gitignore patterns are excluded."""
@@ -101,11 +101,11 @@ test_*.py
         assert not any("build" in path for path in file_paths)
         assert not any(".venv" in path for path in file_paths)
     
-    def test_blarignore_is_additive_to_gitignore(self):
-        """Test that .blarignore adds additional exclusions on top of .gitignore."""
+    def test_cueignore_is_additive_to_gitignore(self):
+        """Test that .cueignore adds additional exclusions on top of .gitignore."""
         self.create_test_structure()
         
-        # Add test files that match .blarignore patterns
+        # Add test files that match .cueignore patterns
         Path(os.path.join(self.test_dir, "test_utils.py")).write_text("# test utils")
         Path(os.path.join(self.test_dir, "app_test.py")).write_text("# app test")
         
@@ -119,7 +119,7 @@ test_*.py
         
         file_names: List[str] = [file.name for file in all_files]
         
-        # Files from .blarignore should also be excluded
+        # Files from .cueignore should also be excluded
         assert "test_utils.py" not in file_names
         assert "app_test.py" not in file_names
         

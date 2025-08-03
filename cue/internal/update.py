@@ -36,13 +36,13 @@ NAMES_TO_SKIP = [
     "versions",
 ]
 
-def update(updated_files: List[UpdatedFile], root_uri: str, blarignore_path: Optional[str] = None):
+def update(updated_files: List[UpdatedFile], root_uri: str, cueignore_path: Optional[str] = None):
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
     project_files_iterator = ProjectFilesIterator(
         root_path=root_uri,
-        blarignore_path=blarignore_path,
+        cueignore_path=cueignore_path,
         names_to_skip=NAMES_TO_SKIP,
     )
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     dotenv.load_dotenv()
     root_path = os.getenv("ROOT_PATH")
-    blarignore_path = os.getenv("BLARIGNORE_PATH")
+    cueignore_path = os.getenv("BLARIGNORE_PATH")
     paths_to_update_str = os.getenv("PATHS_TO_UPDATE")
     
     # Validate required environment variables

@@ -41,7 +41,7 @@ Read our article on Medium to learn more about the motivation behind this projec
 - **Multi-Language Support**: Supports Python, JavaScript, TypeScript, Ruby, Go, C#, PHP, and Java
 - **LLM-Generated Descriptions** (New!): Optionally generate natural language descriptions for code elements using Azure OpenAI
 - **Documentation Knowledge Graph** (New!): Parse documentation files to extract concepts, entities, and automatically link them to relevant code
-- **Gitignore Integration** (New!): Automatically excludes files matching `.gitignore` patterns, with `.blarignore` for additional exclusions
+- **Gitignore Integration** (New!): Automatically excludes files matching `.gitignore` patterns, with `.cueignore` for additional exclusions
 - **Graph Database Integration**: Export to Neo4j or FalkorDB for visualization and querying
 - **Incremental Updates**: Efficiently update the graph when code changes
 
@@ -75,7 +75,7 @@ cue now automatically respects your `.gitignore` patterns, ensuring that version
 ## How it works
 
 - **Automatic `.gitignore` support**: All patterns in `.gitignore` files are automatically applied
-- **`.blarignore` for additional exclusions**: Create a `.blarignore` file for cue-specific exclusions
+- **`.cueignore` for additional exclusions**: Create a `.cueignore` file for cue-specific exclusions
 - **Nested `.gitignore` files**: Supports `.gitignore` files in subdirectories
 - **Full pattern syntax**: Supports all gitignore patterns including globs, directory markers, and comments
 
@@ -94,16 +94,16 @@ graph_builder = GraphBuilder(
     use_gitignore=False
 )
 
-# Specify custom .blarignore path
+# Specify custom .cueignore path
 graph_builder = GraphBuilder(
     root_path="/path/to/project",
-    blarignore_path="/path/to/.blarignore"
+    cueignore_path="/path/to/.cueignore"
 )
 ```
 
-## .blarignore Example
+## .cueignore Example
 
-Create a `.blarignore` file in your project root:
+Create a `.cueignore` file in your project root:
 
 ```
 # Exclude test files

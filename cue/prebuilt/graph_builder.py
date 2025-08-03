@@ -17,7 +17,7 @@ class GraphBuilder:
         enable_llm_descriptions: Optional[bool] = None,
         enable_filesystem_nodes: Optional[bool] = None,
         use_gitignore: bool = True,
-        blarignore_path: Optional[str] = None,
+        cueignore_path: Optional[str] = None,
         enable_documentation_nodes: Optional[bool] = None,
         documentation_patterns: Optional[List[str]] = None,
         max_llm_calls_per_doc: int = 5,
@@ -34,7 +34,7 @@ class GraphBuilder:
             enable_llm_descriptions: If True, generate LLM descriptions for code nodes
             enable_filesystem_nodes: If True, generate filesystem nodes and relationships
             use_gitignore: If True, automatically exclude files matching .gitignore patterns (default: True)
-            blarignore_path: Path to .blarignore file (if not provided, looks for .blarignore in root)
+            cueignore_path: Path to .cueignore file (if not provided, looks for .cueignore in root)
             enable_documentation_nodes: If True, parse documentation and create knowledge graph
             documentation_patterns: Custom patterns for documentation files (e.g., ['*.md', '*.rst'])
             max_llm_calls_per_doc: Maximum LLM calls per documentation file (default: 5)
@@ -59,7 +59,7 @@ class GraphBuilder:
         self.enable_llm_descriptions = enable_llm_descriptions
         self.enable_filesystem_nodes = enable_filesystem_nodes
         self.use_gitignore = use_gitignore
-        self.blarignore_path = blarignore_path
+        self.cueignore_path = cueignore_path
         self.enable_documentation_nodes = enable_documentation_nodes
         self.documentation_patterns = documentation_patterns
         self.max_llm_calls_per_doc = max_llm_calls_per_doc
@@ -91,7 +91,7 @@ class GraphBuilder:
             extensions_to_skip=self.extensions_to_skip, 
             names_to_skip=self.names_to_skip,
             use_gitignore=self.use_gitignore,
-            blarignore_path=self.blarignore_path
+            cueignore_path=self.cueignore_path
         )
 
     def _get_started_lsp_query_helper(self):

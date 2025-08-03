@@ -18,18 +18,18 @@ USER = os.getenv("NEO4J_USERNAME")
 PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 
-def main(root_path: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
+def main(root_path: Optional[str] = None, cueignore_path: Optional[str] = None) -> None:
     if root_path is None:
         raise ValueError("root_path cannot be None")
-    if blarignore_path is None:
-        raise ValueError("blarignore_path cannot be None")
+    if cueignore_path is None:
+        raise ValueError("cueignore_path cannot be None")
         
     lsp_query_helper = LspQueryHelper(root_uri=root_path)
 
     lsp_query_helper.start()
 
     project_files_iterator = ProjectFilesIterator(
-        root_path=root_path, blarignore_path=blarignore_path, extensions_to_skip=[".json", ".xml"]
+        root_path=root_path, cueignore_path=cueignore_path, extensions_to_skip=[".json", ".xml"]
     )
 
     ProjectFileStats(project_files_iterator).print(limit=10)
@@ -54,18 +54,18 @@ def main(root_path: Optional[str] = None, blarignore_path: Optional[str] = None)
     lsp_query_helper.shutdown_exit_close()
 
 
-def main_diff(file_diffs: List[Any], root_uri: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
+def main_diff(file_diffs: List[Any], root_uri: Optional[str] = None, cueignore_path: Optional[str] = None) -> None:
     if root_uri is None:
         raise ValueError("root_uri cannot be None")
-    if blarignore_path is None:
-        raise ValueError("blarignore_path cannot be None")
+    if cueignore_path is None:
+        raise ValueError("cueignore_path cannot be None")
         
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
     project_files_iterator = ProjectFilesIterator(
         root_path=root_uri,
-        blarignore_path=blarignore_path,
+        cueignore_path=cueignore_path,
     )
 
     repoId = "test"
@@ -92,18 +92,18 @@ def main_diff(file_diffs: List[Any], root_uri: Optional[str] = None, blarignore_
     lsp_query_helper.shutdown_exit_close()
 
 
-def main_update(updated_files: List[str], root_uri: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
+def main_update(updated_files: List[str], root_uri: Optional[str] = None, cueignore_path: Optional[str] = None) -> None:
     if root_uri is None:
         raise ValueError("root_uri cannot be None")
-    if blarignore_path is None:
-        raise ValueError("blarignore_path cannot be None")
+    if cueignore_path is None:
+        raise ValueError("cueignore_path cannot be None")
         
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
     project_files_iterator = ProjectFilesIterator(
         root_path=root_uri,
-        blarignore_path=blarignore_path,
+        cueignore_path=cueignore_path,
     )
 
     repoId = "test"
@@ -143,20 +143,20 @@ def delete_updated_files_from_neo4j(updated_files: List[Any], db_manager: Neo4jM
 def main_diff_with_previous(
     file_diffs: List[Any],
     root_uri: Optional[str] = None,
-    blarignore_path: Optional[str] = None,
+    cueignore_path: Optional[str] = None,
     previous_node_states: Optional[List[PreviousNodeState]] = None,
 ) -> None:
     if root_uri is None:
         raise ValueError("root_uri cannot be None")
-    if blarignore_path is None:
-        raise ValueError("blarignore_path cannot be None")
+    if cueignore_path is None:
+        raise ValueError("cueignore_path cannot be None")
         
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
     project_files_iterator = ProjectFilesIterator(
         root_path=root_uri,
-        blarignore_path=blarignore_path,
+        cueignore_path=cueignore_path,
     )
 
     repoId = "test"
@@ -193,8 +193,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     dotenv.load_dotenv()
     root_path = os.getenv("ROOT_PATH")
-    blarignore_path = os.getenv("BLARIGNORE_PATH")
-    main(root_path=root_path, blarignore_path=blarignore_path)
+    cueignore_path = os.getenv("BLARIGNORE_PATH")
+    main(root_path=root_path, cueignore_path=cueignore_path)
     # main_diff(
     #     file_diffs=[
     #         FileDiff(
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     #         ),
     #     ],
     #     root_uri=root_path,
-    #     blarignore_path=blarignore_path,
+    #     cueignore_path=cueignore_path,
     # )
 
     print("Updating")
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     #         # UpdatedFile("file:///temp/repos/development/main/0/encuadrado-web/encuadrado-web/models.py"),
     #     ],
     #     root_uri=root_path,
-    #     blarignore_path=blarignore_path,
+    #     cueignore_path=cueignore_path,
     # )
     # main_update(
     #     updated_files=[
@@ -232,7 +232,7 @@ if __name__ == "__main__":
     #         UpdatedFile("file:///temp/repos/development/main/0/encuadrado-web/encuadrado-web/models.py"),
     #     ],
     #     root_uri=root_path,
-    #     blarignore_path=blarignore_path,
+    #     cueignore_path=cueignore_path,
     # )
 
     # main_diff_with_previous(
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     #         ),
     #     ],
     #     root_uri=root_path,
-    #     blarignore_path=blarignore_path,
+    #     cueignore_path=cueignore_path,
     #     previous_node_states=[
     #         PreviousNodeState(
     #             "/dev/MAIN/blar-qa/blar/agents/tasks.py.execute_pr_report_agent_task",
