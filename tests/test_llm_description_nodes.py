@@ -96,7 +96,7 @@ class TestDescriptionNodes(unittest.TestCase):
         mock_node.path = "file:///test/main.py"
         mock_node.extension = ".py"
         mock_node.hashed_id = "func_123"
-        mock_node.text = "def calculate_average(numbers):\n    return sum(numbers) / len(numbers)"
+        mock_node.code_text = "def calculate_average(numbers):\n    return sum(numbers) / len(numbers)"
         
         mock_graph = Mock()
         

@@ -60,13 +60,25 @@ class PythonDefinitions(LanguageDefinitions):
     def get_language_file_extensions() -> Set[str]:
         return {".py"}
 
-    @staticmethod  
+    @staticmethod
     def _find_relationship_type(node_label: str, node_in_point_reference: TreeSitterNode) -> Optional[FoundRelationshipScope]:
         from blarify.graph.node import NodeLabels
-        
+
+        # Map legacy string labels to NodeLabels enum
+        label_map = {
+            "class_definition": NodeLabels.CLASS,
+            "function_definition": NodeLabels.FUNCTION,
+            "class": NodeLabels.CLASS,
+            "function": NodeLabels.FUNCTION,
+        }
+        node_label_enum = label_map.get(node_label, None)
+        if node_label_enum is None:
+            try:
+                node_label_enum = NodeLabels(node_label)
+            except Exception:
+                return None
+
         relationship_types = PythonDefinitions._get_relationship_types_by_label()
-        # Convert string to NodeLabels enum
-        node_label_enum = NodeLabels(node_label)
         relevant_relationship_types = relationship_types.get(node_label_enum, {})
 
         return LanguageDefinitions._traverse_and_find_relationships(

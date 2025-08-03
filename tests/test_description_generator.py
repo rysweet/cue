@@ -87,7 +87,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         function_node.name = "calculate_total"
         function_node.extension = ".py"
         function_node.hashed_id = "test-hash-2"
-        function_node.text = "def calculate_total(items):\n    return sum(item.price for item in items)"
+        function_node.code_text = "def calculate_total(items):\n    return sum(item.price for item in items)"
         
         prompt_data = self.generator._create_prompt_for_node(function_node, self.graph)  # type: ignore[reportPrivateUsage]
         
