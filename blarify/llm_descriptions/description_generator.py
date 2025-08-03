@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Dict, Optional, TYPE_CHECKING, Any, Set, Union
+from typing import List, Dict, Optional, TYPE_CHECKING, Any, Set
 
 if TYPE_CHECKING:
     from blarify.graph.graph import Graph
@@ -8,9 +8,6 @@ if TYPE_CHECKING:
     from blarify.graph.node import Node
     from blarify.graph.relationship import Relationship
     # Import specific node types that have code_text
-    from blarify.graph.node.types.definition_node import DefinitionNode
-    from blarify.graph.node.class_node import ClassNode
-    from blarify.graph.node.function_node import FunctionNode
 
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship.relationship_type import RelationshipType

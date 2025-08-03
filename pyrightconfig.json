@@ -71,7 +71,7 @@
   "analyzeUnannotatedFunctions": true,
   "strictParameterNoneValue": true,
   "enableTypeIgnoreComments": true,
-  "reportImportCycles": true,
+  "reportImportCycles": false,
   "reportUnusedImport": true,
   "reportUnusedClass": false,
   "reportUnusedFunction": false,

@@ -7,7 +7,6 @@ Tests git worktree creation, management, and cleanup operations.
 
 import unittest
 import tempfile
-import json
 import subprocess
 import shutil
 from pathlib import Path

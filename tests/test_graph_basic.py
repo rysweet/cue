@@ -2,7 +2,7 @@
 Basic tests for graph functionality that work with current codebase structure.
 """
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock
 from blarify.graph.graph import Graph
 from blarify.graph.relationship.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType
@@ -14,7 +14,7 @@ class TestGraphBasic(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.graph = Graph()
+        self.graph = Graph()  # type: ignore[misc]
         
     def test_graph_initialization(self):
         """Test graph is initialized empty."""

@@ -1,20 +1,19 @@
+from typing import Optional, Union, TYPE_CHECKING
+from uuid import uuid4
+
 from blarify.graph.node.class_node import ClassNode
 from blarify.graph.node.deleted_node import DeletedNode
-from ..file_node import FileNode
-from ..folder_node import FolderNode
-from ..function_node import FunctionNode
-from ..types.node_labels import NodeLabels
-
-from typing import Optional, Union, TYPE_CHECKING
-
-from uuid import uuid4
+from blarify.graph.node.file_node import FileNode
+from blarify.graph.node.folder_node import FolderNode
+from blarify.graph.node.function_node import FunctionNode
+from blarify.graph.node.types.node_labels import NodeLabels
 
 if TYPE_CHECKING:
     from blarify.project_file_explorer import Folder
     from blarify.graph.graph_environment import GraphEnvironment
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
-    from ..types.definition_node import DefinitionNode
+    from blarify.graph.node.types.definition_node import DefinitionNode
 
 
 class NodeFactory:

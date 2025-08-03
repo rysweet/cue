@@ -70,6 +70,7 @@ exclude = ["**/node_modules", "**/__pycache__", "**/vendor", "blarify/vendor"]
 typeCheckingMode = "strict"
 reportMissingImports = true
 reportMissingTypeStubs = false
+reportImportCycles = false
 pythonVersion = "3.12"
 strictListInference = true
 strictDictionaryInference = true

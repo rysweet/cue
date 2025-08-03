@@ -2,11 +2,11 @@ from tree_sitter import Tree, Parser
 from typing import List, TYPE_CHECKING, Tuple, Optional, Dict, Any
 
 from blarify.code_hierarchy.languages.FoundRelationshipScope import FoundRelationshipScope
-from blarify.graph.node import NodeFactory
+from blarify.graph.node.utils.node_factory import NodeFactory
 from blarify.code_references.types import Reference, Range, Point
-from blarify.graph.node import NodeLabels
+from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.project_file_explorer import File
-from blarify.graph.relationship import RelationshipType
+from blarify.graph.relationship.relationship_type import RelationshipType
 
 if TYPE_CHECKING:
     from tree_sitter import Node as TreeSitterNode

@@ -1,6 +1,6 @@
 from typing import Any
 import unittest
-from unittest.mock import MagicMock, patch, Mock, call
+from unittest.mock import MagicMock, patch, call
 from blarify.code_references.lsp_helper import (
     LspQueryHelper,
     FileExtensionNotSupported
@@ -13,8 +13,8 @@ class TestLspQueryHelper(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.root_uri = "file:///test/project"
-        self.helper = LspQueryHelper(self.root_uri)
+        self.root_uri: str = "file:///test/project"  # type: ignore[misc]
+        self.helper: LspQueryHelper = LspQueryHelper(self.root_uri)  # type: ignore[misc]
         
     def test_init(self):
         """Test LspQueryHelper initialization."""
@@ -111,7 +111,7 @@ class TestLspQueryHelper(unittest.TestCase):
         mock_sync_server.create.return_value = mock_server
         
         # Call the method
-        result = self.helper._create_lsp_server(mock_lang_def, timeout=20)
+        result = self.helper._create_lsp_server(mock_lang_def, timeout=20)  # type: ignore[attr-defined]
         
         # Assertions
         mock_lang_def.get_language_name.assert_called_once()
@@ -138,7 +138,7 @@ class TestLspQueryHelper(unittest.TestCase):
             mock_lang_def.get_language_name.return_value = "python"
             mock_get_lang.return_value = mock_lang_def
             
-            result = self.helper._get_or_create_lsp_server(".py")
+            result = self.helper._get_or_create_lsp_server(".py")  # type: ignore[attr-defined]
             
         self.assertEqual(result, mock_server)
         
@@ -154,7 +154,7 @@ class TestLspQueryHelper(unittest.TestCase):
                     mock_get_lang.return_value = mock_lang_def
                     mock_create.return_value = mock_server
                     
-                    result = self.helper._get_or_create_lsp_server(".py", timeout=30)
+                    result = self.helper._get_or_create_lsp_server(".py", timeout=30)  # type: ignore[attr-defined]
                     
         mock_create.assert_called_once_with(mock_lang_def, 30)
         mock_init.assert_called_once_with("python", mock_server)
@@ -167,7 +167,7 @@ class TestLspQueryHelper(unittest.TestCase):
         mock_context = MagicMock()
         mock_server.start_server.return_value = mock_context
         
-        self.helper._initialize_lsp_server("python", mock_server)
+        self.helper._initialize_lsp_server("python", mock_server)  # type: ignore[attr-defined]
         
         mock_server.start_server.assert_called_once()
         mock_context.__enter__.assert_called_once()
@@ -214,7 +214,7 @@ class TestLspQueryHelper(unittest.TestCase):
         mock_lsp.request_references.return_value = mock_references
         mock_path_calc.get_relative_path_from_uri.return_value = "file.py"
         
-        result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)
+        result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)  # type: ignore[attr-defined]
         
         self.assertEqual(result, mock_references)
         mock_lsp.request_references.assert_called_once_with(
@@ -239,7 +239,7 @@ class TestLspQueryHelper(unittest.TestCase):
             with patch.object(self.helper, '_get_or_create_lsp_server') as mock_get_server:
                 mock_get_server.return_value = mock_lsp
                 
-                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)
+                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)  # type: ignore[attr-defined]
                 
         mock_restart.assert_called_once_with(extension=".py")
         self.assertEqual(len(result), 1)
@@ -260,7 +260,7 @@ class TestLspQueryHelper(unittest.TestCase):
             with patch.object(self.helper, '_get_or_create_lsp_server') as mock_get_server:
                 mock_get_server.return_value = mock_lsp
                 
-                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)
+                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)  # type: ignore[attr-defined]
                 
         self.assertEqual(result, [])
         self.assertEqual(mock_restart.call_count, 2)
@@ -278,7 +278,7 @@ class TestLspQueryHelper(unittest.TestCase):
                         mock_get_lang.return_value = mock_lang_def
                         mock_create.return_value = mock_server
                         
-                        self.helper._restart_lsp_for_extension(".py")
+                        self.helper._restart_lsp_for_extension(".py")  # type: ignore[attr-defined]
                         
         mock_exit.assert_called_once_with("python")
         mock_create.assert_called_once_with(mock_lang_def)
@@ -288,8 +288,8 @@ class TestLspQueryHelper(unittest.TestCase):
     def test_restart_lsp_for_extension_connection_error(self):
         """Test restarting LSP server with connection error."""
         with patch.object(self.helper, 'get_language_definition_for_extension') as mock_get_lang:
-            with patch.object(self.helper, 'exit_lsp_server') as mock_exit:
-                with patch.object(self.helper, '_create_lsp_server') as mock_create:
+            with patch.object(self.helper, 'exit_lsp_server'):
+                with patch.object(self.helper, '_create_lsp_server'):
                     with patch.object(self.helper, '_initialize_lsp_server') as mock_init:
                         mock_lang_def = MagicMock()
                         mock_lang_def.get_language_name.return_value = "python"
@@ -297,7 +297,7 @@ class TestLspQueryHelper(unittest.TestCase):
                         mock_init.side_effect = ConnectionResetError()
                         
                         # Should not raise exception
-                        self.helper._restart_lsp_for_extension(".py")
+                        self.helper._restart_lsp_for_extension(".py")  # type: ignore[attr-defined]
                         
     @patch('blarify.code_references.lsp_helper.threading.Thread')
     def test_exit_lsp_server_with_context(self, mock_thread_class: Any):
@@ -368,7 +368,7 @@ class TestLspQueryHelper(unittest.TestCase):
         mock_future = MagicMock()
         mock_asyncio.run_coroutine_threadsafe.return_value = mock_future
         
-        self.helper._manual_cleanup_lsp_server("python")
+        self.helper._manual_cleanup_lsp_server("python")  # type: ignore[attr-defined]
         
         # Assertions
         mock_psutil.pid_exists.assert_called_once_with(12345)
@@ -387,7 +387,7 @@ class TestLspQueryHelper(unittest.TestCase):
         
         mock_definitions = [{"uri": "file:///test/def.py"}]
         
-        with patch.object(self.helper, '_get_or_create_lsp_server') as mock_get_server:
+        with patch.object(self.helper, '_get_or_create_lsp_server'):
             with patch.object(self.helper, '_request_definition_with_exponential_backoff') as mock_request:
                 mock_request.return_value = mock_definitions
                 
@@ -473,7 +473,7 @@ class TestLspQueryHelper(unittest.TestCase):
                     
                     # Test that helper attempts retry on connection error
                     try:
-                        self.helper._get_or_create_lsp_server(".py")
+                        self.helper._get_or_create_lsp_server(".py")  # type: ignore[attr-defined]
                     except ConnectionError:
                         pass  # Expected on first failure
                     
@@ -490,7 +490,7 @@ class TestLspQueryHelper(unittest.TestCase):
                 mock_get_server.return_value = mock_lsp
                 
                 # This should trigger restart behavior after timeout
-                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)
+                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp)  # type: ignore[attr-defined]
                 
                 # Verify restart was attempted due to timeout
                 mock_restart.assert_called_with(extension=".py")
@@ -510,7 +510,7 @@ class TestLspQueryHelper(unittest.TestCase):
                 # Return failed server first, then working server
                 mock_get_server.side_effect = [mock_lsp_recovery, mock_lsp_recovery]
                 
-                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp_recovery)
+                result = self.helper._request_references_with_exponential_backoff(mock_node, mock_lsp_recovery)  # type: ignore[attr-defined]
                 
                 # Verify recovery worked
                 mock_restart.assert_called_once_with(extension=".py")
@@ -526,7 +526,7 @@ class TestLspQueryHelper(unittest.TestCase):
         
         for error_type in error_types:
             # These are the types of errors the LSP helper should handle
-            self.assertTrue(issubclass(error_type, Exception))
+            self.assertTrue(issubclass(error_type, Exception))  # type: ignore[misc]
             
         # Test that the helper has the expected retry logic structure
         self.assertTrue(hasattr(self.helper, '_request_references_with_exponential_backoff'))
@@ -546,7 +546,7 @@ class TestLspQueryHelper(unittest.TestCase):
                         mock_create.return_value = mock_server
                         
                         # Test the restart workflow
-                        self.helper._restart_lsp_for_extension(".py")
+                        self.helper._restart_lsp_for_extension(".py")  # type: ignore[attr-defined]
                         
                         # Verify the recovery steps were called
                         mock_exit.assert_called_once_with("python")

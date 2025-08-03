@@ -3,7 +3,7 @@
 import pytest
 import pytest_asyncio
 import os
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock, AsyncMock
 
 # Add parent directory to path
 import sys

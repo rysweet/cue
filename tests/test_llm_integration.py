@@ -4,15 +4,9 @@ Tests for LLM service and description generation.
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import os
-import json
-import pytest
-
 from blarify.llm_descriptions.llm_service import LLMService
 from blarify.llm_descriptions.description_generator import DescriptionGenerator
 from blarify.graph.graph import Graph
-from blarify.graph.node.class_node import ClassNode
-from blarify.graph.node.function_node import FunctionNode
-from blarify.graph.node.file_node import FileNode
 from blarify.graph.node.description_node import DescriptionNode
 from blarify.graph.node.types.node_labels import NodeLabels
 from tests.fixtures.node_factories import (
@@ -29,7 +23,7 @@ class TestLLMService(unittest.TestCase):
         'AZURE_OPENAI_MODEL_CHAT': 'gpt-4'
     })
     @patch('openai.AzureOpenAI')
-    def setUp(self, mock_openai_class):
+    def setUp(self, mock_openai_class: Mock) -> None:
         """Set up test fixtures."""
         # Mock the OpenAI client
         mock_client = MagicMock()
@@ -40,12 +34,12 @@ class TestLLMService(unittest.TestCase):
         mock_response.choices = [MagicMock(message=MagicMock(content="Test description"))]
         mock_client.chat.completions.create.return_value = mock_response
         
-        self.service = LLMService()
+        self.service = LLMService()  # type: ignore[misc]
         self.service.client = mock_client  # Ensure the service uses the mocked client
-        self.mock_client = mock_client
+        self.mock_client = mock_client  # type: ignore[misc]
         
     @patch('openai.AzureOpenAI')
-    def test_initialization_with_env_vars(self, mock_openai_class):
+    def test_initialization_with_env_vars(self, mock_openai_class: Mock) -> None:
         """Test LLM service initialization with environment variables."""
         mock_client = MagicMock()
         mock_openai_class.return_value = mock_client
@@ -63,7 +57,7 @@ class TestLLMService(unittest.TestCase):
         self.assertIn("Azure OpenAI configuration is incomplete", str(context.exception))
         
     @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
-    def test_generate_description_success(self, mock_openai_class):
+    def test_generate_description_success(self, mock_openai_class: Mock) -> None:
         """Test successful description generation."""
         # Mock OpenAI client
         mock_client = MagicMock()
@@ -94,7 +88,7 @@ class TestLLMService(unittest.TestCase):
         mock_client.chat.completions.create.assert_called_once()
         
     @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
-    def test_generate_description_with_retry(self, mock_openai_class):
+    def test_generate_description_with_retry(self, mock_openai_class: Mock) -> None:
         """Test description generation with retry on failure."""
         mock_client = MagicMock()
         mock_openai_class.return_value = mock_client
@@ -121,7 +115,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
         
     @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
-    def test_generate_description_all_retries_fail(self, mock_openai_class):
+    def test_generate_description_all_retries_fail(self, mock_openai_class: Mock) -> None:
         """Test description generation when all retries fail."""
         mock_client = MagicMock()
         mock_openai_class.return_value = mock_client
@@ -167,7 +161,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(results["node2"], "Description for Bar")
         
     @patch('openai.AzureOpenAI')
-    def test_is_enabled(self, mock_openai_class):
+    def test_is_enabled(self, mock_openai_class: Mock) -> None:
         """Test checking if LLM service is enabled."""
         mock_client = MagicMock()
         mock_openai_class.return_value = mock_client
@@ -179,15 +173,15 @@ class TestLLMService(unittest.TestCase):
 class TestDescriptionGenerator(unittest.TestCase):
     """Test description generation for graph nodes."""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
-        self.mock_llm = Mock()
+        self.mock_llm: Mock = Mock()  # type: ignore[misc]
         self.mock_llm.generate_description.return_value = "Test description"
         self.mock_llm.is_enabled.return_value = True
         self.mock_llm.deployment_name = "gpt-4"
         self.mock_llm.generate_batch_descriptions.return_value = {}
-        self.generator = DescriptionGenerator(llm_service=self.mock_llm)
-        self.graph = Graph()
+        self.generator: DescriptionGenerator = DescriptionGenerator(llm_service=self.mock_llm)  # type: ignore[misc]
+        self.graph: Graph = Graph()  # type: ignore[misc]
         
     def test_get_eligible_nodes(self):
         """Test getting eligible nodes for description generation."""
@@ -203,7 +197,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         self.graph.add_node(folder_node)
         
         # Get eligible nodes
-        eligible_nodes = self.generator._get_eligible_nodes(self.graph)
+        eligible_nodes = self.generator._get_eligible_nodes(self.graph)  # type: ignore[attr-defined]
         
         # File, class, and function should be eligible
         self.assertEqual(len(eligible_nodes), 3)
@@ -217,60 +211,60 @@ class TestDescriptionGenerator(unittest.TestCase):
         
     @patch('builtins.open', create=True)
     @patch('os.path.exists')
-    def test_extract_node_context(self, mock_exists, mock_open):
+    def test_extract_node_context(self, mock_exists: Mock, mock_open: Mock) -> None:
         """Test extracting context information for nodes."""
         # Test for function node
         func_node = create_function_node("test_func")
-        func_node.text = "def test_func(): pass"
-        context = self.generator._extract_node_context(func_node, self.graph)
+        func_node.text = "def test_func(): pass"  # type: ignore[attr-defined]
+        context = self.generator._extract_node_context(func_node, self.graph)  # type: ignore[attr-defined]
         
         self.assertIsNotNone(context)
-        self.assertEqual(context["function_name"], "test_func")
-        self.assertEqual(context["code_snippet"], "def test_func(): pass")
+        self.assertEqual(context["function_name"], "test_func")  # type: ignore[index]
+        self.assertEqual(context["code_snippet"], "def test_func(): pass")  # type: ignore[index]
         
         # Test for class node
         class_node = create_class_node("TestClass")
-        class_node.text = "class TestClass: pass"
-        context = self.generator._extract_node_context(class_node, self.graph)
+        class_node.text = "class TestClass: pass"  # type: ignore[attr-defined]
+        context = self.generator._extract_node_context(class_node, self.graph)  # type: ignore[attr-defined]
         
         self.assertIsNotNone(context)
-        self.assertEqual(context["class_name"], "TestClass")
-        self.assertEqual(context["code_snippet"], "class TestClass: pass")
+        self.assertEqual(context["class_name"], "TestClass")  # type: ignore[index]
+        self.assertEqual(context["code_snippet"], "class TestClass: pass")  # type: ignore[index]
         
     def test_detect_language(self):
         """Test language detection from file extensions."""
         # Test common extensions
-        self.assertEqual(self.generator._detect_language(".py"), "Python")
-        self.assertEqual(self.generator._detect_language(".js"), "JavaScript")
-        self.assertEqual(self.generator._detect_language(".ts"), "TypeScript")
-        self.assertEqual(self.generator._detect_language(".java"), "Java")
-        self.assertEqual(self.generator._detect_language(".go"), "Go")
-        self.assertEqual(self.generator._detect_language(".rb"), "Ruby")
-        self.assertEqual(self.generator._detect_language(".php"), "PHP")
-        self.assertEqual(self.generator._detect_language(".cs"), "C#")
+        self.assertEqual(self.generator._detect_language(".py"), "Python")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".js"), "JavaScript")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".ts"), "TypeScript")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".java"), "Java")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".go"), "Go")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".rb"), "Ruby")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".php"), "PHP")  # type: ignore[attr-defined]
+        self.assertEqual(self.generator._detect_language(".cs"), "C#")  # type: ignore[attr-defined]
         
         # Test unknown extension
-        self.assertEqual(self.generator._detect_language(".xyz"), "Unknown")
+        self.assertEqual(self.generator._detect_language(".xyz"), "Unknown")  # type: ignore[attr-defined]
         
     def test_generate_description_for_node(self):
         """Test generating description for a specific node."""
         class_node = create_class_node("UserManager")
-        class_node.text = "class UserManager:\n    def create_user(self, name):\n        pass"
+        class_node.text = "class UserManager:\n    def create_user(self, name):\n        pass"  # type: ignore[attr-defined]
         self.graph.add_node(class_node)
         
         # Create prompt and generate description
-        prompt_data = self.generator._create_prompt_for_node(class_node, self.graph)
+        prompt_data = self.generator._create_prompt_for_node(class_node, self.graph)  # type: ignore[attr-defined]
         self.assertIsNotNone(prompt_data)
-        self.assertEqual(prompt_data["id"], class_node.hashed_id)
+        self.assertEqual(prompt_data["id"], class_node.hashed_id)  # type: ignore[index]
         
         # Test description node creation
-        desc_node, rel = self.generator._create_description_node_and_relationship(
+        desc_node, rel = self.generator._create_description_node_and_relationship(  # type: ignore[attr-defined]
             class_node, "Test description", self.graph
         )
         
         self.assertIsInstance(desc_node, DescriptionNode)
-        self.assertEqual(desc_node.description_text, "Test description")
-        self.assertEqual(desc_node.target_node_id, class_node.hashed_id)
+        self.assertEqual(desc_node.description_text, "Test description")  # type: ignore[attr-defined]
+        self.assertEqual(desc_node.target_node_id, class_node.hashed_id)  # type: ignore[attr-defined]
         
     def test_generate_descriptions_for_graph(self):
         """Test generating descriptions for all eligible nodes in graph."""
@@ -284,8 +278,8 @@ class TestDescriptionGenerator(unittest.TestCase):
         self.graph.add_node(func_node)
         
         # Add text content to nodes
-        class_node.text = "class MainClass:\n    pass"
-        func_node.text = "def main_func():\n    pass"
+        class_node.text = "class MainClass:\n    pass"  # type: ignore[attr-defined]
+        func_node.text = "def main_func():\n    pass"  # type: ignore[attr-defined]
         
         # Mock the batch descriptions to return descriptions for eligible nodes
         self.mock_llm.generate_batch_descriptions.return_value = {
@@ -295,7 +289,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         }
         
         # Generate descriptions
-        description_nodes = self.generator.generate_descriptions_for_graph(self.graph)
+        self.generator.generate_descriptions_for_graph(self.graph)
             
         # Check description nodes were created
         desc_nodes = self.graph.get_nodes_by_label(NodeLabels.DESCRIPTION)
@@ -317,14 +311,14 @@ class TestDescriptionGenerator(unittest.TestCase):
         # Add text content to nodes and create mock descriptions
         mock_descriptions = {}
         for i, node in enumerate(self.graph.get_nodes_by_label(NodeLabels.FUNCTION)):
-            node.text = "def func(): pass"
+            node.text = "def func(): pass"  # type: ignore[attr-defined]
             if i < 3:  # Only first 3 should get descriptions
                 mock_descriptions[node.hashed_id] = f"Description for function {i}"
         
         self.mock_llm.generate_batch_descriptions.return_value = mock_descriptions
         
         # Generate with limit
-        description_nodes = self.generator.generate_descriptions_for_graph(self.graph, node_limit=3)
+        self.generator.generate_descriptions_for_graph(self.graph, node_limit=3)
             
         # Should only create 3 descriptions
         desc_nodes = self.graph.get_nodes_by_label(NodeLabels.DESCRIPTION)
@@ -341,7 +335,7 @@ class TestDescriptionGenerator(unittest.TestCase):
         # Test description with references
         description = "This class uses `UserManager` to create users via 'create_user' function."
         
-        referenced_nodes = self.generator._extract_referenced_nodes(description, self.graph)
+        referenced_nodes = self.generator._extract_referenced_nodes(description, self.graph)  # type: ignore[attr-defined]
         
         # Should find both referenced nodes
         self.assertEqual(len(referenced_nodes), 2)

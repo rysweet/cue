@@ -9,7 +9,7 @@ class TestLLMService(unittest.TestCase):
     
     def setUp(self):
         # Mock environment variables (using both old and new key names)
-        self.env_patcher = patch.dict(os.environ, {
+        self.env_patcher = patch.dict(os.environ, {  # type: ignore[misc]
             'AZURE_OPENAI_KEY': 'test-key',
             'AZURE_OPENAI_ENDPOINT': 'https://test.openai.azure.com/',
             'AZURE_OPENAI_MODEL_CHAT': 'test-deployment',

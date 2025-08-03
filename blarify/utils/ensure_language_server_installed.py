@@ -8,21 +8,25 @@ from blarify.vendor.multilspy.multilspy_config import MultilspyConfig
 from blarify.vendor.multilspy.multilspy_logger import MultilspyLogger
 
 
-def ensure_language_server_installed(language: str):
+def ensure_language_server_installed(language: str) -> None:
     """
     Ensure that the language server for the given language is installed.
     """
 
     my_logger = logging.getLogger(__name__)
 
-    config = MultilspyConfig.from_dict({"code_language": language})
+    # Use Any type to avoid partially unknown type issues
+    from typing import Any, Dict
+    config_dict: Dict[str, Any] = {"code_language": language}
+    config = MultilspyConfig.from_dict(config_dict)  # type: ignore
     logger = MultilspyLogger()
     current_dir_path = os.path.join(str(Path(__file__).resolve().parent))
 
     if language == "csharp":
         print(f"Starting language server for {language}")
         from blarify.vendor.multilspy.language_servers.omnisharp.omnisharp import OmniSharp
-        OmniSharp.setupRuntimeDependencies(None, logger, config)
+        # Restore original call with 3 arguments as expected
+        OmniSharp.setupRuntimeDependencies(None, logger, config)  # type: ignore
         print(f"Started language server for {language}")
         return
 

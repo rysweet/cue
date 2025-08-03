@@ -1,5 +1,5 @@
-from blarify.graph.node import Node
 from typing import Any
+from blarify.graph.node.types.node import Node
 from blarify.utils.path_calculator import PathCalculator
 
 

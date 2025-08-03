@@ -1,7 +1,8 @@
-from blarify.graph.node import Node, NodeLabels
-from blarify.graph.node.file_node import FileNode
 from typing import Union, List, Any
-from blarify.graph.relationship import RelationshipCreator, Relationship
+from blarify.graph.node.types.node import Node
+from blarify.graph.node.types.node_labels import NodeLabels
+from blarify.graph.node.file_node import FileNode
+from blarify.graph.relationship.relationship import Relationship
 
 
 class FolderNode(Node):
@@ -32,6 +33,9 @@ class FolderNode(Node):
             self.relate_node_as_contain_relationship(node)
 
     def get_relationships(self) -> List[Relationship]:
+        # Import at runtime to break circular dependency
+        from blarify.graph.relationship.relationship_creator import RelationshipCreator
+        
         relationships: List[Relationship] = []
         for node in self._contains:
             relationships.append(RelationshipCreator.create_contains_relationship(self, node))

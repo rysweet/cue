@@ -1,6 +1,6 @@
 from typing import Any, Dict
-from blarify.graph.node import NodeLabels
-from .types.definition_node import DefinitionNode
+from blarify.graph.node.types.node_labels import NodeLabels
+from blarify.graph.node.types.definition_node import DefinitionNode
 
 
 class FunctionNode(DefinitionNode):

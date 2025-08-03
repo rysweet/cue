@@ -1,7 +1,6 @@
 """Tests for MCP server."""
 
 import pytest
-import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from src.server import BlarifyMCPServer, GetContextForFilesArgs, GetContextForSymbolArgs, BuildPlanForChangeArgs
 

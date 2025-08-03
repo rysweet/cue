@@ -1,6 +1,6 @@
 """Cypher query builder for graph traversals."""
 
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 
 
 class QueryBuilder:
@@ -26,7 +26,7 @@ class QueryBuilder:
     @staticmethod
     def get_file_context_query(file_path: str, max_depth: int = 2) -> str:
         """Build query to get comprehensive context for a file."""
-        return f"""
+        return """
         // Find the file node
         MATCH (file:FILE)
         WHERE file.path ENDS WITH $file_path
@@ -185,7 +185,7 @@ class QueryBuilder:
     @staticmethod
     def find_related_patterns_query(concept_name: str) -> str:
         """Build query to find code implementing specific patterns/concepts."""
-        return f"""
+        return """
         // Find concept nodes
         MATCH (concept:CONCEPT)
         WHERE concept.name CONTAINS $concept_name

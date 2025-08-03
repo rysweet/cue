@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 """
 Factory functions for creating test nodes.
 """
@@ -152,7 +152,7 @@ def create_filesystem_directory_node(name: str = "src", relative_path: Optional[
 
 
 def create_documentation_file_node(name: str = "README.md", relative_path: Optional[str] = None,
-                                  format: str = "markdown"):
+                                  doc_type: str = "markdown"):
     """Create a documentation file node with default values."""
     if relative_path is None:
         relative_path = name
@@ -161,7 +161,7 @@ def create_documentation_file_node(name: str = "README.md", relative_path: Optio
         name=name,
         level=relative_path.count('/'),
         relative_path=relative_path,
-        format=format,
+        doc_type=doc_type,
         graph_environment=get_test_graph_environment()
     )
 
@@ -209,9 +209,9 @@ def create_description_node(target_node_id: str, description: str = "Test descri
     )
 
 
-def create_sample_project_nodes() -> List:
+def create_sample_project_nodes() -> List[Any]:
     """Create a set of nodes representing a sample project structure."""
-    nodes: List = []
+    nodes: List[Any] = []
     
     # Root folder
     root = create_folder_node("project", "file:///test/project", 0)

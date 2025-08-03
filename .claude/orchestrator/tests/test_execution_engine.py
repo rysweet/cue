@@ -12,7 +12,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
 # Add the components directory to the path

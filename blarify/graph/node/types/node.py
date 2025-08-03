@@ -6,8 +6,7 @@ import os
 from blarify.utils.relative_id_calculator import RelativeIdCalculator
 
 if TYPE_CHECKING:
-    from blarify.graph.relationship import Relationship
-    from blarify.graph.node import NodeLabels
+    from blarify.graph.node.types.node_labels import NodeLabels
     from blarify.graph.graph_environment import GraphEnvironment
 
 
@@ -84,7 +83,7 @@ class Node:
             },
         }
 
-    def get_relationships(self) -> List["Relationship"]:
+    def get_relationships(self) -> List[Any]:
         return []
 
     def filter_children_by_path(self, paths: List[str]) -> None:

@@ -11,7 +11,7 @@ class ProjectFilesIterator:
     paths_to_skip: List[str]
     names_to_skip: List[str]
     extensions_to_skip: List[str]
-    max_file_size_mb: int
+    max_file_size_mb: float
 
     def __init__(
         self,
@@ -20,7 +20,7 @@ class ProjectFilesIterator:
         names_to_skip: Optional[List[str]] = None,
         extensions_to_skip: Optional[List[str]] = None,
         blarignore_path: Optional[str] = None,
-        max_file_size_mb: int = 0.8,
+        max_file_size_mb: float = 0.8,
         use_gitignore: bool = True,
     ):
         self.paths_to_skip = paths_to_skip or []
@@ -78,7 +78,7 @@ class ProjectFilesIterator:
                     level=level,
                 )
 
-    def _get_filtered_dirs(self, root: str, dirs: List[str]) -> List[Folder]:
+    def _get_filtered_dirs(self, root: str, dirs: List[str]) -> List[str]:
         dirs = [dir for dir in dirs if not self._should_skip_directory(os.path.join(root, dir))]
         return dirs
 
@@ -156,8 +156,8 @@ class ProjectFilesIterator:
 
         return is_basename_in_names_to_skip or is_path_in_paths_to_skip or is_file_size_too_big or is_extension_to_skip
 
-    def _mb_to_bytes(self, mb: int) -> int:
-        return 1024 * 1024 * mb
+    def _mb_to_bytes(self, mb: float) -> int:
+        return int(1024 * 1024 * mb)
 
     def get_base_name(self, current_path: str) -> str:
         return os.path.basename(current_path)

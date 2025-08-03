@@ -1,12 +1,9 @@
-from typing import List, Optional, Tuple, Union, TYPE_CHECKING, Dict, Any
+from typing import List, Optional, Tuple, TYPE_CHECKING, Dict, Any
 from blarify.graph.node.types.node import Node
 
 import re
 
 if TYPE_CHECKING:
-    from ..class_node import ClassNode
-    from ..function_node import FunctionNode
-    from blarify.graph.relationship import Relationship
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
     from blarify.graph.graph_environment import GraphEnvironment
@@ -14,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class DefinitionNode(Node):
-    _defines: List[Union["ClassNode", "FunctionNode"]]
+    _defines: List[Any]  # Using Any to break circular imports
     definition_range: "Reference"
     node_range: "Reference"
     code_text: str
@@ -27,7 +24,7 @@ class DefinitionNode(Node):
     def __init__(
         self, definition_range: "Reference", node_range: "Reference", code_text: str, body_node: Optional["TreeSitterNode"], tree_sitter_node: "TreeSitterNode", *args: Any, **kwargs: Any
     ) -> None:
-        self._defines: List[Union["ClassNode", "FunctionNode"]] = []
+        self._defines: List[Any] = []
         self.definition_range = definition_range
         self.node_range = node_range
         self.code_text = code_text
@@ -53,21 +50,23 @@ class DefinitionNode(Node):
             return NestingStats(0, 0, 0, 0)
         return CodeComplexityCalculator.calculate_nesting_stats(self.body_node, extension=self.extension)
 
-    def relate_node_as_define_relationship(self, node: Union["ClassNode", "FunctionNode"]) -> None:
+    def relate_node_as_define_relationship(self, node: Any) -> None:
         self._defines.append(node)
 
-    def relate_nodes_as_define_relationship(self, nodes: List[Union["ClassNode", "FunctionNode"]]) -> None:
+    def relate_nodes_as_define_relationship(self, nodes: List[Any]) -> None:
         self._defines.extend(nodes)
 
-    def get_relationships(self) -> List["Relationship"]:
-        # Import here to avoid circular dependencies
-        from blarify.graph.relationship import RelationshipCreator
-        
-        relationships: List["Relationship"] = []
+    def get_relationships(self) -> List[Any]:
+        relationships: List[Any] = []
         for node in self._defines:
-            relationships.append(RelationshipCreator.create_defines_relationship(self, node))
-
+            relationships.append(self._create_defines_relationship(node))
         return relationships
+    
+    def _create_defines_relationship(self, node: Any) -> Any:
+        """Helper method to create relationship with lazy import"""
+        # Import only when this method is called to break circular dependency
+        from blarify.graph.relationship.relationship_creator import RelationshipCreator
+        return RelationshipCreator.create_defines_relationship(self, node)
 
     def get_start_and_end_line(self):
         return self.node_range.range.start.line, self.node_range.range.end.line

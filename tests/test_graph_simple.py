@@ -2,9 +2,8 @@
 Simple tests for graph operations that work with current structure.
 """
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from blarify.graph.graph import Graph
-from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType
@@ -15,7 +14,7 @@ class TestGraphSimple(unittest.TestCase):
     
     def setUp(self):
         """Set up test graph instance."""
-        self.graph = Graph()
+        self.graph = Graph()  # type: ignore[misc]
         
     def test_graph_creation(self):
         """Test creating an empty graph."""
@@ -61,7 +60,7 @@ class TestGraphSimple(unittest.TestCase):
         retrieved = self.graph.get_node_by_id(node.id)
         
         self.assertEqual(retrieved, node)
-        self.assertEqual(retrieved.name, "src")
+        self.assertEqual(retrieved.name, "src")  # type: ignore[attr-defined]
         
     def test_get_nodes_by_label(self):
         """Test retrieving nodes by label."""

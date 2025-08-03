@@ -6,7 +6,8 @@ class RelationshipMarker:
         node_names = RelationshipMarker.__get_all_node_names(nodes_as_objects)
         for node in nodes_as_objects:
             for name in node_names:
-                if not node.get("attributes") or not node.get("attributes").get("text"):
+                attributes = node.get("attributes")
+                if not attributes or not attributes.get("text"):
                     print("Node does not have attributes or text")
                     continue
                 import re

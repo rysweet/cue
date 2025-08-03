@@ -193,7 +193,7 @@ def create_documentation_graph():
         name="README.md",
         level=1,
         relative_path="README.md",
-        format="markdown"
+        doc_type="markdown"
     )
     graph.add_node(readme)
     

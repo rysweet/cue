@@ -4,14 +4,13 @@ import shutil
 import os
 from unittest.mock import patch, MagicMock
 from blarify.prebuilt.graph_builder import GraphBuilder
-from blarify.graph.node import NodeLabels
 
 
 class TestLLMIntegration(unittest.TestCase):
     
     def setUp(self):
         # Create a temporary directory for test files
-        self.test_dir = tempfile.mkdtemp()
+        self.test_dir = tempfile.mkdtemp()  # type: ignore[misc]
         
         # Create test Python files
         self.create_test_file("main.py", """
@@ -53,7 +52,7 @@ def validate_input(value):
         # Clean up temporary directory
         shutil.rmtree(self.test_dir)
     
-    def create_test_file(self, filename, content):
+    def create_test_file(self, filename: str, content: str) -> None:
         filepath = os.path.join(self.test_dir, filename)
         with open(filepath, 'w') as f:
             f.write(content)
@@ -65,7 +64,7 @@ def validate_input(value):
         'ENABLE_LLM_DESCRIPTIONS': 'true'
     })
     @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
-    def test_graph_with_llm_descriptions(self, mock_azure_openai):
+    def test_graph_with_llm_descriptions(self, mock_azure_openai: MagicMock) -> None:
         # Mock the OpenAI client
         mock_client = MagicMock()
         mock_azure_openai.return_value = mock_client
@@ -83,7 +82,7 @@ def validate_input(value):
             "Validates that the input is a positive number, returning True if valid."
         ]
         
-        def mock_create(*args, **kwargs):
+        def mock_create(*args: str, **kwargs: str) -> MagicMock:
             nonlocal response_counter
             mock_response = MagicMock()
             mock_response.choices[0].message.content = descriptions[response_counter % len(descriptions)]

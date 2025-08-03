@@ -2,9 +2,8 @@
 Tests for filesystem node functionality.
 """
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 import tempfile
-import os
 import time
 from pathlib import Path
 
@@ -84,7 +83,7 @@ class TestFilesystemFileNode(unittest.TestCase):
         # Retrieve by ID
         retrieved = graph.get_node_by_id(node.id)
         self.assertIsNotNone(retrieved)
-        self.assertEqual(retrieved.extension, ".js")
+        self.assertEqual(retrieved.extension, ".js")  # type: ignore[attr-defined]
         
         # Retrieve by label
         fs_nodes = graph.get_nodes_by_label(NodeLabels.FILESYSTEM_FILE)
@@ -164,7 +163,7 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
     
     def setUp(self):
         """Set up test directory."""
-        self.test_dir = tempfile.mkdtemp()
+        self.test_dir: str = tempfile.mkdtemp()  # type: ignore[reportUninitializedInstanceVariable]
         
     def tearDown(self):
         """Clean up test directory."""
@@ -231,10 +230,10 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         test_node = next((n for n in file_nodes if n.name == "test.txt"), None)
         
         self.assertIsNotNone(test_node)
-        self.assertEqual(test_node.extension, ".txt")
-        self.assertEqual(test_node.size, len(test_content))
+        self.assertEqual(test_node.extension, ".txt")  # type: ignore[attr-defined]
+        self.assertEqual(test_node.size, len(test_content))  # type: ignore[attr-defined]
         # Allow some delta for timing
-        self.assertAlmostEqual(test_node.last_modified, stats.st_mtime, delta=1)
+        self.assertAlmostEqual(test_node.last_modified, stats.st_mtime, delta=1)  # type: ignore[attr-defined,arg-type]
 
 
 class TestFilesystemRelationships(unittest.TestCase):

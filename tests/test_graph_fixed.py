@@ -2,7 +2,6 @@
 Fixed tests for graph functionality that match actual implementation.
 """
 import unittest
-from unittest.mock import Mock, MagicMock, patch
 from typing import Any
 from blarify.graph.graph import Graph
 from blarify.graph.relationship.relationship import Relationship
@@ -27,7 +26,7 @@ class TestGraph(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.graph = Graph()
+        self.graph = Graph()  # type: ignore[misc]
         
     def test_graph_initialization(self):
         """Test graph is initialized properly."""
@@ -101,7 +100,7 @@ class TestGraph(unittest.TestCase):
         self.graph.add_node(child)
         
         # Relationships are created between nodes, not IDs
-        rel = Relationship(
+        rel = Relationship(  # type: ignore[var-annotated]
             start_node=parent,
             end_node=child,
             rel_type=RelationshipType.CONTAINS

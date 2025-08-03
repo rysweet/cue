@@ -3,7 +3,6 @@ Integration test to verify Blarify works with missing language modules.
 This test actually tests the warning system rather than mocking imports.
 """
 import unittest
-import warnings
 import sys
 import os
 
@@ -73,7 +72,7 @@ class TestConditionalImportsIntegration(unittest.TestCase):
         self.assertGreater(len(creator.languages), 0, "Should have some language mappings")
         
         # Test fallback for unknown extension
-        unknown_def = creator._get_language_definition('.unknown')
+        unknown_def = creator.languages.get('.unknown', FallbackDefinitions)
         self.assertEqual(unknown_def.__name__, 'FallbackDefinitions')
     
     def test_lsp_helper_error_messages(self):

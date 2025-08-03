@@ -38,7 +38,7 @@ class ContextTools:
             file_nodes = self.graph_traversal.find_files(file_paths)
             
             if not file_nodes:
-                return f"# Files Not Found\n\nNo files matching these paths were found:\n" + \
+                return "# Files Not Found\n\nNo files matching these paths were found:\n" + \
                        "\n".join(f"- {path}" for path in file_paths)
             
             # Get context for each file
