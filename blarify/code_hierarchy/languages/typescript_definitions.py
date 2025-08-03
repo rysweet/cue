@@ -7,9 +7,11 @@ from typing import Dict
 
 
 class TypescriptDefinitions(JavascriptDefinitions):
+    @staticmethod
     def get_language_name() -> str:
         return "typescript"
 
+    @staticmethod
     def get_parsers_for_extensions() -> Dict[str, Parser]:
         parsers = {
             ".ts": Parser(Language(tstypescript.language_typescript())),
@@ -20,5 +22,6 @@ class TypescriptDefinitions(JavascriptDefinitions):
 
         return parsers
 
+    @staticmethod
     def get_language_file_extensions():
         return {".ts", ".tsx", ".js", ".jsx"}

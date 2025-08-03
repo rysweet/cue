@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional, List, Dict, Any
 from blarify.graph.node.types.node import Node
 from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship import RelationshipCreator, Relationship
+from blarify.graph.relationship import Relationship
 
 if TYPE_CHECKING:
     from blarify.graph.graph_environment import GraphEnvironment
@@ -12,6 +12,7 @@ class FilesystemDirectoryNode(Node):
     
     relative_path: str
     permissions: Optional[str]
+    _contains: List[Node]
     
     def __init__(
         self,
@@ -20,8 +21,8 @@ class FilesystemDirectoryNode(Node):
         level: int,
         relative_path: str,
         permissions: Optional[str] = None,
-        parent: "Node" = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional["Node"] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ):
         super().__init__(
             label=NodeLabels.FILESYSTEM_DIRECTORY,
@@ -33,13 +34,13 @@ class FilesystemDirectoryNode(Node):
         )
         self.relative_path = relative_path
         self.permissions = permissions
-        self._contains = []
+        self._contains: List[Node] = []
     
     @property
     def node_repr_for_identifier(self) -> str:
         return f"/FILESYSTEM_DIR[{self.relative_path}]"
     
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         obj = super().as_object()
         obj["attributes"].update({
             "relative_path": self.relative_path,
@@ -60,10 +61,9 @@ class FilesystemDirectoryNode(Node):
     
     def get_relationships(self) -> List["Relationship"]:
         """Get FILESYSTEM_CONTAINS relationships for children."""
-        from blarify.graph.relationship import Relationship
         from blarify.graph.relationship.relationship_type import RelationshipType
         
-        relationships = []
+        relationships: List["Relationship"] = []
         for child in self._contains:
             rel = Relationship(
                 start_node=self,

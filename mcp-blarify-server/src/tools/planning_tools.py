@@ -1,7 +1,7 @@
 """MCP tools for change planning."""
 
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any
 from neo4j import Driver
 
 from ..processors.graph_traversal import GraphTraversal
@@ -167,9 +167,9 @@ To create a more detailed plan, please provide specific information about the co
         # Add files to modify
         for i, file_path in enumerate(affected_files[:10], 1):
             plan += f"\n#### {i}. Update `{file_path}`"
-            plan += f"\n- Review current implementation"
-            plan += f"\n- Apply necessary changes"
-            plan += f"\n- Ensure backward compatibility\n"
+            plan += "\n- Review current implementation"
+            plan += "\n- Apply necessary changes"
+            plan += "\n- Ensure backward compatibility\n"
         
         if len(affected_files) > 10:
             plan += f"\n... and {len(affected_files) - 10} more files\n"

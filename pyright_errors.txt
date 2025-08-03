@@ -1,0 +1,93 @@
+/Users/ryan/src/cue2/cue/blarify/graph/graph.py
+  /Users/ryan/src/cue2/cue/blarify/graph/graph.py: error: Cycle detected in import chain
+    /Users/ryan/src/cue2/cue/blarify/graph/graph.py
+    /Users/ryan/src/cue2/cue/blarify/graph/node/file_node.py
+    /Users/ryan/src/cue2/cue/blarify/graph/node/types/definition_node.py
+    /Users/ryan/src/cue2/cue/blarify/graph/relationship/relationship_creator.py (reportImportCycles)
+/Users/ryan/src/cue2/cue/tests/test_llm_service.py
+  /Users/ryan/src/cue2/cue/tests/test_llm_service.py:12:14 - error: Instance variable "env_patcher" is not initialized in the class body or __init__ method (reportUninitializedInstanceVariable)
+/Users/ryan/src/cue2/cue/tests/test_lsp_helper.py
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:3:45 - error: Import "Mock" is not accessed (reportUnusedImport)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:16:14 - error: Instance variable "root_uri" is not initialized in the class body or __init__ method (reportUninitializedInstanceVariable)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:17:14 - error: Instance variable "helper" is not initialized in the class body or __init__ method (reportUninitializedInstanceVariable)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:114:30 - error: "_create_lsp_server" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:141:34 - error: "_get_or_create_lsp_server" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:157:42 - error: "_get_or_create_lsp_server" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:170:21 - error: "_initialize_lsp_server" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:217:30 - error: "_request_references_with_exponential_backoff" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:242:38 - error: "_request_references_with_exponential_backoff" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:263:38 - error: "_request_references_with_exponential_backoff" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:281:37 - error: "_restart_lsp_for_extension" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:291:66 - error: Variable "mock_exit" is not accessed (reportUnusedVariable)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:292:73 - error: Variable "mock_create" is not accessed (reportUnusedVariable)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:300:37 - error: "_restart_lsp_for_extension" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:390:72 - error: Variable "mock_get_server" is not accessed (reportUnusedVariable)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:476:37 - error: "_get_or_create_lsp_server" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:493:38 - error: "_request_references_with_exponential_backoff" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:513:38 - error: "_request_references_with_exponential_backoff" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:529:29 - error: Unnecessary issubclass call; "type[TimeoutError] | type[ConnectionResetError] | type[OSError] | type[BrokenPipeError]" is always a subclass of "Exception" (reportUnnecessaryIsInstance)
+  /Users/ryan/src/cue2/cue/tests/test_lsp_helper.py:549:37 - error: "_restart_lsp_for_extension" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+/Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:5:40 - error: Import "MagicMock" is not accessed (reportUnusedImport)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:128:14 - error: Instance variable "temp_dir" is not initialized in the class body or __init__ method (reportUninitializedInstanceVariable)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:171:13 - error: Type of "extend" is partially unknown
+    Type of "extend" is "(iterable: Iterable[Unknown], /) -> None" (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:172:9 - error: Type of "file_names" is partially unknown
+    Type of "file_names" is "list[Unknown]" (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:172:23 - error: Type of "name" is unknown (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:172:34 - error: Type of "f" is unknown (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:175:36 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:176:35 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:177:34 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:178:35 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:179:39 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:194:13 - error: Type of "extend" is partially unknown
+    Type of "extend" is "(iterable: Iterable[Unknown], /) -> None" (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:195:9 - error: Type of "file_names" is partially unknown
+    Type of "file_names" is "list[Unknown]" (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:195:23 - error: Type of "name" is unknown (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:195:34 - error: Type of "f" is unknown (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:198:39 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertNotIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:200:34 - error: Argument type is partially unknown
+    Argument corresponds to parameter "container" in function "assertIn"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:216:13 - error: Type of "extend" is partially unknown
+    Type of "extend" is "(iterable: Iterable[Unknown], /) -> None" (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:217:9 - error: Type of "file_paths" is partially unknown
+    Type of "file_paths" is "list[Unknown]" (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:217:23 - error: Type of "path" is unknown (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:217:34 - error: Type of "f" is unknown (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:227:48 - error: Type of "p" is unknown (reportUnknownVariableType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:256:32 - error: "level" is not a known attribute of "None" (reportOptionalMemberAccess)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:256:44 - error: "level" is not a known attribute of "None" (reportOptionalMemberAccess)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:285:13 - error: Type of "extend" is partially unknown
+    Type of "extend" is "(iterable: Iterable[Unknown], /) -> None" (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:287:30 - error: Argument type is partially unknown
+    Argument corresponds to parameter "obj" in function "len"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:288:26 - error: Type of "name" is unknown (reportUnknownMemberType)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:353:30 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:354:30 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:355:13 - error: No overloads for "assertGreater" match the provided arguments (reportCallIssue)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:355:32 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /Users/ryan/src/cue2/cue/tests/test_project_file_explorer.py:355:51 - error: Argument of type "Literal[0]" cannot be assigned to parameter "b" of type "SupportsDunderLT[_T@assertGreater]" in function "assertGreater"
+    "Literal[0]" is incompatible with protocol "SupportsDunderLT[str | int | Unknown]"
+      "__lt__" is an incompatible type
+        Type "(value: int, /) -> bool" is not assignable to type "(other: _T_contra@SupportsDunderLT, /) -> bool"
+          Parameter 1: type "_T_contra@SupportsDunderLT" is incompatible with type "int"
+            Type "str | int | Unknown" is not assignable to type "int" (reportArgumentType)
+/Users/ryan/src/cue2/cue/tests/test_tree_sitter_helper.py
+  /Users/ryan/src/cue2/cue/tests/test_tree_sitter_helper.py:194:30 - error: "_does_path_have_valid_extension" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+55 errors, 0 warnings, 0 informations 

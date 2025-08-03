@@ -1,7 +1,7 @@
 """Graph traversal logic for extracting context from Neo4j."""
 
-from typing import List, Dict, Any, Optional, Set
-from neo4j import GraphDatabase, Driver
+from typing import List, Dict, Any, Optional
+from neo4j import Driver
 import logging
 
 from ..config import Config

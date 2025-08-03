@@ -73,9 +73,13 @@ jobs:
         poetry run ruff check blarify/ || true
         poetry run ruff format --check blarify/ || true
     
-    - name: Run type checking
+    - name: Run type checking with pyright
       run: |
-        poetry run mypy blarify/ --ignore-missing-imports || true
+        poetry run pyright blarify/graph/graph.py || echo "Type checking in progress - some modules still need type annotations"
+        
+    - name: Run legacy mypy check (transitional)
+      run: |
+        poetry run mypy blarify/ --ignore-missing-imports || echo "MyPy check - transitioning to pyright"
     
     - name: Run tests with coverage
       env:

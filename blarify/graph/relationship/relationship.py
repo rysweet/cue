@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Any
 
 if TYPE_CHECKING:
-    from blarify.graph.node import Node
-    from blarify.graph.relationship import RelationshipType
+    from blarify.graph.node.types.node import Node
+    from blarify.graph.relationship.relationship_type import RelationshipType
 
 
 class Relationship:
@@ -17,7 +17,7 @@ class Relationship:
         self.rel_type = rel_type
         self.scope_text = scope_text
 
-    def as_object(self) -> dict:
+    def as_object(self) -> Dict[str, Any]:
         return {
             "sourceId": self.start_node.hashed_id,
             "targetId": self.end_node.hashed_id,

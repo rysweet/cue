@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from openai import AzureOpenAI
 
 from ..config import Config
@@ -279,9 +279,9 @@ Format as clear Markdown with numbered steps and specific file paths."""
     
     def _build_basic_implementation_plan(self, change_request: str, impact_analysis: Dict[str, Any]) -> str:
         """Build basic implementation plan without LLM."""
-        md = f"# Implementation Plan\n\n"
+        md = "# Implementation Plan\n\n"
         md += f"## Change Request\n{change_request}\n\n"
-        md += f"## Impact Analysis\n"
+        md += "## Impact Analysis\n"
         
         for entity, impact in impact_analysis.items():
             md += f"\n### {entity}\n"

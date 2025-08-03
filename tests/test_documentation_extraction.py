@@ -2,7 +2,7 @@
 Tests for documentation extraction and processing.
 """
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import tempfile
 import os
 from pathlib import Path
@@ -19,8 +19,8 @@ class TestDocumentationParser(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.temp_dir = tempfile.mkdtemp()
-        self.parser = DocumentationParser(root_path=self.temp_dir)
+        self.temp_dir: str = tempfile.mkdtemp()  # type: ignore[reportUninitializedInstanceVariable]
+        self.parser: DocumentationParser = DocumentationParser(root_path=self.temp_dir)  # type: ignore[reportUninitializedInstanceVariable]
         
     def tearDown(self):
         """Clean up test files."""
@@ -34,21 +34,21 @@ class TestDocumentationParser(unittest.TestCase):
         Path(readme_path).write_text("# Test Project")
         
         # Test that common documentation files are identified
-        self.assertTrue(self.parser._is_documentation_file("README.md", readme_path))
-        self.assertTrue(self.parser._is_documentation_file("CHANGELOG.md", "CHANGELOG.md"))
-        self.assertTrue(self.parser._is_documentation_file("docs.md", "docs.md"))
+        self.assertTrue(self.parser._is_documentation_file("README.md", readme_path))  # type: ignore[reportPrivateUsage]
+        self.assertTrue(self.parser._is_documentation_file("CHANGELOG.md", "CHANGELOG.md"))  # type: ignore[reportPrivateUsage]
+        self.assertTrue(self.parser._is_documentation_file("docs.md", "docs.md"))  # type: ignore[reportPrivateUsage]
         
     def test_is_documentation_file_other_formats(self):
         """Test identifying other documentation formats."""
-        self.assertTrue(self.parser._is_documentation_file("README.rst", "README.rst"))
-        self.assertTrue(self.parser._is_documentation_file("documentation.txt", "documentation.txt"))
-        self.assertTrue(self.parser._is_documentation_file("guide.adoc", "guide.adoc"))
+        self.assertTrue(self.parser._is_documentation_file("README.rst", "README.rst"))  # type: ignore[reportPrivateUsage]
+        self.assertTrue(self.parser._is_documentation_file("documentation.txt", "documentation.txt"))  # type: ignore[reportPrivateUsage]
+        self.assertTrue(self.parser._is_documentation_file("guide.adoc", "guide.adoc"))  # type: ignore[reportPrivateUsage]
         
     def test_is_not_documentation_file(self):
         """Test files that should not be identified as documentation."""
-        self.assertFalse(self.parser._is_documentation_file("main.py", "main.py"))
-        self.assertFalse(self.parser._is_documentation_file("config.json", "config.json"))
-        self.assertFalse(self.parser._is_documentation_file("test.js", "test.js"))
+        self.assertFalse(self.parser._is_documentation_file("main.py", "main.py"))  # type: ignore[reportPrivateUsage]
+        self.assertFalse(self.parser._is_documentation_file("config.json", "config.json"))  # type: ignore[reportPrivateUsage]
+        self.assertFalse(self.parser._is_documentation_file("test.js", "test.js"))  # type: ignore[reportPrivateUsage]
         
     def test_find_documentation_files(self):
         """Test finding documentation files in directory."""
@@ -90,8 +90,8 @@ class TestDocumentationGraphGenerator(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.temp_dir = tempfile.mkdtemp()
-        self.mock_llm = Mock()
+        self.temp_dir: str = tempfile.mkdtemp()  # type: ignore[reportUninitializedInstanceVariable]
+        self.mock_llm: Mock = Mock()  # type: ignore[reportUninitializedInstanceVariable]
         
     def tearDown(self):
         """Clean up."""
@@ -99,7 +99,7 @@ class TestDocumentationGraphGenerator(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
         
     @patch('blarify.project_file_explorer.project_files_iterator.ProjectFilesIterator')
-    def test_generate_documentation_nodes(self, mock_iterator):
+    def test_generate_documentation_nodes(self, mock_iterator: Mock):
         """Test generating documentation nodes."""
         # Create test structure
         (Path(self.temp_dir) / "README.md").write_text("# Test Project")

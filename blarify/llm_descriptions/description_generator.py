@@ -1,11 +1,13 @@
 import logging
 import re
-from typing import List, Dict, Optional, Set, TYPE_CHECKING
+from typing import List, Dict, Optional, TYPE_CHECKING, Any, Set
 
 if TYPE_CHECKING:
     from blarify.graph.graph import Graph
     from blarify.graph.graph_environment import GraphEnvironment
     from blarify.graph.node import Node
+    from blarify.graph.relationship import Relationship
+    # Import specific node types that have code_text
 
 from blarify.graph.node.types.node_labels import NodeLabels
 from blarify.graph.relationship.relationship_type import RelationshipType
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 class DescriptionGenerator:
     """Generates LLM descriptions for code nodes and creates description nodes."""
     
-    def __init__(self, llm_service: LLMService, graph_environment: "GraphEnvironment" = None):
+    def __init__(self, llm_service: LLMService, graph_environment: Optional["GraphEnvironment"] = None):
         self.llm_service = llm_service
         self.graph_environment = graph_environment
         self._prompt_templates = self._initialize_prompt_templates()
@@ -95,7 +97,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
         logger.info(f"Generating descriptions for {len(eligible_nodes)} nodes")
         
         # Prepare prompts
-        prompts = []
+        prompts: List[Dict[str, Any]] = []
         for node in eligible_nodes:
             prompt_data = self._create_prompt_for_node(node, graph)
             if prompt_data:
@@ -105,18 +107,20 @@ Please provide a concise description (2-3 sentences) of what this module contain
         descriptions = self.llm_service.generate_batch_descriptions(prompts)
         
         # Create description nodes
-        description_nodes = {}
-        relationships = []
+        description_nodes: Dict[str, "Node"] = {}
+        relationships: List["Relationship"] = []
         
         for node in eligible_nodes:
             node_id = node.hashed_id
             if node_id in descriptions and descriptions[node_id]:
-                desc_node, rel = self._create_description_node_and_relationship(
-                    node, descriptions[node_id], graph
-                )
-                if desc_node:
-                    description_nodes[desc_node.hashed_id] = desc_node
-                    relationships.append(rel)
+                description_text = descriptions[node_id]
+                if description_text:  # Ensure it's not None
+                    desc_node, rel = self._create_description_node_and_relationship(
+                        node, description_text, graph
+                    )
+                    if desc_node and rel:
+                        description_nodes[desc_node.hashed_id] = desc_node
+                        relationships.append(rel)
         
         # Add nodes and relationships to graph
         for desc_node in description_nodes.values():
@@ -134,7 +138,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
             NodeLabels.METHOD, NodeLabels.MODULE
         }
         
-        eligible_nodes = []
+        eligible_nodes: List["Node"] = []
         for label in eligible_labels:
             nodes = graph.get_nodes_by_label(label)
             eligible_nodes.extend(nodes)
@@ -175,11 +179,13 @@ Please provide a concise description (2-3 sentences) of what this module contain
         elif node.label in [NodeLabels.FUNCTION, NodeLabels.METHOD]:
             context["function_name"] = node.name
             context["method_name"] = node.name
-            # Get code snippet if available
-            if hasattr(node, 'text'):
-                context["code_snippet"] = node.text[:1000]  # Limit snippet length
-            else:
-                context["code_snippet"] = "# Code snippet not available"
+            # Get code snippet if available - cast to specific node type that has code_text
+            code_snippet = "# Code snippet not available"
+            if hasattr(node, 'code_text'):
+                code_text = getattr(node, 'code_text', None)
+                if code_text:
+                    code_snippet = str(code_text)[:1000]  # Limit snippet length
+            context["code_snippet"] = code_snippet
             
             # Add class context for methods
             if node.label == NodeLabels.METHOD and node.parent:
@@ -187,10 +193,13 @@ Please provide a concise description (2-3 sentences) of what this module contain
                 
         elif node.label == NodeLabels.CLASS:
             context["class_name"] = node.name
-            if hasattr(node, 'text'):
-                context["code_snippet"] = node.text[:1000]
-            else:
-                context["code_snippet"] = "# Code snippet not available"
+            # Get code snippet if available - use getattr to avoid type checker issues
+            code_snippet = "# Code snippet not available"
+            if hasattr(node, 'code_text'):
+                code_text = getattr(node, 'code_text', None)
+                if code_text:
+                    code_snippet = str(code_text)[:1000]
+            context["code_snippet"] = code_snippet
                 
         elif node.label == NodeLabels.MODULE:
             context["module_path"] = node.path
@@ -263,7 +272,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
     
     def _extract_referenced_nodes(self, description: str, graph: "Graph") -> List["Node"]:
         """Extract nodes that are referenced in the description text."""
-        referenced_nodes = []
+        referenced_nodes: List["Node"] = []
         
         # Look for function/class/method names in backticks or quotes
         patterns = [
@@ -272,7 +281,7 @@ Please provide a concise description (2-3 sentences) of what this module contain
             r"'([a-zA-Z_][a-zA-Z0-9_]*)'",  # Single quotes
         ]
         
-        potential_references = set()
+        potential_references: Set[str] = set()
         for pattern in patterns:
             matches = re.findall(pattern, description)
             potential_references.update(matches)

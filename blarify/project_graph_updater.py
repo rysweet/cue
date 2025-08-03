@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from blarify.project_graph_diff_creator import ProjectGraphDiffCreator, FileDiff, ChangeType
-from typing import List
+from typing import List, Any
 from blarify.graph.graph_update import GraphUpdate
 
 from blarify.graph.graph_environment import GraphEnvironment
@@ -14,7 +14,7 @@ class UpdatedFile:
 class ProjectGraphUpdater(ProjectGraphDiffCreator):
     updated_files: List[UpdatedFile]
 
-    def __init__(self, updated_files: List[UpdatedFile], graph_environment: GraphEnvironment, *args, **kwargs):
+    def __init__(self, updated_files: List[UpdatedFile], graph_environment: GraphEnvironment, *args: Any, **kwargs: Any):
         """
         This class is just a wrapper around ProjectGraphDiffCreator
 

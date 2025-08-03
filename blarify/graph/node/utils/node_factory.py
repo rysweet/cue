@@ -1,25 +1,25 @@
+from typing import Optional, Union, TYPE_CHECKING
+from uuid import uuid4
+
 from blarify.graph.node.class_node import ClassNode
 from blarify.graph.node.deleted_node import DeletedNode
-from ..file_node import FileNode
-from ..folder_node import FolderNode
-from ..function_node import FunctionNode
-from ..types.node_labels import NodeLabels
-
-from typing import Optional, Union, TYPE_CHECKING
-
-from uuid import uuid4
+from blarify.graph.node.file_node import FileNode
+from blarify.graph.node.folder_node import FolderNode
+from blarify.graph.node.function_node import FunctionNode
+from blarify.graph.node.types.node_labels import NodeLabels
 
 if TYPE_CHECKING:
     from blarify.project_file_explorer import Folder
     from blarify.graph.graph_environment import GraphEnvironment
     from blarify.code_references.types import Reference
     from tree_sitter import Node as TreeSitterNode
+    from blarify.graph.node.types.definition_node import DefinitionNode
 
 
 class NodeFactory:
     @staticmethod
     def create_folder_node(
-        folder: "Folder", parent: FolderNode = None, graph_environment: "GraphEnvironment" = None
+        folder: "Folder", parent: Optional[FolderNode] = None, graph_environment: Optional["GraphEnvironment"] = None
     ) -> FolderNode:
         return FolderNode(
             path=folder.uri_path,
@@ -37,10 +37,10 @@ class NodeFactory:
         node_range: "Reference",
         definition_range: "Reference",
         code_text: str,
-        parent: FolderNode,
+        parent: Optional[FolderNode],
         tree_sitter_node: "TreeSitterNode",
         body_node: Optional["TreeSitterNode"] = None,
-        graph_environment: "GraphEnvironment" = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> FileNode:
         return FileNode(
             path=path,
@@ -62,11 +62,11 @@ class NodeFactory:
         definition_range: "Reference",
         node_range: "Reference",
         code_text: str,
-        body_node: "TreeSitterNode",
+        body_node: Optional["TreeSitterNode"],
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Union[FileNode, ClassNode, FunctionNode] = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional[Union["DefinitionNode", FileNode, ClassNode, FunctionNode]] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> ClassNode:
         return ClassNode(
             name=class_name,
@@ -88,11 +88,11 @@ class NodeFactory:
         definition_range: "Reference",
         node_range: "Reference",
         code_text: str,
-        body_node: "TreeSitterNode",
+        body_node: Optional["TreeSitterNode"],
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Union[FileNode, ClassNode, FunctionNode] = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional[Union["DefinitionNode", FileNode, ClassNode, FunctionNode]] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> FunctionNode:
         return FunctionNode(
             name=function_name,
@@ -115,11 +115,11 @@ class NodeFactory:
         definition_range: "Reference",
         node_range: "Reference",
         code_text: str,
-        body_node: "TreeSitterNode",
+        body_node: Optional["TreeSitterNode"],
         level: int,
         tree_sitter_node: "TreeSitterNode",
-        parent: Union[FileNode, ClassNode, FunctionNode] = None,
-        graph_environment: "GraphEnvironment" = None,
+        parent: Optional[Union["DefinitionNode", FileNode, ClassNode, FunctionNode]] = None,
+        graph_environment: Optional["GraphEnvironment"] = None,
     ) -> Union[ClassNode, FunctionNode]:
         if kind == NodeLabels.CLASS:
             return NodeFactory.create_class_node(
@@ -152,11 +152,16 @@ class NodeFactory:
 
     @staticmethod
     def create_deleted_node(
-        graph_environment: "GraphEnvironment" = None,
-    ):
+        graph_environment: Optional["GraphEnvironment"] = None,
+    ) -> DeletedNode:
+        if graph_environment is None:
+            path = f"file:///DELETED-{str(uuid4())}"
+        else:
+            path = f"file://{graph_environment.root_path}/DELETED-{str(uuid4())}"
+        
         return DeletedNode(
             label=NodeLabels.DELETED,
-            path="file://" + graph_environment.root_path + f"/DELETED-{str(uuid4())}",
+            path=path,
             name="DELETED",
             level=0,
             graph_environment=graph_environment,

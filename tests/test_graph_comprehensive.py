@@ -1,8 +1,8 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from blarify.graph.graph import Graph
 from blarify.graph.node import Node, NodeLabels, FileNode
-from blarify.graph.relationship import Relationship, RelationshipType
+from blarify.graph.relationship import Relationship
 
 
 class TestGraphComprehensive(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestGraphComprehensive(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.graph = Graph()
+        self.graph = Graph()  # type: ignore[misc]
         
     def test_has_folder_node_with_path(self):
         """Test checking if folder node exists with path."""
@@ -38,9 +38,9 @@ class TestGraphComprehensive(unittest.TestCase):
             mock_node.path = f"/test/file{i}.py"
             mock_node.label = NodeLabels.CLASS
             mock_node.relative_id = f"node{i}"
-            nodes.append(mock_node)
+            nodes.append(mock_node)  # type: ignore[arg-type]
             
-        self.graph.add_nodes(nodes)
+        self.graph.add_nodes(nodes)  # type: ignore[arg-type]
         
         # Verify all nodes were added
         for i in range(3):
@@ -209,8 +209,8 @@ class TestGraphComprehensive(unittest.TestCase):
             mock_node.path = f"/test/file{i}.py"
             mock_node.label = NodeLabels.CLASS
             mock_node.relative_id = f"node{i}"
-            mock_node.filter_children_by_path = MagicMock()
-            nodes.append(mock_node)
+            mock_node.filter_children_by_path = MagicMock()  # type: ignore[attr-defined]
+            nodes.append(mock_node)  # type: ignore[arg-type]
             self.graph.add_node(mock_node)
             
         # Create relationships
@@ -235,8 +235,8 @@ class TestGraphComprehensive(unittest.TestCase):
         self.assertIsNone(filtered_graph.get_node_by_id("node3"))
         
         # Verify filter_children_by_path was called
-        nodes[0].filter_children_by_path.assert_called_once_with(paths_to_keep)
-        nodes[1].filter_children_by_path.assert_called_once_with(paths_to_keep)
+        nodes[0].filter_children_by_path.assert_called_once_with(paths_to_keep)  # type: ignore[attr-defined]
+        nodes[1].filter_children_by_path.assert_called_once_with(paths_to_keep)  # type: ignore[attr-defined]
         
         # Verify only relevant relationships are kept
         filtered_relationships = filtered_graph.get_all_relationships()
@@ -285,21 +285,21 @@ class TestGraphComprehensive(unittest.TestCase):
         mock_node1.path = "/test/file1.py"
         mock_node1.label = NodeLabels.CLASS
         mock_node1.relative_id = "node1"
-        mock_node1.__str__.return_value = "Node1: Class"
+        mock_node1.__str__.return_value = "Node1: Class"  # type: ignore[attr-defined]
         
         mock_node2 = MagicMock(spec=Node)
         mock_node2.id = "node2"
         mock_node2.path = "/test/file2.py"
         mock_node2.label = NodeLabels.FUNCTION
         mock_node2.relative_id = "node2"
-        mock_node2.__str__.return_value = "Node2: Function"
+        mock_node2.__str__.return_value = "Node2: Function"  # type: ignore[attr-defined]
         
         self.graph.add_node(mock_node1)
         self.graph.add_node(mock_node2)
         
         # Add reference relationship
         mock_rel = MagicMock(spec=Relationship)
-        mock_rel.__str__.return_value = "Relationship: Node1 -> Node2"
+        mock_rel.__str__.return_value = "Relationship: Node1 -> Node2"  # type: ignore[attr-defined]
         self.graph.add_references_relationships([mock_rel])
         
         graph_str = str(self.graph)
@@ -334,13 +334,13 @@ class TestGraphComprehensive(unittest.TestCase):
             mock_node.path = f"/test/file{i}.py"
             mock_node.label = NodeLabels.CLASS
             mock_node.relative_id = f"node{i}"
-            nodes.append(mock_node)
+            nodes.append(mock_node)  # type: ignore[arg-type]
             self.graph.add_node(mock_node)
             
         all_nodes = self.graph.get_all_nodes()
         
         self.assertEqual(len(all_nodes), 3)
-        for node in nodes:
+        for node in nodes:  # type: ignore[attr-defined]
             self.assertIn(node, all_nodes)
     
     def test_filtered_graph_with_self_referencing_relationships(self):

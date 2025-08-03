@@ -1,6 +1,5 @@
 """Tests for query builder."""
 
-import pytest
 from src.tools.query_builder import QueryBuilder
 
 

@@ -2,15 +2,11 @@
 Comprehensive tests for graph operations.
 """
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from blarify.graph.graph import Graph
-from blarify.graph.node.file_node import FileNode
-from blarify.graph.node.class_node import ClassNode
-from blarify.graph.node.function_node import FunctionNode
 from blarify.graph.relationship.relationship import Relationship
 from blarify.graph.relationship.relationship_type import RelationshipType
 from blarify.graph.node.types.node_labels import NodeLabels
-from tests.fixtures.graph_fixtures import create_test_graph
 from tests.fixtures.node_factories import (
     create_filesystem_file_node, create_concept_node, create_documented_entity_node
 )
@@ -21,7 +17,7 @@ class TestGraphOperations(unittest.TestCase):
     
     def setUp(self):
         """Set up test graph instance."""
-        self.graph = Graph()
+        self.graph = Graph()  # type: ignore[misc]
         
     def test_add_node_success(self):
         """Test adding a node to the graph."""
@@ -61,7 +57,7 @@ class TestGraphOperations(unittest.TestCase):
         retrieved = self.graph.get_node_by_id(node.id)
         
         self.assertEqual(retrieved, node)
-        self.assertEqual(retrieved.name, "TestConcept")
+        self.assertEqual(retrieved.name, "TestConcept")  # type: ignore[attr-defined]
         
     def test_get_node_by_id_not_found(self):
         """Test retrieving non-existent node returns None."""
@@ -286,17 +282,17 @@ class TestGraphOperations(unittest.TestCase):
         all_rels = self.graph.get_all_relationships()
         
         # Find nodes connected to concept1
-        connected_to_concept1 = set()
+        connected_to_concept1 = set()  # type: ignore[var-annotated]
         for rel in all_rels:
             if rel.start_node == concept1:
-                connected_to_concept1.add(rel.end_node)
+                connected_to_concept1.add(rel.end_node)  # type: ignore[arg-type]
             elif rel.end_node == concept1:
-                connected_to_concept1.add(rel.start_node)
+                connected_to_concept1.add(rel.start_node)  # type: ignore[arg-type]
         
         # Should include file1 (incoming) and entity1 (outgoing)
-        self.assertIn(file1, connected_to_concept1)
-        self.assertIn(entity1, connected_to_concept1)
-        self.assertNotIn(file2, connected_to_concept1)
+        self.assertIn(file1, connected_to_concept1)  # type: ignore[arg-type]
+        self.assertIn(entity1, connected_to_concept1)  # type: ignore[arg-type]
+        self.assertNotIn(file2, connected_to_concept1)  # type: ignore[arg-type]
         
     def test_get_subgraph(self):
         """Test extracting a subgraph around specific nodes."""

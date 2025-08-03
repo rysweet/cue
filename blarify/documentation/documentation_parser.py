@@ -1,7 +1,6 @@
 import os
 import logging
 from typing import List, Dict, Any, Optional
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ class DocumentationParser:
         Returns:
             List of absolute paths to documentation files
         """
-        doc_files = []
+        doc_files: List[str] = []
         
         for root, dirs, files in os.walk(self.root_path):
             # Skip hidden directories and common non-doc directories
@@ -103,7 +102,7 @@ class DocumentationParser:
             Dictionary containing parsed documentation data
         """
         doc_files = self.find_documentation_files()
-        result = {
+        result: Dict[str, Any] = {
             "documentation_files": [],
             "concepts": [],
             "entities": [],

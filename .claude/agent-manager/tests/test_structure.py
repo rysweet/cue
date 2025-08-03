@@ -5,7 +5,6 @@ Simple structural tests for Agent Manager sub-agent.
 These tests validate that the agent-manager file exists and has proper structure.
 """
 
-import os
 import unittest
 from pathlib import Path
 

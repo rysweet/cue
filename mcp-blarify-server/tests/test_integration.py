@@ -2,7 +2,6 @@
 
 import pytest
 import pytest_asyncio
-import asyncio
 import os
 from neo4j import GraphDatabase
 import subprocess
@@ -14,7 +13,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.server import BlarifyMCPServer
 from src.tools.context_tools import ContextTools
-from src.tools.planning_tools import PlanningTools
 
 
 class TestIntegration:

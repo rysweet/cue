@@ -2,9 +2,7 @@
 Graph fixtures for testing graph operations.
 """
 from blarify.graph.graph import Graph
-from blarify.graph.node.file_node import FileNode
-from blarify.graph.node.class_node import ClassNode
-from blarify.graph.node.function_node import FunctionNode
+# Removed unused imports - FileNode, ClassNode, FunctionNode
 from blarify.graph.node.filesystem_file_node import FilesystemFileNode
 from blarify.graph.node.filesystem_directory_node import FilesystemDirectoryNode
 from blarify.graph.relationship.relationship import Relationship
@@ -195,7 +193,7 @@ def create_documentation_graph():
         name="README.md",
         level=1,
         relative_path="README.md",
-        format="markdown"
+        doc_type="markdown"
     )
     graph.add_node(readme)
     

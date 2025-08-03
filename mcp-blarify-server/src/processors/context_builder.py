@@ -1,7 +1,7 @@
 """Context builder for organizing graph data into consumable formats."""
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from collections import defaultdict
 
 from ..config import Config
