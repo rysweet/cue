@@ -1,3 +1,4 @@
+from typing import List, Any, Optional
 from blarify.prebuilt.graph_builder import GraphBuilder
 from blarify.db_managers.neo4j_manager import Neo4jManager
 from blarify.db_managers.falkordb_manager import FalkorDBManager
@@ -6,7 +7,13 @@ import dotenv
 import os
 
 
-def build(root_path: str = None, enable_llm_descriptions: bool = None):
+def build(root_path: Optional[str] = None, enable_llm_descriptions: Optional[bool] = None):
+    # Provide defaults for None values
+    if root_path is None:
+        root_path = os.getcwd()
+    if enable_llm_descriptions is None:
+        enable_llm_descriptions = False
+        
     graph_builder = GraphBuilder(
         root_path=root_path,
         extensions_to_skip=[".json"],
@@ -25,7 +32,7 @@ def build(root_path: str = None, enable_llm_descriptions: bool = None):
 
     save_to_neo4j(relationships, nodes)
 
-def save_to_neo4j(relationships, nodes):
+def save_to_neo4j(relationships: List[Any], nodes: List[Any]) -> None:
     graph_manager = Neo4jManager(repo_id="repo", entity_id="organization")
 
     print(f"Saving graph with {len(nodes)} nodes and {len(relationships)} relationships")
@@ -33,7 +40,7 @@ def save_to_neo4j(relationships, nodes):
     graph_manager.close()
 
 
-def save_to_falkordb(relationships, nodes):
+def save_to_falkordb(relationships: List[Any], nodes: List[Any]) -> None:
     graph_manager = FalkorDBManager(repo_id="repo", entity_id="organization")
 
     print(f"Saving graph with {len(nodes)} nodes and {len(relationships)} relationships")

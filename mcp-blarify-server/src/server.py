@@ -9,7 +9,7 @@ import os
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from mcp.server import Server, NotificationOptions
+from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.types import Tool, TextContent
 from neo4j import GraphDatabase

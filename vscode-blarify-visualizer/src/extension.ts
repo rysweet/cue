@@ -14,6 +14,9 @@ let statusBarManager: StatusBarManager;
 let configManager: ConfigurationManager;
 let outputChannel: vscode.OutputChannel;
 
+// Neo4j initialization promise to prevent concurrent calls
+let neo4jInitPromise: Promise<void> | null = null;
+
 // Setup state tracking
 const setupState = {
     isSetupComplete: false,
@@ -134,7 +137,7 @@ export async function activate(context: vscode.ExtensionContext) {
             if (neo4jManager && statusBarManager) {
                 statusBarManager.setStatus('Starting Neo4j...', 'sync~spin');
                 try {
-                    await neo4jManager.ensureRunning();
+                    await ensureNeo4jRunning();
                     statusBarManager.setStatus('Neo4j ready', 'database');
                     outputChannel.appendLine('Neo4j started successfully');
                 } catch (error) {
@@ -307,6 +310,34 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
     // Cleanup will be handled by dispose methods
+    // Reset the initialization promise
+    neo4jInitPromise = null;
+}
+
+// Helper function to ensure Neo4j is running with singleton pattern
+async function ensureNeo4jRunning(): Promise<void> {
+    outputChannel.appendLine('[Neo4j Singleton] ensureNeo4jRunning called');
+    
+    // If already initializing, return the existing promise
+    if (neo4jInitPromise) {
+        outputChannel.appendLine('[Neo4j Singleton] Returning existing initialization promise');
+        return neo4jInitPromise;
+    }
+    
+    // Create new initialization promise
+    outputChannel.appendLine('[Neo4j Singleton] Creating new initialization promise');
+    neo4jInitPromise = neo4jManager.ensureRunning()
+        .then(() => {
+            outputChannel.appendLine('[Neo4j Singleton] Neo4j initialization successful');
+        })
+        .catch((error) => {
+            outputChannel.appendLine(`[Neo4j Singleton] Neo4j initialization failed: ${error}`);
+            // Reset promise on failure so it can be retried
+            neo4jInitPromise = null;
+            throw error;
+        });
+    
+    return neo4jInitPromise;
 }
 
 async function showVisualization(context: vscode.ExtensionContext) {
@@ -333,7 +364,7 @@ async function ingestWorkspace() {
     
     // Ensure Neo4j is running before attempting analysis
     try {
-        await neo4jManager.ensureRunning();
+        await ensureNeo4jRunning();
     } catch (error) {
         vscode.window.showErrorMessage(`Neo4j is not running: ${error}. Please restart Neo4j and try again.`);
         return;
@@ -428,7 +459,9 @@ async function restartNeo4j() {
         }
         
         // Start fresh
-        await neo4jManager.ensureRunning();
+        // Reset the promise since we're restarting
+        neo4jInitPromise = null;
+        await ensureNeo4jRunning();
         statusBarManager.setStatus('Neo4j ready', 'database');
         vscode.window.showInformationMessage('Neo4j restarted successfully');
     } catch (error) {

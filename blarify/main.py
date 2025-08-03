@@ -1,3 +1,4 @@
+from typing import Optional, List, Any
 from blarify.project_graph_creator import ProjectGraphCreator
 from blarify.project_file_explorer import ProjectFilesIterator
 from blarify.project_file_explorer import ProjectFileStats
@@ -10,7 +11,6 @@ from blarify.utils.file_remover import FileRemover
 
 import dotenv
 import os
-
 import logging
 
 URI = os.getenv("NEO4J_URI")
@@ -18,7 +18,12 @@ USER = os.getenv("NEO4J_USERNAME")
 PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 
-def main(root_path: str = None, blarignore_path: str = None):
+def main(root_path: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
+    if root_path is None:
+        raise ValueError("root_path cannot be None")
+    if blarignore_path is None:
+        raise ValueError("blarignore_path cannot be None")
+        
     lsp_query_helper = LspQueryHelper(root_uri=root_path)
 
     lsp_query_helper.start()
@@ -49,7 +54,12 @@ def main(root_path: str = None, blarignore_path: str = None):
     lsp_query_helper.shutdown_exit_close()
 
 
-def main_diff(file_diffs: list, root_uri: str = None, blarignore_path: str = None):
+def main_diff(file_diffs: List[Any], root_uri: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
+    if root_uri is None:
+        raise ValueError("root_uri cannot be None")
+    if blarignore_path is None:
+        raise ValueError("blarignore_path cannot be None")
+        
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
@@ -82,7 +92,12 @@ def main_diff(file_diffs: list, root_uri: str = None, blarignore_path: str = Non
     lsp_query_helper.shutdown_exit_close()
 
 
-def main_update(updated_files: list, root_uri: str = None, blarignore_path: str = None):
+def main_update(updated_files: List[str], root_uri: Optional[str] = None, blarignore_path: Optional[str] = None) -> None:
+    if root_uri is None:
+        raise ValueError("root_uri cannot be None")
+    if blarignore_path is None:
+        raise ValueError("blarignore_path cannot be None")
+        
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
@@ -97,8 +112,12 @@ def main_update(updated_files: list, root_uri: str = None, blarignore_path: str 
 
     delete_updated_files_from_neo4j(updated_files, graph_manager)
 
+    # Convert string paths to UpdatedFile objects if needed
+    from blarify.project_graph_updater import UpdatedFile
+    updated_file_objects = [UpdatedFile(path) for path in updated_files]
+    
     graph_diff_creator = ProjectGraphUpdater(
-        updated_files=updated_files,
+        updated_files=updated_file_objects,
         root_path=root_uri,
         lsp_query_helper=lsp_query_helper,
         project_files_iterator=project_files_iterator,
@@ -116,17 +135,22 @@ def main_update(updated_files: list, root_uri: str = None, blarignore_path: str 
     lsp_query_helper.shutdown_exit_close()
 
 
-def delete_updated_files_from_neo4j(updated_files, db_manager: Neo4jManager):
+def delete_updated_files_from_neo4j(updated_files: List[Any], db_manager: Neo4jManager) -> None:
     for updated_file in updated_files:
         db_manager.detatch_delete_nodes_with_path(updated_file.path)
 
 
 def main_diff_with_previous(
-    file_diffs: list,
-    root_uri: str = None,
-    blarignore_path: str = None,
-    previous_node_states: list[PreviousNodeState] = None,
-):
+    file_diffs: List[Any],
+    root_uri: Optional[str] = None,
+    blarignore_path: Optional[str] = None,
+    previous_node_states: Optional[List[PreviousNodeState]] = None,
+) -> None:
+    if root_uri is None:
+        raise ValueError("root_uri cannot be None")
+    if blarignore_path is None:
+        raise ValueError("blarignore_path cannot be None")
+        
     lsp_query_helper = LspQueryHelper(root_uri=root_uri)
     lsp_query_helper.start()
 
@@ -148,6 +172,9 @@ def main_diff_with_previous(
         pr_environment=GraphEnvironment("dev", "pr-123", root_uri),
     )
 
+    # Handle optional previous_node_states
+    if previous_node_states is None:
+        previous_node_states = []
     graph = graph_diff_creator.build_with_previous_node_states(previous_node_states=previous_node_states)
 
     relationships = graph.get_relationships_as_objects()

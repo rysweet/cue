@@ -2,6 +2,7 @@ import os
 import tempfile
 import shutil
 from pathlib import Path
+from typing import List, Any
 import pytest
 from blarify.project_file_explorer import ProjectFilesIterator
 
@@ -11,7 +12,7 @@ class TestGitignoreIntegration:
     
     def setup_method(self):
         """Create a temporary directory for testing."""
-        self.test_dir = tempfile.mkdtemp()
+        self.test_dir = tempfile.mkdtemp()  # type: ignore[misc]
         
     def teardown_method(self):
         """Clean up the temporary directory."""
@@ -76,13 +77,13 @@ test_*.py
         iterator = ProjectFilesIterator(root_path=self.test_dir)
         
         # Collect all files
-        all_files = []
+        all_files: List[Any] = []
         for folder in iterator:
             all_files.extend(folder.files)
         
         # Get file names
-        file_names = [file.name for file in all_files]
-        file_paths = [file.path for file in all_files]
+        file_names: List[str] = [file.name for file in all_files]
+        file_paths: List[str] = [file.path for file in all_files]
         
         # Files that should be included
         assert "main.py" in file_names
@@ -112,11 +113,11 @@ test_*.py
         iterator = ProjectFilesIterator(root_path=self.test_dir)
         
         # Collect all files
-        all_files = []
+        all_files: List[Any] = []
         for folder in iterator:
             all_files.extend(folder.files)
         
-        file_names = [file.name for file in all_files]
+        file_names: List[str] = [file.name for file in all_files]
         
         # Files from .blarignore should also be excluded
         assert "test_utils.py" not in file_names
@@ -146,12 +147,12 @@ local.conf
         iterator = ProjectFilesIterator(root_path=self.test_dir)
         
         # Collect all files in src/
-        src_files = []
+        src_files: List[Any] = []
         for folder in iterator:
             if folder.name == "src":
                 src_files.extend(folder.files)
         
-        src_file_names = [file.name for file in src_files]
+        src_file_names: List[str] = [file.name for file in src_files]
         
         # Files from nested .gitignore should be excluded
         assert "local.conf" not in src_file_names
@@ -193,14 +194,14 @@ build/*
         iterator = ProjectFilesIterator(root_path=self.test_dir)
         
         # Collect all files
-        all_files = []
-        all_folders = []
+        all_files: List[Any] = []
+        all_folders: List[str] = []
         for folder in iterator:
             all_folders.append(folder.path)
             all_files.extend(folder.files)
         
-        file_names = [file.name for file in all_files]
-        file_paths = [file.path for file in all_files]
+        file_names: List[str] = [file.name for file in all_files]
+        file_paths: List[str] = [file.path for file in all_files]
         
         # Debug: print what files were found
         print(f"\nFound folders: {all_folders}")
@@ -225,11 +226,11 @@ build/*
         )
         
         # Collect all files
-        all_files = []
+        all_files: List[Any] = []
         for folder in iterator:
             all_files.extend(folder.files)
         
-        file_names = [file.name for file in all_files]
+        file_names: List[str] = [file.name for file in all_files]
         
         # When disabled, gitignored files should be included
         assert ".env" in file_names

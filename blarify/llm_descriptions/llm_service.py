@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any, Callable
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 import time
@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-def retry_on_exception(max_retries: int = 3, delay: float = 1.0, backoff: float = 2.0):
-    def decorator(func):
+def retry_on_exception(max_retries: int = 3, delay: float = 1.0, backoff: float = 2.0) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             retries = 0
             current_delay = delay
             
@@ -39,10 +39,10 @@ def retry_on_exception(max_retries: int = 3, delay: float = 1.0, backoff: float 
 class LLMService:
     def __init__(
         self,
-        api_key: str = None,
-        endpoint: str = None,
-        deployment_name: str = None,
-        api_version: str = None,
+        api_key: Optional[str] = None,
+        endpoint: Optional[str] = None,
+        deployment_name: Optional[str] = None,
+        api_version: Optional[str] = None,
         temperature: float = 0.3,
         max_tokens: int = 500
     ):
@@ -67,9 +67,13 @@ class LLMService:
             )
         
         # Extract base endpoint from full URL if needed
-        if "/openai/deployments/" in self.endpoint:
+        if self.endpoint and "/openai/deployments/" in self.endpoint:
             self.endpoint = self.endpoint.split("/openai/deployments/")[0] + "/"
         
+        # Ensure endpoint is not None after validation
+        if not self.endpoint:
+            raise ValueError("Endpoint cannot be None after validation")
+            
         self.client = AzureOpenAI(
             api_key=self.api_key,
             api_version=self.api_version,
@@ -81,7 +85,7 @@ class LLMService:
     @retry_on_exception(max_retries=3, delay=1.0)
     def generate_description(self, prompt: str) -> Optional[str]:
         """Generate a description using Azure OpenAI."""
-        if not self.enabled:
+        if not self.enabled or not self.client:
             return None
         
         try:
@@ -95,20 +99,23 @@ class LLMService:
                 max_tokens=self.max_tokens
             )
             
-            description = response.choices[0].message.content.strip()
-            return description
+            content = response.choices[0].message.content
+            if content:
+                description = content.strip()
+                return description
+            return None
             
         except Exception as e:
             logger.error(f"Error generating description: {str(e)}")
             raise
     
-    def generate_batch_descriptions(self, prompts: List[Dict[str, str]], batch_size: int = None) -> Dict[str, Optional[str]]:
+    def generate_batch_descriptions(self, prompts: List[Dict[str, str]], batch_size: Optional[int] = None) -> Dict[str, Optional[str]]:
         """Generate descriptions for multiple prompts in batches."""
         if not self.enabled:
             return {p["id"]: None for p in prompts}
         
         batch_size = batch_size or int(os.getenv("LLM_BATCH_SIZE", "10"))
-        results = {}
+        results: Dict[str, Optional[str]] = {}
         
         for i in range(0, len(prompts), batch_size):
             batch = prompts[i:i + batch_size]

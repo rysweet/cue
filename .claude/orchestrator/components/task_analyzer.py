@@ -16,7 +16,7 @@ import re
 import ast
 import json
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Set, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 import logging
@@ -699,7 +699,7 @@ def main():
         tasks = analyzer.analyze_all_prompts()
         execution_plan = analyzer.generate_execution_plan()
         
-        print(f"\n📊 Analysis Summary:")
+        print("\n📊 Analysis Summary:")
         print(f"Total tasks: {execution_plan['total_tasks']}")
         print(f"Parallelizable: {execution_plan['parallelizable_tasks']}")
         print(f"Sequential: {execution_plan['sequential_tasks']}")

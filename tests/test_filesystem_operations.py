@@ -2,10 +2,7 @@
 Comprehensive tests for filesystem operations and graph generation.
 """
 import unittest
-from unittest.mock import Mock, patch, MagicMock
 import tempfile
-import os
-import time
 from pathlib import Path
 
 from blarify.filesystem.filesystem_graph_generator import FilesystemGraphGenerator
@@ -21,13 +18,13 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.temp_dir = tempfile.mkdtemp()
+        self.temp_dir: str = tempfile.mkdtemp()  # type: ignore[reportUninitializedInstanceVariable]
         # Create generator with common names to skip
-        self.generator = FilesystemGraphGenerator(
+        self.generator: FilesystemGraphGenerator = FilesystemGraphGenerator(  # type: ignore[reportUninitializedInstanceVariable]
             root_path=self.temp_dir,
             names_to_skip=['.git', '__pycache__', '.DS_Store', 'node_modules']
         )
-        self.graph = Graph()
+        self.graph: Graph = Graph()  # type: ignore[reportUninitializedInstanceVariable]
         
     def tearDown(self):
         """Clean up test directory."""
@@ -109,12 +106,12 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         self.assertIsNotNone(src_node)
         
         main_py_node = next((n for n in self.graph.get_nodes_by_label(NodeLabels.FILESYSTEM_FILE)
-                           if n.name == "main.py" and hasattr(n, 'relative_path') and "src" in n.relative_path), None)
+                           if n.name == "main.py" and hasattr(n, 'relative_path') and "src" in n.relative_path), None)  # type: ignore[attr-defined]
         self.assertIsNotNone(main_py_node)
         
         # Find relationship
         rel_exists = any(r for r in contains_rels
-                        if r['sourceId'] == src_node.hashed_id and r['targetId'] == main_py_node.hashed_id)
+                        if r['sourceId'] == src_node.hashed_id and r['targetId'] == main_py_node.hashed_id)  # type: ignore[attr-defined]
         self.assertTrue(rel_exists)
         
     def test_skip_hidden_directories(self):
@@ -151,9 +148,9 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         test_node = next((n for n in file_nodes if n.name == "test.py"), None)
         
         self.assertIsNotNone(test_node)
-        self.assertEqual(test_node.extension, ".py")
-        self.assertEqual(test_node.size, len(test_content))
-        self.assertAlmostEqual(test_node.last_modified, stats.st_mtime, delta=1)
+        self.assertEqual(test_node.extension, ".py")  # type: ignore[attr-defined]
+        self.assertEqual(test_node.size, len(test_content))  # type: ignore[attr-defined]
+        self.assertAlmostEqual(test_node.last_modified, stats.st_mtime, delta=1)  # type: ignore[attr-defined]
         
     def test_empty_directory(self):
         """Test handling empty directories."""
@@ -254,14 +251,13 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         
         # Check all files were processed
         file_nodes = self.graph.get_nodes_by_label(NodeLabels.FILESYSTEM_FILE)
-        large_dir_files = [n for n in file_nodes if hasattr(n, 'relative_path') and "large" in n.relative_path]
+        large_dir_files = [n for n in file_nodes if hasattr(n, 'relative_path') and "large" in n.relative_path]  # type: ignore[attr-defined]
         
         self.assertEqual(len(large_dir_files), 100)
         
     @unittest.skip("connect_to_code_nodes method doesn't exist in FilesystemGraphGenerator")
     def test_connect_to_code_nodes(self):
         """Test connecting filesystem nodes to existing code nodes."""
-        from blarify.graph.node.file_node import FileNode
         from blarify.graph.node.class_node import ClassNode
         from unittest.mock import Mock
         
@@ -304,7 +300,7 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
         self.generator.generate_filesystem_nodes(self.graph)
         
         # Connect filesystem to code
-        self.generator.connect_to_code_nodes(self.graph)
+        self.generator.connect_to_code_nodes(self.graph)  # type: ignore[attr-defined]
         
         # Check IMPLEMENTS relationship was created
         relationships = self.graph.get_relationships_as_objects()
@@ -320,8 +316,8 @@ class TestGitignoreManager(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.temp_dir = tempfile.mkdtemp()
-        self.manager = GitignoreManager(self.temp_dir)
+        self.temp_dir: str = tempfile.mkdtemp()  # type: ignore[reportUninitializedInstanceVariable]
+        self.manager: GitignoreManager = GitignoreManager(self.temp_dir)  # type: ignore[reportUninitializedInstanceVariable]
         
     def tearDown(self):
         """Clean up test directory."""

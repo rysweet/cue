@@ -11,16 +11,16 @@ class ProjectFilesIterator:
     paths_to_skip: List[str]
     names_to_skip: List[str]
     extensions_to_skip: List[str]
-    max_file_size_mb: int
+    max_file_size_mb: float
 
     def __init__(
         self,
         root_path: str,
-        paths_to_skip: List[str] = None,
-        names_to_skip: List[str] = None,
-        extensions_to_skip: List[str] = None,
-        blarignore_path: str = None,
-        max_file_size_mb: int = 0.8,
+        paths_to_skip: Optional[List[str]] = None,
+        names_to_skip: Optional[List[str]] = None,
+        extensions_to_skip: Optional[List[str]] = None,
+        blarignore_path: Optional[str] = None,
+        max_file_size_mb: float = 0.8,
         use_gitignore: bool = True,
     ):
         self.paths_to_skip = paths_to_skip or []
@@ -37,7 +37,7 @@ class ProjectFilesIterator:
         
         # Initialize blarignore patterns
         self.blarignore_spec: Optional[pathspec.PathSpec] = None
-        blarignore_patterns = []
+        blarignore_patterns: List[str] = []
         
         # Load .blarignore if path provided
         if blarignore_path:
@@ -78,11 +78,11 @@ class ProjectFilesIterator:
                     level=level,
                 )
 
-    def _get_filtered_dirs(self, root: str, dirs: List[str]) -> List[Folder]:
+    def _get_filtered_dirs(self, root: str, dirs: List[str]) -> List[str]:
         dirs = [dir for dir in dirs if not self._should_skip_directory(os.path.join(root, dir))]
         return dirs
 
-    def get_path_level_relative_to_root(self, path) -> int:
+    def get_path_level_relative_to_root(self, path: str) -> int:
         level = path.count(os.sep) - self.root_path.count(os.sep)
         return level
 
@@ -91,7 +91,7 @@ class ProjectFilesIterator:
 
         return [File(name=file, root_path=root, level=level) for file in files]
 
-    def empty_folders_from_dirs(self, root: str, dirs: List[str], level) -> List[Folder]:
+    def empty_folders_from_dirs(self, root: str, dirs: List[str], level: int) -> List[Folder]:
         return [
             Folder(
                 name=dir,
@@ -156,8 +156,8 @@ class ProjectFilesIterator:
 
         return is_basename_in_names_to_skip or is_path_in_paths_to_skip or is_file_size_too_big or is_extension_to_skip
 
-    def _mb_to_bytes(self, mb: int) -> int:
-        return 1024 * 1024 * mb
+    def _mb_to_bytes(self, mb: float) -> int:
+        return int(1024 * 1024 * mb)
 
     def get_base_name(self, current_path: str) -> str:
         return os.path.basename(current_path)

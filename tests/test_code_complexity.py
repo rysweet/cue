@@ -2,9 +2,9 @@
 Tests for code complexity calculation.
 """
 import unittest
-from unittest.mock import Mock, patch
+from typing import Optional
 import tree_sitter_python as tspython
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser, Node as TreeSitterNode
 
 from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
 
@@ -12,19 +12,19 @@ from blarify.stats.complexity import CodeComplexityCalculator, NestingStats
 class TestCodeComplexityCalculator(unittest.TestCase):
     """Test code complexity calculations."""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
-        self.calculator = CodeComplexityCalculator()
+        self.calculator: CodeComplexityCalculator = CodeComplexityCalculator()  # type: ignore[reportUninitializedInstanceVariable]
         # Set up tree-sitter for Python
-        self.PY_LANGUAGE = Language(tspython.language())
-        self.parser = Parser(self.PY_LANGUAGE)
+        self.py_language: Language = Language(tspython.language())  # type: ignore[reportUninitializedInstanceVariable]
+        self.parser: Parser = Parser(self.py_language)  # type: ignore[reportUninitializedInstanceVariable]
         
-    def parse_code(self, code):
+    def parse_code(self, code: str) -> TreeSitterNode:
         """Parse Python code and return tree."""
         return self.parser.parse(bytes(code, "utf8")).root_node
         
         
-    def test_calculate_nesting_stats(self):
+    def test_calculate_nesting_stats(self) -> None:
         """Test nesting depth calculation."""
         code = """
 def nested_function():
@@ -38,6 +38,9 @@ def nested_function():
         
         tree = self.parse_code(code)
         func_node = self.find_node_by_type(tree, "function_definition")
+        
+        if func_node is None:
+            self.fail("Could not find function definition node")
         
         # Get the body of the function
         body_node = None
@@ -53,7 +56,7 @@ def nested_function():
             self.assertGreaterEqual(stats.max_indentation, 3)  # At least 3 levels nested
             self.assertGreaterEqual(stats.average_indentation, 1)
             
-    def test_calculate_nesting_stats_empty_body(self):
+    def test_calculate_nesting_stats_empty_body(self) -> None:
         """Test nesting stats for empty function body."""
         code = """
 def empty_function():
@@ -62,6 +65,9 @@ def empty_function():
         
         tree = self.parse_code(code)
         func_node = self.find_node_by_type(tree, "function_definition")
+        
+        if func_node is None:
+            self.fail("Could not find function definition node")
         
         # Get the body
         body_node = None
@@ -78,7 +84,7 @@ def empty_function():
             self.assertEqual(stats.max_indentation, 0)
             self.assertEqual(stats.min_indentation, 0)
             
-    def test_calculate_parameter_count(self):
+    def test_calculate_parameter_count(self) -> None:
         """Test parameter counting."""
         code = """
 def function_with_params(a, b, c=None, *args, **kwargs):
@@ -88,12 +94,15 @@ def function_with_params(a, b, c=None, *args, **kwargs):
         tree = self.parse_code(code)
         func_node = self.find_node_by_type(tree, "function_definition")
         
+        if func_node is None:
+            self.fail("Could not find function definition node")
+        
         param_count = CodeComplexityCalculator.calculate_parameter_count(func_node)
         
         # Should count all parameters including *args and **kwargs
         self.assertEqual(param_count, 5)
         
-    def test_calculate_parameter_count_no_params(self):
+    def test_calculate_parameter_count_no_params(self) -> None:
         """Test parameter counting for parameterless function."""
         code = """
 def no_params():
@@ -103,12 +112,15 @@ def no_params():
         tree = self.parse_code(code)
         func_node = self.find_node_by_type(tree, "function_definition")
         
+        if func_node is None:
+            self.fail("Could not find function definition node")
+        
         param_count = CodeComplexityCalculator.calculate_parameter_count(func_node)
         
         self.assertEqual(param_count, 0)
         
         
-    def find_node_by_type(self, node, node_type):
+    def find_node_by_type(self, node: TreeSitterNode, node_type: str) -> Optional[TreeSitterNode]:
         """Helper to find first node of given type."""
         if node.type == node_type:
             return node
@@ -124,9 +136,9 @@ def no_params():
 class TestComplexityMetrics(unittest.TestCase):
     """Test various complexity metric calculations."""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
-        self.calculator = CodeComplexityCalculator()
+        self.calculator: CodeComplexityCalculator = CodeComplexityCalculator()  # type: ignore[reportUninitializedInstanceVariable]
         
     def test_nesting_stats_dataclass(self):
         """Test NestingStats dataclass."""
