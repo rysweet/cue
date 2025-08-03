@@ -3,10 +3,10 @@ Comprehensive tests for graph operations.
 """
 import unittest
 from unittest.mock import Mock
-from blarify.graph.graph import Graph
-from blarify.graph.relationship.relationship import Relationship
-from blarify.graph.relationship.relationship_type import RelationshipType
-from blarify.graph.node.types.node_labels import NodeLabels
+from cue.graph.graph import Graph
+from cue.graph.relationship.relationship import Relationship
+from cue.graph.relationship.relationship_type import RelationshipType
+from cue.graph.node.types.node_labels import NodeLabels
 from tests.fixtures.node_factories import (
     create_filesystem_file_node, create_concept_node, create_documented_entity_node
 )

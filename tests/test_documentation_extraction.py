@@ -7,10 +7,10 @@ import tempfile
 import os
 from pathlib import Path
 
-from blarify.documentation.documentation_parser import DocumentationParser
-from blarify.documentation.documentation_graph_generator import DocumentationGraphGenerator
-from blarify.graph.graph import Graph
-from blarify.graph.node.types.node_labels import NodeLabels
+from cue.documentation.documentation_parser import DocumentationParser
+from cue.documentation.documentation_graph_generator import DocumentationGraphGenerator
+from cue.graph.graph import Graph
+from cue.graph.node.types.node_labels import NodeLabels
 # from tests.fixtures.graph_fixtures import create_test_graph  # Commented out due to FileNode constructor issues
 
 
@@ -98,7 +98,7 @@ class TestDocumentationGraphGenerator(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir)
         
-    @patch('blarify.project_file_explorer.project_files_iterator.ProjectFilesIterator')
+    @patch('cue.project_file_explorer.project_files_iterator.ProjectFilesIterator')
     def test_generate_documentation_nodes(self, mock_iterator: Mock):
         """Test generating documentation nodes."""
         # Create test structure

@@ -16,15 +16,15 @@ class TestConditionalImportsIntegration(unittest.TestCase):
     def test_import_with_warnings(self):
         """Test that the import system properly handles and warns about failures."""
         # Force reimport to trigger the conditional loading
-        if 'blarify.code_hierarchy.languages' in sys.modules:
-            del sys.modules['blarify.code_hierarchy.languages']
+        if 'cue.code_hierarchy.languages' in sys.modules:
+            del sys.modules['cue.code_hierarchy.languages']
             # Also clear the language-specific modules
             for key in list(sys.modules.keys()):
-                if key.startswith('blarify.code_hierarchy.languages.'):
+                if key.startswith('cue.code_hierarchy.languages.'):
                     del sys.modules[key]
         
         # Import and check functionality
-        from blarify.code_hierarchy.languages import (
+        from cue.code_hierarchy.languages import (
             get_available_languages,
             get_language_definition,
             FallbackDefinitions
@@ -49,8 +49,8 @@ class TestConditionalImportsIntegration(unittest.TestCase):
     
     def test_project_graph_creator_robustness(self):
         """Test that ProjectGraphCreator is robust to missing languages."""
-        from blarify.project_graph_creator import ProjectGraphCreator
-        from blarify.code_hierarchy.languages import FallbackDefinitions
+        from cue.project_graph_creator import ProjectGraphCreator
+        from cue.code_hierarchy.languages import FallbackDefinitions
         from unittest.mock import MagicMock
         
         # Create mock dependencies
@@ -77,7 +77,7 @@ class TestConditionalImportsIntegration(unittest.TestCase):
     
     def test_lsp_helper_error_messages(self):
         """Test that LspQueryHelper provides clear error messages."""
-        from blarify.code_references.lsp_helper import (
+        from cue.code_references.lsp_helper import (
             LspQueryHelper,
             FileExtensionNotSupported
         )
@@ -90,7 +90,7 @@ class TestConditionalImportsIntegration(unittest.TestCase):
         self.assertIn('not supported', error_msg)
         
         # Test that supported extensions work
-        from blarify.code_hierarchy.languages import get_available_languages
+        from cue.code_hierarchy.languages import get_available_languages
         available = get_available_languages()
         
         if 'python' in available:

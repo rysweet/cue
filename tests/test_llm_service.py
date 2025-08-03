@@ -2,7 +2,7 @@ from typing import Any
 import unittest
 from unittest.mock import patch, MagicMock, call
 import os
-from blarify.llm_descriptions.llm_service import LLMService, retry_on_exception
+from cue.llm_descriptions.llm_service import LLMService, retry_on_exception
 
 
 class TestLLMService(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestLLMService(unittest.TestCase):
     def tearDown(self):
         self.env_patcher.stop()
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_init_with_environment_variables(self, mock_azure_openai: Any):
         service = LLMService()
         
@@ -45,7 +45,7 @@ class TestLLMService(unittest.TestCase):
             
             self.assertIn("Azure OpenAI configuration is incomplete", str(context.exception))
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description(self, mock_azure_openai: Any):
         # Mock the OpenAI client
         mock_client = MagicMock()
@@ -62,7 +62,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(description, "This is a test description.")
         mock_client.chat.completions.create.assert_called_once()
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_disabled(self, mock_azure_openai: Any):
         with patch.dict(os.environ, {'ENABLE_LLM_DESCRIPTIONS': 'false'}):
             service = LLMService()
@@ -71,7 +71,7 @@ class TestLLMService(unittest.TestCase):
             self.assertIsNone(description)
             mock_azure_openai.assert_not_called()
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_batch_descriptions(self, mock_azure_openai: Any):
         # Mock the OpenAI client
         mock_client = MagicMock()
@@ -95,8 +95,8 @@ class TestLLMService(unittest.TestCase):
         self.assertIn("node2", results)
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
-    @patch('blarify.llm_descriptions.llm_service.time.sleep')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.time.sleep')
     def test_retry_on_exception(self, mock_sleep: Any, mock_azure_openai: Any):
         # Mock the OpenAI client
         mock_client = MagicMock()
@@ -118,7 +118,7 @@ class TestLLMService(unittest.TestCase):
     
     def test_init_with_custom_parameters(self):
         """Test initialization with custom parameters."""
-        with patch('blarify.llm_descriptions.llm_service.AzureOpenAI'):
+        with patch('cue.llm_descriptions.llm_service.AzureOpenAI'):
             service = LLMService(
                 api_key="custom-key",
                 endpoint="https://custom.openai.azure.com/",
@@ -144,7 +144,7 @@ class TestLLMService(unittest.TestCase):
             'AZURE_OPENAI_API_VERSION': '2024-01-01',
             'ENABLE_LLM_DESCRIPTIONS': 'true'
         }, clear=True):
-            with patch('blarify.llm_descriptions.llm_service.AzureOpenAI'):
+            with patch('cue.llm_descriptions.llm_service.AzureOpenAI'):
                 service = LLMService()
                 
                 self.assertEqual(service.api_key, 'old-key')
@@ -158,7 +158,7 @@ class TestLLMService(unittest.TestCase):
             self.assertFalse(service.enabled)
             self.assertIsNone(service.client)
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_with_exception(self, mock_azure_openai: Any):
         """Test generate_description when an exception is raised."""
         mock_client = MagicMock()
@@ -176,7 +176,7 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(str(context.exception), "API Error")
         self.assertEqual(mock_client.chat.completions.create.call_count, 3)
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_description_with_empty_response(self, mock_azure_openai: Any):
         """Test generate_description with empty response content."""
         mock_client = MagicMock()
@@ -192,7 +192,7 @@ class TestLLMService(unittest.TestCase):
         
         self.assertEqual(description, "")
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_batch_descriptions_with_failures(self, mock_azure_openai: Any):
         """Test batch generation with some failures."""
         mock_client = MagicMock()
@@ -215,13 +215,13 @@ class TestLLMService(unittest.TestCase):
             {"id": "node2", "prompt": "Prompt 2"}
         ]
         
-        with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+        with patch('cue.llm_descriptions.llm_service.time.sleep'):
             results = service.generate_batch_descriptions(prompts, batch_size=1)
         
         self.assertEqual(results["node1"], "Success description")
         self.assertIsNone(results["node2"])
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_batch_descriptions_with_env_batch_size(self, mock_azure_openai: Any):
         """Test batch generation using environment variable for batch size."""
         mock_client = MagicMock()
@@ -235,7 +235,7 @@ class TestLLMService(unittest.TestCase):
             service = LLMService()
             prompts = [{"id": f"node{i}", "prompt": f"Prompt {i}"} for i in range(10)]
             
-            with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+            with patch('cue.llm_descriptions.llm_service.time.sleep'):
                 results = service.generate_batch_descriptions(prompts)
             
             self.assertEqual(len(results), 10)
@@ -257,7 +257,7 @@ class TestLLMService(unittest.TestCase):
             self.assertIsNone(results["node1"])
             self.assertIsNone(results["node2"])
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_batch_descriptions_complex_mixed_scenarios(self, mock_azure_openai: Any):
         """Test batch generation with complex mixed success/failure/retry scenarios."""
         mock_client = MagicMock()
@@ -291,7 +291,7 @@ class TestLLMService(unittest.TestCase):
             {"id": "node4", "prompt": "Prompt 4"}
         ]
         
-        with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+        with patch('cue.llm_descriptions.llm_service.time.sleep'):
             results = service.generate_batch_descriptions(prompts, batch_size=1)
         
         # Verify results
@@ -305,7 +305,7 @@ class TestLLMService(unittest.TestCase):
         # node1: 1 call, node2: 3 calls, node3: 3 calls, node4: 1 call = 8 total
         self.assertEqual(mock_client.chat.completions.create.call_count, 8)
     
-    @patch('blarify.llm_descriptions.llm_service.AzureOpenAI')
+    @patch('cue.llm_descriptions.llm_service.AzureOpenAI')
     def test_generate_batch_descriptions_partial_success_with_retries(self, mock_azure_openai: Any):
         """Test batch processing where some succeed after retries and some fail permanently."""
         mock_client = MagicMock()
@@ -337,7 +337,7 @@ class TestLLMService(unittest.TestCase):
             {"id": "another_immediate", "prompt": "Prompt 5"}
         ]
         
-        with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+        with patch('cue.llm_descriptions.llm_service.time.sleep'):
             results = service.generate_batch_descriptions(prompts, batch_size=2)
         
         # Verify results match expected patterns
@@ -352,7 +352,7 @@ class TestLLMService(unittest.TestCase):
     
     def test_is_enabled(self):
         """Test is_enabled method."""
-        with patch('blarify.llm_descriptions.llm_service.AzureOpenAI'):
+        with patch('cue.llm_descriptions.llm_service.AzureOpenAI'):
             service = LLMService()
             self.assertTrue(service.is_enabled())
             
@@ -360,16 +360,16 @@ class TestLLMService(unittest.TestCase):
             service = LLMService()
             self.assertFalse(service.is_enabled())
     
-    @patch('blarify.llm_descriptions.llm_service.logger')
+    @patch('cue.llm_descriptions.llm_service.logger')
     def test_generate_batch_descriptions_logging(self, mock_logger: Any):
         """Test logging in batch descriptions."""
-        with patch('blarify.llm_descriptions.llm_service.AzureOpenAI'):
+        with patch('cue.llm_descriptions.llm_service.AzureOpenAI'):
             service = LLMService()
             prompts = [{"id": f"node{i}", "prompt": f"Prompt {i}"} for i in range(15)]
             
             with patch.object(service, 'generate_description') as mock_gen:
                 mock_gen.return_value = "Test"
-                with patch('blarify.llm_descriptions.llm_service.time.sleep'):
+                with patch('cue.llm_descriptions.llm_service.time.sleep'):
                     service.generate_batch_descriptions(prompts, batch_size=10)
             
             # Should log batch processing
@@ -383,8 +383,8 @@ class TestLLMService(unittest.TestCase):
 class TestRetryDecorator(unittest.TestCase):
     """Test cases for retry_on_exception decorator."""
     
-    @patch('blarify.llm_descriptions.llm_service.time.sleep')
-    @patch('blarify.llm_descriptions.llm_service.logger')
+    @patch('cue.llm_descriptions.llm_service.time.sleep')
+    @patch('cue.llm_descriptions.llm_service.logger')
     def test_retry_decorator_success_first_try(self, mock_logger: Any, mock_sleep: Any):
         """Test retry decorator succeeds on first try."""
         @retry_on_exception(max_retries=3, delay=1.0, backoff=2.0)
@@ -396,8 +396,8 @@ class TestRetryDecorator(unittest.TestCase):
         mock_sleep.assert_not_called()
         mock_logger.warning.assert_not_called()
     
-    @patch('blarify.llm_descriptions.llm_service.time.sleep')
-    @patch('blarify.llm_descriptions.llm_service.logger')
+    @patch('cue.llm_descriptions.llm_service.time.sleep')
+    @patch('cue.llm_descriptions.llm_service.logger')
     def test_retry_decorator_success_after_retries(self, mock_logger: Any, mock_sleep: Any):
         """Test retry decorator succeeds after retries."""
         call_count = 0
@@ -421,8 +421,8 @@ class TestRetryDecorator(unittest.TestCase):
         # Check warning logs
         self.assertEqual(mock_logger.warning.call_count, 2)
     
-    @patch('blarify.llm_descriptions.llm_service.time.sleep')
-    @patch('blarify.llm_descriptions.llm_service.logger')
+    @patch('cue.llm_descriptions.llm_service.time.sleep')
+    @patch('cue.llm_descriptions.llm_service.logger')
     def test_retry_decorator_max_retries_exceeded(self, mock_logger: Any, mock_sleep: Any):
         """Test retry decorator when max retries exceeded."""
         @retry_on_exception(max_retries=3, delay=1.0, backoff=2.0)
@@ -437,7 +437,7 @@ class TestRetryDecorator(unittest.TestCase):
         mock_logger.error.assert_called_once()
         self.assertIn("Max retries (3) reached", mock_logger.error.call_args[0][0])
     
-    @patch('blarify.llm_descriptions.llm_service.time.sleep')
+    @patch('cue.llm_descriptions.llm_service.time.sleep')
     def test_retry_decorator_with_different_exceptions(self, mock_sleep: Any):
         """Test retry decorator with different exception types."""
         call_count = 0

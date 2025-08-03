@@ -1,12 +1,12 @@
 """
 Graph fixtures for testing graph operations.
 """
-from blarify.graph.graph import Graph
+from cue.graph.graph import Graph
 # Removed unused imports - FileNode, ClassNode, FunctionNode
-from blarify.graph.node.filesystem_file_node import FilesystemFileNode
-from blarify.graph.node.filesystem_directory_node import FilesystemDirectoryNode
-from blarify.graph.relationship.relationship import Relationship
-from blarify.graph.relationship.relationship_type import RelationshipType
+from cue.graph.node.filesystem_file_node import FilesystemFileNode
+from cue.graph.node.filesystem_directory_node import FilesystemDirectoryNode
+from cue.graph.relationship.relationship import Relationship
+from cue.graph.relationship.relationship_type import RelationshipType
 
 
 def create_test_graph():
@@ -47,8 +47,8 @@ def create_test_graph():
     graph.add_node(test_file)
     
     # Add documentation nodes
-    from blarify.graph.node.concept_node import ConceptNode
-    from blarify.graph.node.documented_entity_node import DocumentedEntityNode
+    from cue.graph.node.concept_node import ConceptNode
+    from cue.graph.node.documented_entity_node import DocumentedEntityNode
     
     app_concept = ConceptNode(
         name="Application Architecture",
@@ -181,9 +181,9 @@ def create_filesystem_graph():
 
 def create_documentation_graph():
     """Create a test graph with documentation nodes."""
-    from blarify.graph.node.documentation_file_node import DocumentationFileNode
-    from blarify.graph.node.concept_node import ConceptNode
-    from blarify.graph.node.documented_entity_node import DocumentedEntityNode
+    from cue.graph.node.documentation_file_node import DocumentationFileNode
+    from cue.graph.node.concept_node import ConceptNode
+    from cue.graph.node.documented_entity_node import DocumentedEntityNode
     
     graph = Graph()
     

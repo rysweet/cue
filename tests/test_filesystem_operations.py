@@ -5,12 +5,12 @@ import unittest
 import tempfile
 from pathlib import Path
 
-from blarify.filesystem.filesystem_graph_generator import FilesystemGraphGenerator
-from blarify.graph.graph import Graph
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.relationship.relationship_type import RelationshipType
-from blarify.project_file_explorer.gitignore_manager import GitignoreManager
-from blarify.graph.graph_environment import GraphEnvironment
+from cue.filesystem.filesystem_graph_generator import FilesystemGraphGenerator
+from cue.graph.graph import Graph
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.relationship.relationship_type import RelationshipType
+from cue.project_file_explorer.gitignore_manager import GitignoreManager
+from cue.graph.graph_environment import GraphEnvironment
 
 
 class TestFilesystemGraphGenerator(unittest.TestCase):
@@ -258,7 +258,7 @@ class TestFilesystemGraphGenerator(unittest.TestCase):
     @unittest.skip("connect_to_code_nodes method doesn't exist in FilesystemGraphGenerator")
     def test_connect_to_code_nodes(self):
         """Test connecting filesystem nodes to existing code nodes."""
-        from blarify.graph.node.class_node import ClassNode
+        from cue.graph.node.class_node import ClassNode
         from unittest.mock import Mock
         
         # Create code nodes first
