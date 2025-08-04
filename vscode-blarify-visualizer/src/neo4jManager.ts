@@ -17,7 +17,7 @@ interface GraphStats {
 }
 
 // Constants
-const CONTAINER_PREFIX = 'blarify-visualizer';
+const CONTAINER_PREFIX = 'cue-visualizer';
 const ENVIRONMENT = 'development';
 
 export class Neo4jManager {

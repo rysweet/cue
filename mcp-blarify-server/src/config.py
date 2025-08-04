@@ -18,7 +18,7 @@ class Config:
     
     # Container management settings
     MANAGE_NEO4J_CONTAINER: bool = os.getenv("MANAGE_NEO4J_CONTAINER", "true").lower() == "true"
-    NEO4J_DATA_DIR: str = os.getenv("NEO4J_DATA_DIR", os.path.join(os.getcwd(), ".blarify", "neo4j"))
+    NEO4J_DATA_DIR: str = os.getenv("NEO4J_DATA_DIR", os.path.join(os.getcwd(), ".cue", "neo4j"))
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     

@@ -7,7 +7,7 @@ version: '3.8'
 services:
   neo4j:
     image: neo4j:5-community
-    container_name: blarify-neo4j-test
+    container_name: cue-neo4j-test
     ports:
       - "7474:7474"  # HTTP
       - "7687:7687"  # Bolt

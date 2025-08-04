@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
-from blarify.graph.graph import Graph
-from blarify.graph.node import Node, NodeLabels, FileNode
-from blarify.graph.relationship import Relationship
+from cue.graph.graph import Graph
+from cue.graph.node import Node, NodeLabels, FileNode
+from cue.graph.relationship import Relationship
 
 
 class TestGraphComprehensive(unittest.TestCase):

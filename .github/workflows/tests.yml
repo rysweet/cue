@@ -70,16 +70,16 @@ jobs:
     
     - name: Run linting
       run: |
-        poetry run ruff check blarify/ || true
-        poetry run ruff format --check blarify/ || true
+        poetry run ruff check cue/ || true
+        poetry run ruff format --check cue/ || true
     
     - name: Run type checking with pyright
       run: |
-        poetry run pyright blarify/graph/graph.py || echo "Type checking in progress - some modules still need type annotations"
+        poetry run pyright cue/graph/graph.py || echo "Type checking in progress - some modules still need type annotations"
         
     - name: Run legacy mypy check (transitional)
       run: |
-        poetry run mypy blarify/ --ignore-missing-imports || echo "MyPy check - transitioning to pyright"
+        poetry run mypy cue/ --ignore-missing-imports || echo "MyPy check - transitioning to pyright"
     
     - name: Run tests with coverage
       env:
@@ -159,7 +159,7 @@ jobs:
         poetry run python -m pytest tests/test_integration*.py -v || echo "Integration tests need work"
         
         # Run MCP server tests if they exist
-        if [ -d "mcp-blarify-server/tests" ]; then
-          cd mcp-blarify-server
+        if [ -d "mcp-cue-server/tests" ]; then
+          cd mcp-cue-server
           poetry run python -m pytest tests/ -v || echo "MCP tests need work"
         fi

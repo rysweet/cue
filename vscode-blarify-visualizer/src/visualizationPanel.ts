@@ -4,7 +4,7 @@ import { GraphDataProvider, GraphData } from './graphDataProvider';
 
 export class VisualizationPanel {
     public static currentPanel: VisualizationPanel | undefined;
-    private static readonly viewType = 'blarifyVisualization';
+    private static readonly viewType = 'cueVisualization';
     
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;

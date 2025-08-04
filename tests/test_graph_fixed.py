@@ -3,11 +3,11 @@ Fixed tests for graph functionality that match actual implementation.
 """
 import unittest
 from typing import Any
-from blarify.graph.graph import Graph
-from blarify.graph.relationship.relationship import Relationship
-from blarify.graph.relationship.relationship_type import RelationshipType
-from blarify.graph.node.types.node_labels import NodeLabels
-from blarify.graph.node.types.node import Node
+from cue.graph.graph import Graph
+from cue.graph.relationship.relationship import Relationship
+from cue.graph.relationship.relationship_type import RelationshipType
+from cue.graph.node.types.node_labels import NodeLabels
+from cue.graph.node.types.node import Node
 
 
 class MockNode(Node):
@@ -121,7 +121,7 @@ class TestNodeTypes(unittest.TestCase):
     
     def test_description_node(self):
         """Test DescriptionNode creation."""
-        from blarify.graph.node.description_node import DescriptionNode
+        from cue.graph.node.description_node import DescriptionNode
         
         node = DescriptionNode(
             path="file:///test/description_123",
@@ -139,8 +139,8 @@ class TestNodeTypes(unittest.TestCase):
         
     def test_filesystem_nodes(self):
         """Test filesystem node types."""
-        from blarify.graph.node.filesystem_file_node import FilesystemFileNode
-        from blarify.graph.node.filesystem_directory_node import FilesystemDirectoryNode
+        from cue.graph.node.filesystem_file_node import FilesystemFileNode
+        from cue.graph.node.filesystem_directory_node import FilesystemDirectoryNode
         
         file_node = FilesystemFileNode(
             path="file:///project/src/main.py",
@@ -166,8 +166,8 @@ class TestNodeTypes(unittest.TestCase):
         
     def test_documentation_nodes(self):
         """Test documentation node types."""
-        from blarify.graph.node.concept_node import ConceptNode
-        from blarify.graph.node.documented_entity_node import DocumentedEntityNode
+        from cue.graph.node.concept_node import ConceptNode
+        from cue.graph.node.documented_entity_node import DocumentedEntityNode
         
         concept = ConceptNode(
             name="Repository Pattern",

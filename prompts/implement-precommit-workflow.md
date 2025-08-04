@@ -4,11 +4,11 @@
 
 **Implement Comprehensive Pre-commit Hooks for Multi-Language Codebase Quality Assurance**
 
-This prompt guides the implementation of a robust pre-commit workflow for the Blarify VS Code Extension repository (vscode-blarify-visualizer), which contains both a TypeScript-based VS Code extension and a Python-based codebase analysis engine. The workflow will ensure code quality, prevent broken builds, and maintain consistent formatting standards across both TypeScript and Python codebases in a single repository.
+This prompt guides the implementation of a robust pre-commit workflow for the Blarify VS Code Extension repository (vscode-cue-visualizer), which contains both a TypeScript-based VS Code extension and a Python-based codebase analysis engine. The workflow will ensure code quality, prevent broken builds, and maintain consistent formatting standards across both TypeScript and Python codebases in a single repository.
 
 The repository structure includes:
 - **TypeScript VS Code Extension**: Located in `/src/`, `/media/`, and root-level configuration
-- **Python Blarify Engine**: Located in `/bundled/blarify/` with Poetry configuration
+- **Python Blarify Engine**: Located in `/bundled/cue/` with Poetry configuration
 - **Shared Configuration**: Git hooks, documentation, and CI/CD configuration
 
 This hybrid architecture requires a sophisticated pre-commit workflow that handles both ecosystems while maintaining performance and developer experience standards.
@@ -16,7 +16,7 @@ This hybrid architecture requires a sophisticated pre-commit workflow that handl
 ## Problem Statement
 
 ### Current Limitations
-The vscode-blarify-visualizer repository currently lacks automated quality gates before commits, leading to potential issues across both language ecosystems:
+The vscode-cue-visualizer repository currently lacks automated quality gates before commits, leading to potential issues across both language ecosystems:
 
 #### TypeScript/VS Code Extension Issues
 - **Code Quality Inconsistency**: No automated formatting enforcement leads to inconsistent code style across the TypeScript codebase
@@ -733,7 +733,7 @@ Implement a robust pre-commit workflow supporting both TypeScript (VS Code exten
 
 ## Repository Structure Context
 - **TypeScript**: VS Code extension in `/src/`, `/media/`, root configs
-- **Python**: Blarify engine in `/bundled/blarify/` with Poetry management
+- **Python**: Blarify engine in `/bundled/cue/` with Poetry management
 - **Shared**: Documentation, configuration, and integration components
 
 ## Requirements
@@ -821,7 +821,7 @@ npm run compile --dry-run      # Test current compilation
 # Analyze Python structure  
 find bundled -name "*.py" | wc -l  # Count Python files
 cd bundled && poetry install       # Test Poetry environment
-cd bundled && poetry run python -m blarify --help  # Test Python execution
+cd bundled && poetry run python -m cue --help  # Test Python execution
 ```
 
 ### 4. Implementation Phase 1: Multi-Language Infrastructure Foundation
@@ -936,15 +936,15 @@ pre-commit install
 
 # Test with simple changes
 echo "// Test TypeScript change" >> src/extension.ts
-echo "# Test Python change" >> bundled/blarify/main.py
+echo "# Test Python change" >> bundled/cue/main.py
 
-git add src/extension.ts bundled/blarify/main.py
+git add src/extension.ts bundled/cue/main.py
 git commit -m "test: verify multi-language pre-commit infrastructure"
 
 # Clean up test changes
 git reset --soft HEAD~1
 git reset HEAD
-git checkout src/extension.ts bundled/blarify/main.py
+git checkout src/extension.ts bundled/cue/main.py
 ```
 
 ### 5. Implementation Phase 2: TypeScript Quality Pipeline
@@ -1081,7 +1081,7 @@ ignore = ["E501", "COM812", "ISC001"]
 "test_*.py" = ["S101", "PLR2004"]
 
 [tool.pyright]
-include = ["blarify/**/*.py"]
+include = ["cue/**/*.py"]
 exclude = ["vendor/**", "build/**", ".venv/**"]
 typeCheckingMode = "strict"
 pythonVersion = "3.10"
@@ -1227,10 +1227,10 @@ fi
 if [ -n "$TS_CHANGED" ] && [ -n "$PY_CHANGED" ]; then
     echo "🔌 Validating TypeScript-Python API compatibility..."
     # Check for potential breaking changes in common interface files
-    if git diff --cached --name-only | grep -E "(extension\.ts|main\.py|blarifyIntegration\.ts)"; then
+    if git diff --cached --name-only | grep -E "(extension\.ts|main\.py|cueIntegration\.ts)"; then
         echo "⚠️  API interface files changed - ensure compatibility between TypeScript and Python"
         echo "📋 Files that may affect integration:"
-        git diff --cached --name-only | grep -E "(extension\.ts|main\.py|blarifyIntegration\.ts)" || true
+        git diff --cached --name-only | grep -E "(extension\.ts|main\.py|cueIntegration\.ts)" || true
     fi
 fi
 
@@ -1323,7 +1323,7 @@ This repository uses a sophisticated pre-commit workflow that handles both TypeS
 
 ## Repository Structure
 - **TypeScript**: VS Code extension code in `/src/`, configurations in root
-- **Python**: Blarify engine in `/bundled/blarify/` with Poetry management
+- **Python**: Blarify engine in `/bundled/cue/` with Poetry management
 - **Shared**: Documentation, configurations, and integration components
 
 ## Quick Start
@@ -1332,7 +1332,7 @@ This repository uses a sophisticated pre-commit workflow that handles both TypeS
 ```bash
 # Clone and setup
 git clone <repository>
-cd vscode-blarify-visualizer
+cd vscode-cue-visualizer
 
 # Install pre-commit framework
 pip install pre-commit
@@ -1364,7 +1364,7 @@ git commit -m "feat: add new extension feature"
 #### Python Development
 ```bash
 # Normal development - hooks run automatically
-git add bundled/blarify/main.py
+git add bundled/cue/main.py
 git commit -m "feat: enhance Python analysis engine"
 # ⚡ Ruff formats code and fixes linting issues
 # 🔍 pyright checks types
@@ -1375,7 +1375,7 @@ git commit -m "feat: enhance Python analysis engine"
 #### Mixed-Language Changes
 ```bash
 # Both languages - parallel processing
-git add src/extension.ts bundled/blarify/main.py
+git add src/extension.ts bundled/cue/main.py
 git commit -m "feat: improve TypeScript-Python integration"
 # 🔗 Cross-language validation runs
 # ⚡ Performance optimized for mixed changes
@@ -1588,7 +1588,7 @@ Implements a sophisticated pre-commit workflow supporting both TypeScript (VS Co
 ## Repository Context
 This repository contains a hybrid codebase:
 - **TypeScript**: VS Code extension (`/src/`, `/media/`, root configs)
-- **Python**: Blarify analysis engine (`/bundled/blarify/` with Poetry)
+- **Python**: Blarify analysis engine (`/bundled/cue/` with Poetry)
 - **Integration**: TypeScript extension integrates with Python engine via subprocess calls
 
 ## Multi-Language Architecture

@@ -51,16 +51,16 @@ For optimal development experience, install the Pylance extension:
 
 ```bash
 # Check entire codebase
-poetry run pyright blarify/
+poetry run pyright cue/
 
 # Check specific file
-poetry run pyright blarify/graph/graph.py
+poetry run pyright cue/graph/graph.py
 
 # Check with statistics
-poetry run pyright blarify/ --stats
+poetry run pyright cue/ --stats
 
 # Generate JSON output for CI
-poetry run pyright blarify/ --outputjson
+poetry run pyright cue/ --outputjson
 ```
 
 ### Development Workflow
@@ -70,7 +70,7 @@ poetry run pyright blarify/ --outputjson
 poetry run pyright <file_you_modified>
 
 # Full validation before commit
-poetry run pyright blarify/
+poetry run pyright cue/
 ```
 
 ## Type Annotation Guidelines
@@ -134,7 +134,7 @@ For circular imports, use the TYPE_CHECKING pattern:
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from blarify.graph.relationship import Relationship
+    from cue.graph.relationship import Relationship
 
 class Node:
     def get_relationships(self) -> List["Relationship"]:
@@ -170,23 +170,23 @@ def as_object(self) -> Dict[str, Any]:
 
 ### ✅ Fully Typed Modules
 
-- `blarify/graph/graph.py` - **Zero pyright errors**
-- `blarify/graph/node/types/node.py` - Basic typing complete
-- `blarify/graph/relationship/relationship.py` - Basic typing complete
+- `cue/graph/graph.py` - **Zero pyright errors**
+- `cue/graph/node/types/node.py` - Basic typing complete
+- `cue/graph/relationship/relationship.py` - Basic typing complete
 
 ### 🔄 In Progress
 
-- `blarify/graph/node/` - Node hierarchy (175 errors)
+- `cue/graph/node/` - Node hierarchy (175 errors)
 - Import cycle resolution across modules
 - Optional type parameter fixes
 
 ### ⏳ Pending
 
-- Database managers (`blarify/db_managers/`)
-- LSP integration (`blarify/code_references/`)
-- Language processing (`blarify/code_hierarchy/`)
-- LLM integration (`blarify/llm_descriptions/`)
-- File system operations (`blarify/project_file_explorer/`)
+- Database managers (`cue/db_managers/`)
+- LSP integration (`cue/code_references/`)
+- Language processing (`cue/code_hierarchy/`)
+- LLM integration (`cue/llm_descriptions/`)
+- File system operations (`cue/project_file_explorer/`)
 - Test files (`tests/`)
 
 ## Error Categories and Solutions
@@ -281,7 +281,7 @@ The project uses gradual adoption:
 ```yaml
 - name: Run type checking with pyright
   run: |
-    poetry run pyright blarify/graph/graph.py || echo "Type checking in progress"
+    poetry run pyright cue/graph/graph.py || echo "Type checking in progress"
 ```
 
 ### Future Pipeline (Target)
@@ -289,7 +289,7 @@ The project uses gradual adoption:
 ```yaml
 - name: Run type checking
   run: |
-    poetry run pyright blarify/
+    poetry run pyright cue/
 ```
 
 ## Contributing

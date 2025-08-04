@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import * as path from 'path';
 import { Neo4jManager } from '../../neo4jManager';
 import { ConfigurationManager } from '../../configurationManager';
-import { BlarifyIntegration } from '../../blarifyIntegration';
+import { BlarifyIntegration } from '../../cueIntegration';
 import { GraphDataProvider } from '../../graphDataProvider';
 
 suite('Extension Test Suite', () => {
@@ -21,11 +21,11 @@ suite('Extension Test Suite', () => {
     });
     
     test('Extension should be present', () => {
-        assert.ok(vscode.extensions.getExtension('blarify.blarify-visualizer'));
+        assert.ok(vscode.extensions.getExtension('cue.cue-visualizer'));
     });
     
     test('Should activate successfully', async () => {
-        const extension = vscode.extensions.getExtension('blarify.blarify-visualizer');
+        const extension = vscode.extensions.getExtension('cue.cue-visualizer');
         assert.ok(extension);
         
         // The extension should be active after activation events
@@ -81,7 +81,7 @@ suite('Neo4jManager Test Suite', () => {
         const mockManager = {
             listInstances: sandbox.stub().returns([]),
             startContainer: sandbox.stub().resolves({
-                name: 'blarify-neo4j-vscode',
+                name: 'cue-neo4j-vscode',
                 port: 7687,
                 containerId: 'test-container',
                 uri: 'bolt://localhost:7687',
@@ -119,7 +119,7 @@ suite('Neo4jManager Test Suite', () => {
         neo4jManager = new Neo4jManager(configManager, extensionPath);
         
         const mockInstance = {
-            name: 'blarify-neo4j-vscode',
+            name: 'cue-neo4j-vscode',
             port: 7688,
             containerId: 'test-container',
             uri: 'bolt://localhost:7688',
@@ -157,7 +157,7 @@ suite('Neo4jManager Test Suite', () => {
         assert.ok(mockManager.startContainer.calledOnce);
         const startCall = mockManager.startContainer.getCall(0);
         assert.deepEqual(startCall.args[0], {
-            name: 'blarify-neo4j-vscode',
+            name: 'cue-neo4j-vscode',
             environment: 'development'
         });
         
@@ -222,7 +222,7 @@ suite('ConfigurationManager Test Suite', () => {
 });
 
 suite('BlarifyIntegration Test Suite', () => {
-    let blarifyIntegration: BlarifyIntegration;
+    let cueIntegration: BlarifyIntegration;
     let configManager: ConfigurationManager;
     let sandbox: sinon.SinonSandbox;
     
@@ -231,7 +231,7 @@ suite('BlarifyIntegration Test Suite', () => {
         configManager = new ConfigurationManager();
         const extensionPath = path.resolve(__dirname, '..', '..', '..');
         const neo4jManager = new Neo4jManager(configManager, extensionPath);
-        blarifyIntegration = new BlarifyIntegration(configManager, extensionPath, neo4jManager);
+        cueIntegration = new BlarifyIntegration(configManager, extensionPath, neo4jManager);
     });
     
     teardown(() => {
@@ -249,22 +249,22 @@ suite('BlarifyIntegration Test Suite', () => {
         };
         spawnStub.returns(processStub);
         
-        const isInstalled = await blarifyIntegration.checkBlarifyInstalled();
+        const isInstalled = await cueIntegration.checkBlarifyInstalled();
         assert.ok(isInstalled);
     });
     
     test('Should handle Blarify bundled with extension', async () => {
         // Blarify is now bundled with the extension, so it should always be "installed"
         const extensionPath = path.join(__dirname, '..', '..', '..');
-        const blarifyPath = path.join(extensionPath, 'bundled', 'blarify', 'main.py');
+        const cuePath = path.join(extensionPath, 'bundled', 'cue', 'main.py');
         const fs = require('fs');
         
         // Check that the bundled Blarify exists
-        const bundledExists = fs.existsSync(blarifyPath);
+        const bundledExists = fs.existsSync(cuePath);
         assert.ok(bundledExists, 'Bundled Blarify should exist');
         
         // The checkBlarifyInstalled method should return true for bundled Blarify
-        const isInstalled = await blarifyIntegration.checkBlarifyInstalled();
+        const isInstalled = await cueIntegration.checkBlarifyInstalled();
         assert.ok(isInstalled, 'Blarify should be detected as installed (bundled)');
     });
     

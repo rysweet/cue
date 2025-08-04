@@ -26,14 +26,14 @@ suite('Bundled Modules Test Suite', () => {
         }
     });
     
-    test('blarify module should exist', () => {
+    test('cue module should exist', () => {
         const extensionPath = path.join(__dirname, '..', '..', '..');
-        const blarifyPath = path.join(extensionPath, 'bundled', 'blarify');
+        const cuePath = path.join(extensionPath, 'bundled', 'cue');
         const fs = require('fs');
         
-        assert.ok(fs.existsSync(blarifyPath), 'Blarify directory should exist');
-        assert.ok(fs.existsSync(path.join(blarifyPath, 'main.py')), 'Blarify main.py should exist');
-        assert.ok(fs.existsSync(path.join(blarifyPath, '__init__.py')), 'Blarify __init__.py should exist');
+        assert.ok(fs.existsSync(cuePath), 'Blarify directory should exist');
+        assert.ok(fs.existsSync(path.join(cuePath, 'main.py')), 'Blarify main.py should exist');
+        assert.ok(fs.existsSync(path.join(cuePath, '__init__.py')), 'Blarify __init__.py should exist');
     });
     
     test('required dependencies should be available', () => {

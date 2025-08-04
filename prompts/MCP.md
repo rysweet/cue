@@ -184,7 +184,7 @@ Add email verification to the user registration process.
 
 ### MCP Server Structure
 ```
-mcp-blarify-server/
+mcp-cue-server/
 ├── src/
 │   ├── server.py          # Main MCP server
 │   ├── tools/

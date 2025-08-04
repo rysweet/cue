@@ -3,10 +3,10 @@ Basic tests for graph functionality that work with current codebase structure.
 """
 import unittest
 from unittest.mock import Mock
-from blarify.graph.graph import Graph
-from blarify.graph.relationship.relationship import Relationship
-from blarify.graph.relationship.relationship_type import RelationshipType
-from blarify.graph.node.types.node_labels import NodeLabels
+from cue.graph.graph import Graph
+from cue.graph.relationship.relationship import Relationship
+from cue.graph.relationship.relationship_type import RelationshipType
+from cue.graph.node.types.node_labels import NodeLabels
 
 
 class TestGraphBasic(unittest.TestCase):
@@ -254,7 +254,7 @@ class TestDescriptionNode(unittest.TestCase):
     
     def test_description_node_creation(self):
         """Test creating a description node."""
-        from blarify.graph.node.description_node import DescriptionNode
+        from cue.graph.node.description_node import DescriptionNode
         
         target_id = "function_123"
         desc_text = "This function calculates the sum"
@@ -280,7 +280,7 @@ class TestDescriptionNode(unittest.TestCase):
         
     def test_description_node_as_object(self):
         """Test serializing description node."""
-        from blarify.graph.node.description_node import DescriptionNode
+        from cue.graph.node.description_node import DescriptionNode
         
         node = DescriptionNode(
             path="file:///test/desc2",
@@ -308,7 +308,7 @@ class TestFilesystemNodes(unittest.TestCase):
     
     def test_filesystem_file_node(self):
         """Test FilesystemFileNode creation."""
-        from blarify.graph.node.filesystem_file_node import FilesystemFileNode
+        from cue.graph.node.filesystem_file_node import FilesystemFileNode
         
         node = FilesystemFileNode(
             path="file:///project/src/main.py",
@@ -328,7 +328,7 @@ class TestFilesystemNodes(unittest.TestCase):
         
     def test_filesystem_directory_node(self):
         """Test FilesystemDirectoryNode creation."""
-        from blarify.graph.node.filesystem_directory_node import FilesystemDirectoryNode
+        from cue.graph.node.filesystem_directory_node import FilesystemDirectoryNode
         
         node = FilesystemDirectoryNode(
             path="file:///project/src",
@@ -347,7 +347,7 @@ class TestDocumentationNodes(unittest.TestCase):
     
     def test_concept_node(self):
         """Test ConceptNode creation."""
-        from blarify.graph.node.concept_node import ConceptNode
+        from cue.graph.node.concept_node import ConceptNode
         
         node = ConceptNode(
             name="Repository Pattern",
@@ -362,7 +362,7 @@ class TestDocumentationNodes(unittest.TestCase):
         
     def test_documented_entity_node(self):
         """Test DocumentedEntityNode creation."""
-        from blarify.graph.node.documented_entity_node import DocumentedEntityNode
+        from cue.graph.node.documented_entity_node import DocumentedEntityNode
         
         node = DocumentedEntityNode(
             name="UserService",

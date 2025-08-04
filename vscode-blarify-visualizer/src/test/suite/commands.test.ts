@@ -16,11 +16,11 @@ suite('Extension Commands Test Suite', () => {
     test('All extension commands should be registered', async () => {
         // Expected commands
         const expectedCommands = [
-            'blarifyVisualizer.showVisualization',
-            'blarifyVisualizer.ingestWorkspace',
-            'blarifyVisualizer.updateGraph',
-            'blarifyVisualizer.searchGraph',
-            'blarifyVisualizer.restartNeo4j'
+            'cueVisualizer.showVisualization',
+            'cueVisualizer.ingestWorkspace',
+            'cueVisualizer.updateGraph',
+            'cueVisualizer.searchGraph',
+            'cueVisualizer.restartNeo4j'
         ];
         
         // Get all registered commands
@@ -37,7 +37,7 @@ suite('Extension Commands Test Suite', () => {
     
     test('Extension should activate on startup', async () => {
         // Check if our extension is active
-        const extension = vscode.extensions.getExtension('blarify.blarify-visualizer');
+        const extension = vscode.extensions.getExtension('cue.cue-visualizer');
         assert.ok(extension, 'Extension should be present');
         
         // The extension should be active since we have "*" activation
@@ -47,8 +47,8 @@ suite('Extension Commands Test Suite', () => {
     test('Commands should be executable after activation', async () => {
         // This test will fail if commands are not properly registered
         const testableCommands = [
-            'blarifyVisualizer.showVisualization',
-            'blarifyVisualizer.searchGraph'
+            'cueVisualizer.showVisualization',
+            'cueVisualizer.searchGraph'
         ];
         
         for (const cmd of testableCommands) {
@@ -66,13 +66,13 @@ suite('Extension Commands Test Suite', () => {
     });
     
     test('ingestWorkspace command should be registered and callable', async () => {
-        const commandId = 'blarifyVisualizer.ingestWorkspace';
+        const commandId = 'cueVisualizer.ingestWorkspace';
         
         // Check if command is registered
         const commands = await vscode.commands.getCommands();
         assert.ok(
             commands.includes(commandId),
-            `Command '${commandId}' not found. Available commands: ${commands.filter(c => c.startsWith('blarify')).join(', ')}`
+            `Command '${commandId}' not found. Available commands: ${commands.filter(c => c.startsWith('cue')).join(', ')}`
         );
         
         // Try to get command info (this would fail if command doesn't exist)
@@ -87,7 +87,7 @@ suite('Extension Commands Test Suite', () => {
     });
     
     test('Extension activation should happen immediately with "*" event', () => {
-        const extension = vscode.extensions.getExtension('blarify.blarify-visualizer');
+        const extension = vscode.extensions.getExtension('cue.cue-visualizer');
         assert.ok(extension, 'Extension should exist');
         
         // Check activation events in package.json
@@ -102,14 +102,14 @@ suite('Extension Commands Test Suite', () => {
 suite('Command Registration Debugging', () => {
     test('List all Blarify commands for debugging', async () => {
         const allCommands = await vscode.commands.getCommands();
-        const blarifyCommands = allCommands.filter(cmd => cmd.includes('blarify'));
+        const cueCommands = allCommands.filter(cmd => cmd.includes('cue'));
         
         console.log('=== All Blarify Commands ===');
-        console.log(blarifyCommands.length > 0 
-            ? blarifyCommands.join('\n') 
+        console.log(cueCommands.length > 0 
+            ? cueCommands.join('\n') 
             : 'NO BLARIFY COMMANDS FOUND');
         
         // This will help us see what's actually registered
-        assert.ok(true, `Found ${blarifyCommands.length} Blarify commands`);
+        assert.ok(true, `Found ${cueCommands.length} Blarify commands`);
     });
 });

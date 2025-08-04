@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "blarify"
+name = "cue"
 version = "1.2.0"
 description = "A simple graph builder based on LSP calls"
 authors = ["Juan Vargas <juan@blar.io>", "Benjamín Errazuriz <benjamin@blar.io>"]
 readme = "README.md"
 homepage = "https://blar.io"
-repository = "https://github.com/blarApp/blarify"
+repository = "https://github.com/blarApp/cue"
 license = "MIT"
-packages = [{include = "blarify"}]
+packages = [{include = "cue"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<=3.14"
@@ -42,8 +42,8 @@ pytest-asyncio = "^1.1.0"
 pyright = "^1.1.403"
 
 [tool.vendoring]
-destination = "blarify/vendor"
-namespace = "blarify.vendor"
+destination = "cue/vendor"
+namespace = "cue.vendor"
 requirements = "requirements-vendor.txt"
 
 [build-system]
@@ -72,7 +72,7 @@ ignore = ["E501", "COM812", "ISC001"]
 "test_*.py" = ["S101", "PLR2004"]
 
 [tool.pyright]
-include = ["blarify/**/*.py"]
+include = ["cue/**/*.py"]
 exclude = ["vendor/**", "build/**", ".venv/**"]
 typeCheckingMode = "strict"
 pythonVersion = "3.10"

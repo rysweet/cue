@@ -7,10 +7,10 @@ import tempfile
 import os
 from pathlib import Path
 
-from blarify.project_file_explorer.file import File
-from blarify.project_file_explorer.folder import Folder
-from blarify.project_file_explorer.project_files_iterator import ProjectFilesIterator
-from blarify.project_file_explorer.project_files_stats import ProjectFileStats
+from cue.project_file_explorer.file import File
+from cue.project_file_explorer.folder import Folder
+from cue.project_file_explorer.project_files_iterator import ProjectFilesIterator
+from cue.project_file_explorer.project_files_stats import ProjectFileStats
 
 
 class TestFile(unittest.TestCase):
@@ -377,7 +377,7 @@ class TestProjectFileStats(unittest.TestCase):
             with patch('os.path.getsize') as mock_getsize:
                 mock_getsize.return_value = 1000
                 
-                with patch('blarify.logger.Logger.log') as mock_log:
+                with patch('cue.logger.Logger.log') as mock_log:
                     stats = ProjectFileStats(project_files_iterator=mock_iterator)
                     stats.print(limit=1)
                     

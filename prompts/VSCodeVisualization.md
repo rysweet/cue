@@ -96,11 +96,11 @@ We will create a VS Code extension that provides an interactive 3D graph visuali
 ### Extension Architecture
 
 ```
-vscode-blarify-visualizer/
+vscode-cue-visualizer/
 ├── src/
 │   ├── extension.ts           # Main extension entry point
 │   ├── neo4jManager.ts        # Docker container management
-│   ├── blarifyIngestion.ts   # Workspace ingestion logic
+│   ├── cueIngestion.ts   # Workspace ingestion logic
 │   ├── graphProvider.ts      # Graph data provider
 │   ├── webview/
 │   │   ├── index.html        # WebView HTML
@@ -126,16 +126,16 @@ The extension should provide VS Code settings for:
 
 ```json
 {
-  "blarifyVisualizer.azureOpenAI.apiKey": "",
-  "blarifyVisualizer.azureOpenAI.endpoint": "",
-  "blarifyVisualizer.azureOpenAI.deploymentName": "",
-  "blarifyVisualizer.neo4j.uri": "bolt://localhost:7687",
-  "blarifyVisualizer.neo4j.username": "neo4j",
-  "blarifyVisualizer.neo4j.password": "",
-  "blarifyVisualizer.visualization.nodeLimit": 500,
-  "blarifyVisualizer.visualization.defaultLayout": "force-directed",
-  "blarifyVisualizer.ingestion.autoUpdate": true,
-  "blarifyVisualizer.ingestion.excludePatterns": []
+  "cueVisualizer.azureOpenAI.apiKey": "",
+  "cueVisualizer.azureOpenAI.endpoint": "",
+  "cueVisualizer.azureOpenAI.deploymentName": "",
+  "cueVisualizer.neo4j.uri": "bolt://localhost:7687",
+  "cueVisualizer.neo4j.username": "neo4j",
+  "cueVisualizer.neo4j.password": "",
+  "cueVisualizer.visualization.nodeLimit": 500,
+  "cueVisualizer.visualization.defaultLayout": "force-directed",
+  "cueVisualizer.ingestion.autoUpdate": true,
+  "cueVisualizer.ingestion.excludePatterns": []
 }
 ```
 

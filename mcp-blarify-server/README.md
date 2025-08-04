@@ -49,7 +49,7 @@ The server now includes transparent Neo4j container management:
 
 1. Clone the repository:
 ```bash
-cd mcp-blarify-server
+cd mcp-cue-server
 ```
 
 2. Install dependencies:
@@ -59,9 +59,9 @@ pip install -r requirements.txt
 
 3. Install Neo4j container manager (optional, for automatic container management):
 ```bash
-npm install @blarify/neo4j-container-manager
+npm install @cue/neo4j-container-manager
 # Or if using local development version:
-cd ../neo4j-container-manager && npm install && npm run build && cd ../mcp-blarify-server
+cd ../neo4j-container-manager && npm install && npm run build && cd ../mcp-cue-server
 ```
 
 4. Configure environment variables:
@@ -74,7 +74,7 @@ export NEO4J_DATABASE="neo4j"
 
 # Container management (new)
 export MANAGE_NEO4J_CONTAINER="true"  # Auto-manage Neo4j container lifecycle
-export NEO4J_DATA_DIR="./.blarify/neo4j"  # Data persistence directory
+export NEO4J_DATA_DIR="./.cue/neo4j"  # Data persistence directory
 export ENVIRONMENT="development"  # or "test", "production"
 export DEBUG="false"
 
@@ -107,10 +107,10 @@ Add to your Claude Desktop configuration:
 ```json
 {
   "mcpServers": {
-    "blarify": {
+    "cue": {
       "command": "python",
       "args": ["-m", "src.server"],
-      "cwd": "/path/to/mcp-blarify-server",
+      "cwd": "/path/to/mcp-cue-server",
       "env": {
         "MANAGE_NEO4J_CONTAINER": "true",
         "NEO4J_PASSWORD": "your-secure-password",
@@ -151,7 +151,7 @@ Use the buildPlanForChange tool to create a plan for:
 ## Architecture
 
 ```
-mcp-blarify-server/
+mcp-cue-server/
 ├── src/
 │   ├── server.py              # Main MCP server
 │   ├── config.py              # Configuration management
@@ -172,7 +172,7 @@ mcp-blarify-server/
 |---------------------|-------------|---------|
 | **Container Management** | | |
 | `MANAGE_NEO4J_CONTAINER` | Auto-manage Neo4j container | `true` |
-| `NEO4J_DATA_DIR` | Directory for Neo4j data persistence | `./.blarify/neo4j` |
+| `NEO4J_DATA_DIR` | Directory for Neo4j data persistence | `./.cue/neo4j` |
 | `ENVIRONMENT` | Environment mode (development/test/production) | `development` |
 | `DEBUG` | Enable debug logging | `false` |
 | **Neo4j Connection** | | |
