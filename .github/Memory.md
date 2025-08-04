@@ -1,5 +1,5 @@
 # AI Assistant Memory
-Last Updated: 2025-08-01T21:30:00Z
+Last Updated: 2025-08-04T12:30:00Z
 
 ## Current Goals
 - ✅ Improve test coverage for Blarify codebase to >80% (ACHIEVED 3x improvement: 20.76% → 63.76%)
@@ -15,6 +15,7 @@ Last Updated: 2025-08-01T21:30:00Z
 - ✅ Fix VS Code BlarifyIntegration command mismatch issue (PR #55 - COMPLETED)
 - 🔄 **ACTIVE**: Complete pyright type checking implementation - achieve 0 errors (PR #62 - OUTSTANDING PROGRESS: 715 → 606 errors, 109 fixed, 15.2% improvement)
 - 🔄 Continue improving test coverage for low-coverage modules
+- 🔄 **ACTIVE**: Comprehensive README update for Cue/Blarify project (Issue #67) - Document multilayer code understanding, MCP server, VS Code extension
 
 ## Todo List
 - [x] Write prompt file for test coverage improvement agent
