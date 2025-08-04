@@ -29,7 +29,7 @@ The improvement will:
 ## Technical Analysis
 
 ### Current Testing Infrastructure
-- Tests exist in `tests/` and `mcp-blarify-server/tests/` directories
+- Tests exist in `tests/` and `mcp-cue-server/tests/` directories
 - Using Python's unittest framework
 - Some tests for filesystem nodes, documentation parsing, LLM service
 - No systematic coverage measurement or CI/CD integration
@@ -45,33 +45,33 @@ The improvement will:
 ### Critical Modules Needing Tests
 
 #### Core Graph Components
-- `blarify/graph/graph.py`: Graph operations, node/relationship management
-- `blarify/graph/node/*.py`: All node types and their serialization
-- `blarify/graph/relationship/*.py`: Relationship creation and validation
-- `blarify/graph/graph_update.py`: Graph update operations
+- `cue/graph/graph.py`: Graph operations, node/relationship management
+- `cue/graph/node/*.py`: All node types and their serialization
+- `cue/graph/relationship/*.py`: Relationship creation and validation
+- `cue/graph/graph_update.py`: Graph update operations
 
 #### Language Processing
-- `blarify/code_hierarchy/languages/*.py`: Language definitions
-- `blarify/code_hierarchy/tree_sitter_helper.py`: Tree-sitter integration
-- `blarify/vendor/multilspy/*.py`: LSP server integration
+- `cue/code_hierarchy/languages/*.py`: Language definitions
+- `cue/code_hierarchy/tree_sitter_helper.py`: Tree-sitter integration
+- `cue/vendor/multilspy/*.py`: LSP server integration
 
 #### Database Layer
-- `blarify/db_managers/*.py`: Neo4j and FalkorDB operations
+- `cue/db_managers/*.py`: Neo4j and FalkorDB operations
 - Transaction handling and rollback
 - Connection pooling and error recovery
 
 #### File System Operations
-- `blarify/project_file_explorer/*.py`: File traversal, gitignore
-- `blarify/filesystem/*.py`: Filesystem graph generation
+- `cue/project_file_explorer/*.py`: File traversal, gitignore
+- `cue/filesystem/*.py`: Filesystem graph generation
 - Path handling and permission errors
 
 #### LLM Integration
-- `blarify/llm_descriptions/*.py`: Description generation
+- `cue/llm_descriptions/*.py`: Description generation
 - API error handling and retries
 - Prompt construction and response parsing
 
 #### Documentation Processing
-- `blarify/documentation/*.py`: Documentation parsing and linking
+- `cue/documentation/*.py`: Documentation parsing and linking
 - Concept extraction and entity recognition
 
 ## Implementation Plan
@@ -104,7 +104,7 @@ import unittest
 from unittest.mock import Mock, patch
 import tempfile
 import shutil
-from blarify.tests.fixtures import TestGraphFixture, create_test_file
+from cue.tests.fixtures import TestGraphFixture, create_test_file
 
 class TestModuleName(unittest.TestCase):
     """Test suite for module functionality."""
@@ -214,9 +214,9 @@ Commit changes incrementally as you implement each component, with clear commit 
 # tests/test_graph_operations.py
 import unittest
 from unittest.mock import Mock, patch
-from blarify.graph.graph import Graph
-from blarify.graph.node.file_node import FileNode
-from blarify.graph.relationship.relationship_type import RelationshipType
+from cue.graph.graph import Graph
+from cue.graph.node.file_node import FileNode
+from cue.graph.relationship.relationship_type import RelationshipType
 from tests.fixtures.graph_fixtures import create_test_graph
 
 class TestGraphOperations(unittest.TestCase):

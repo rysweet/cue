@@ -413,7 +413,7 @@ git push -u origin feature/fix-environment-setup-coordination-{issue-number}
 - **Plan Backward Compatibility**: Ensure existing setups continue to work
 
 ### Step 4: Phase 1 Implementation - Blarify CLI Interface
-- **Create CLI Module**: Add `blarify/cli/command_line_interface.py` with argparse implementation
+- **Create CLI Module**: Add `cue/cli/command_line_interface.py` with argparse implementation
 - **Update main.py**: Integrate CLI parsing with existing environment variable loading
 - **Add Configuration Classes**: Create structured configuration objects for type safety
 - **Implement Validation**: Add comprehensive validation for all configuration types

@@ -28,7 +28,7 @@ Analysis of the codebase reveals:
 - **Basic Type Hints**: Some functions have type annotations (e.g., `main.py` functions use basic parameter types)
 - **TYPE_CHECKING Imports**: Many modules use `from typing import TYPE_CHECKING` pattern for circular import avoidance
 - **Mixed Type Coverage**: Some modules like `graph.py` have good type annotations while others lack them entirely
-- **CI Integration**: MyPy is configured but not enforced (`poetry run mypy blarify/ --ignore-missing-imports || true`)
+- **CI Integration**: MyPy is configured but not enforced (`poetry run mypy cue/ --ignore-missing-imports || true`)
 
 ### Impact on Development
 
@@ -114,29 +114,29 @@ Without strict type checking:
 
 The Blarify codebase consists of the following main packages:
 
-1. **Core Graph System** (`blarify/graph/`):
+1. **Core Graph System** (`cue/graph/`):
    - `graph.py`: Main graph data structure with some type annotations
    - `node/`: Node type hierarchy with mixed type coverage
    - `relationship/`: Relationship management with basic typing
 
-2. **Code Analysis** (`blarify/code_hierarchy/`, `blarify/code_references/`):
+2. **Code Analysis** (`cue/code_hierarchy/`, `cue/code_references/`):
    - Tree-sitter integration for multiple languages
    - LSP helper for symbol resolution
    - Language-specific definition extractors
 
-3. **Database Management** (`blarify/db_managers/`):
+3. **Database Management** (`cue/db_managers/`):
    - Neo4j and FalkorDB managers
    - Graph persistence and querying
 
-4. **Documentation Processing** (`blarify/documentation/`):
+4. **Documentation Processing** (`cue/documentation/`):
    - Documentation parsing and linking
    - Concept extraction and graph generation
 
-5. **LLM Integration** (`blarify/llm_descriptions/`):
+5. **LLM Integration** (`cue/llm_descriptions/`):
    - OpenAI integration for code descriptions
    - Description generation and management
 
-6. **Project Analysis** (`blarify/project_file_explorer/`):
+6. **Project Analysis** (`cue/project_file_explorer/`):
    - File system traversal and filtering
    - Gitignore integration
 
@@ -147,7 +147,7 @@ The Blarify codebase consists of the following main packages:
    ```json
    // pyrightconfig.json
    {
-     "include": ["blarify", "tests"],
+     "include": ["cue", "tests"],
      "exclude": ["**/node_modules", "**/__pycache__", "dist", "build"],
      "typeCheckingMode": "strict",
      "reportMissingImports": true,
@@ -163,7 +163,7 @@ The Blarify codebase consists of the following main packages:
    pyright = "^1.1.350"
    
    [tool.pyright]
-   include = ["blarify", "tests"]
+   include = ["cue", "tests"]
    exclude = ["**/node_modules", "**/__pycache__"]
    typeCheckingMode = "strict"
    reportMissingImports = true
@@ -260,8 +260,8 @@ The Blarify codebase consists of the following main packages:
 
 **Deliverables**:
 1. Complete type annotations for `Graph` class and methods
-2. Full typing for all node types in `blarify/graph/node/`
-3. Comprehensive relationship typing in `blarify/graph/relationship/`
+2. Full typing for all node types in `cue/graph/node/`
+3. Comprehensive relationship typing in `cue/graph/relationship/`
 4. Type-safe graph operations and queries
 5. Updated tests with proper type annotations
 
@@ -273,7 +273,7 @@ The Blarify codebase consists of the following main packages:
 - Update related tests to match new type signatures
 
 **Success Criteria**:
-- Zero pyright errors in `blarify/graph/` package
+- Zero pyright errors in `cue/graph/` package
 - All graph operations are type-safe
 - Tests pass with new type annotations
 - Type coverage report shows 100% for graph modules
@@ -619,7 +619,7 @@ The Blarify codebase consists of the following main packages:
 
 #### Step 3: Phase 2 - Core Graph System
 1. **Graph Module Analysis**
-   - Examine `blarify/graph/graph.py` current type annotations
+   - Examine `cue/graph/graph.py` current type annotations
    - Identify missing type annotations in graph operations
    - Analyze node and relationship type hierarchies
    - Document complex type relationships

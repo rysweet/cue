@@ -17,7 +17,7 @@ source .venv/bin/activate
 
 Install the Blarify repository:
 ```bash
-pip install blarify
+pip install cue
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ PATH_TO_YOUR_PROJECT = "/path/to/your/project/"
 Import GraphBuilder from the prebuilt module
 
 ```python
-from blarify.prebuilt.graph_builder import GraphBuilder
+from cue.prebuilt.graph_builder import GraphBuilder
 ```
 
 Create the graph builder
@@ -95,10 +95,10 @@ this will return a list of dictionaries with the following structure
 ## Complete Example
 
 ```python
-# Taken from blarify/examples/graph_builder.py
-from blarify.prebuilt.graph_builder import GraphBuilder
-from blarify.db_managers.neo4j_manager import Neo4jManager
-from blarify.db_managers.falkordb_manager import FalkorDBManager
+# Taken from cue/examples/graph_builder.py
+from cue.prebuilt.graph_builder import GraphBuilder
+from cue.db_managers.neo4j_manager import Neo4jManager
+from cue.db_managers.falkordb_manager import FalkorDBManager
 
 import dotenv
 import os

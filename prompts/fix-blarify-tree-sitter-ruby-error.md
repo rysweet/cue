@@ -24,7 +24,7 @@ The error trace shows that `ruby_definitions.py` is imported unconditionally in 
 5. Test the fix with both Ruby and non-Ruby projects
 
 ## Technical Approach
-1. Modify `blarify/code_hierarchy/languages/__init__.py` to use conditional imports
+1. Modify `cue/code_hierarchy/languages/__init__.py` to use conditional imports
 2. Implement lazy loading for language-specific parsers
 3. Add try-except blocks around language imports with informative warnings
 4. Consider using importlib for dynamic imports based on detected languages

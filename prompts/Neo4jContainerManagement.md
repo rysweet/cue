@@ -99,12 +99,12 @@ class Neo4jContainerManager {
 
 ### Phase 4: Data Persistence
 - Create named volumes based on environment and timestamp
-- Volume naming: `blarify-neo4j-{env}-{timestamp}`
+- Volume naming: `cue-neo4j-{env}-{timestamp}`
 - Automatic volume reuse for same environment
 - Volume backup before risky operations
 
 ### Phase 5: Test Isolation
-- Test containers use prefix: `blarify-neo4j-test-{uuid}`
+- Test containers use prefix: `cue-neo4j-test-{uuid}`
 - Test volumes auto-cleanup after test run
 - Parallel test support with unique containers
 - Mock mode for unit tests (no real Docker)
@@ -203,19 +203,19 @@ afterEach(async () => {
 ## Implementation Notes
 
 1. **Container Naming Convention**:
-   - Development: `blarify-neo4j-dev`
-   - Test: `blarify-neo4j-test-{uuid}`
-   - Production: `blarify-neo4j-prod`
+   - Development: `cue-neo4j-dev`
+   - Test: `cue-neo4j-test-{uuid}`
+   - Production: `cue-neo4j-prod`
 
 2. **Volume Naming Convention**:
-   - Development: `blarify-neo4j-dev-data`
-   - Test: `blarify-neo4j-test-{uuid}-data`
-   - Production: `blarify-neo4j-prod-data`
+   - Development: `cue-neo4j-dev-data`
+   - Test: `cue-neo4j-test-{uuid}-data`
+   - Production: `cue-neo4j-prod-data`
 
 3. **Port Allocation Strategy**:
    - Start from base ports (7474, 7687)
    - Increment by 10 for each instance
-   - Track in `~/.blarify/ports.json`
+   - Track in `~/.cue/ports.json`
 
 4. **Health Check Implementation**:
    - Wait for Neo4j to be fully ready

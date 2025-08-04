@@ -30,9 +30,9 @@ We need to modify Blarify so that `.blarignore` becomes **additive** to `.gitign
 
 ### Key Files to Modify
 
-- `blarify/project_file_explorer/project_files_iterator.py` - Core file filtering logic
-- `blarify/prebuilt/graph_builder.py` - High-level API that needs `.gitignore` support
-- `blarify/main.py` - Example usage patterns
+- `cue/project_file_explorer/project_files_iterator.py` - Core file filtering logic
+- `cue/prebuilt/graph_builder.py` - High-level API that needs `.gitignore` support
+- `cue/main.py` - Example usage patterns
 
 ## Implementation Plan
 

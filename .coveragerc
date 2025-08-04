@@ -1,5 +1,5 @@
 [run]
-source = blarify
+source = cue
 omit = 
     */tests/*
     */test_*

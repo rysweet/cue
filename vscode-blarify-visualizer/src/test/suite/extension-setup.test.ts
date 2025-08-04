@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { PythonEnvironment } from '../../pythonEnvironment';
-import { BlarifyIntegration } from '../../blarifyIntegration';
+import { BlarifyIntegration } from '../../cueIntegration';
 import { ConfigurationManager } from '../../configurationManager';
 
 suite('Extension Setup Tests', () => {
@@ -12,7 +12,7 @@ suite('Extension Setup Tests', () => {
 
     suiteSetup(() => {
         // Get the extension path from VS Code context
-        const extension = vscode.extensions.getExtension('blarify.blarify-visualizer');
+        const extension = vscode.extensions.getExtension('cue.cue-visualizer');
         extensionPath = extension ? extension.extensionPath : path.join(__dirname, '../../..');
         bundledPath = path.join(extensionPath, 'bundled');
     });
@@ -51,12 +51,12 @@ suite('Extension Setup Tests', () => {
             assert.ok(fs.existsSync(setupPath), 'setup.py should exist in bundled directory');
         });
 
-        test('blarify source should exist in bundled directory', () => {
-            const blarifyPath = path.join(bundledPath, 'blarify');
-            assert.ok(fs.existsSync(blarifyPath), 'blarify directory should exist in bundled directory');
+        test('cue source should exist in bundled directory', () => {
+            const cuePath = path.join(bundledPath, 'cue');
+            assert.ok(fs.existsSync(cuePath), 'cue directory should exist in bundled directory');
             
-            const mainPath = path.join(blarifyPath, 'main.py');
-            assert.ok(fs.existsSync(mainPath), 'blarify/main.py should exist');
+            const mainPath = path.join(cuePath, 'main.py');
+            assert.ok(fs.existsSync(mainPath), 'cue/main.py should exist');
         });
 
         test('requirements.txt should exist in bundled directory', () => {
@@ -111,25 +111,25 @@ suite('Extension Setup Tests', () => {
     });
 
     suite('BlarifyIntegration Setup Dependency', () => {
-        let blarifyIntegration: BlarifyIntegration;
+        let cueIntegration: BlarifyIntegration;
         let configManager: ConfigurationManager;
 
         setup(() => {
             configManager = new ConfigurationManager();
-            blarifyIntegration = new BlarifyIntegration(configManager, extensionPath);
+            cueIntegration = new BlarifyIntegration(configManager, extensionPath);
         });
 
         test('BlarifyIntegration should be created without errors', () => {
-            assert.ok(blarifyIntegration, 'BlarifyIntegration should be created');
+            assert.ok(cueIntegration, 'BlarifyIntegration should be created');
         });
 
         test('checkBlarifyInstalled should work with bundled version', async () => {
-            const isInstalled = await blarifyIntegration.checkBlarifyInstalled();
+            const isInstalled = await cueIntegration.checkBlarifyInstalled();
             assert.ok(isInstalled, 'Bundled Blarify should be detected as installed');
         });
 
         test('getLastAnalysis should return undefined before analysis', () => {
-            const lastAnalysis = blarifyIntegration.getLastAnalysis();
+            const lastAnalysis = cueIntegration.getLastAnalysis();
             assert.strictEqual(lastAnalysis, undefined, 'Last analysis should be undefined initially');
         });
     });
@@ -137,7 +137,7 @@ suite('Extension Setup Tests', () => {
     suite('Setup Flow Integration', () => {
         test('Extension activation should not throw errors', async () => {
             // Get the extension
-            const extension = vscode.extensions.getExtension('blarify.blarify-visualizer');
+            const extension = vscode.extensions.getExtension('cue.cue-visualizer');
             assert.ok(extension, 'Extension should be available');
             
             if (!extension.isActive) {
@@ -155,12 +155,12 @@ suite('Extension Setup Tests', () => {
 
         test('Extension commands should be registered', async () => {
             const commands = await vscode.commands.getCommands();
-            const blarifyCommands = commands.filter(cmd => cmd.startsWith('blarifyVisualizer.'));
+            const cueCommands = commands.filter(cmd => cmd.startsWith('cueVisualizer.'));
             
-            assert.ok(blarifyCommands.length > 0, 'Blarify commands should be registered');
-            assert.ok(blarifyCommands.includes('blarifyVisualizer.ingestWorkspace'), 
+            assert.ok(cueCommands.length > 0, 'Blarify commands should be registered');
+            assert.ok(cueCommands.includes('cueVisualizer.ingestWorkspace'), 
                 'ingestWorkspace command should be registered');
-            assert.ok(blarifyCommands.includes('blarifyVisualizer.showVisualization'), 
+            assert.ok(cueCommands.includes('cueVisualizer.showVisualization'), 
                 'showVisualization command should be registered');
         });
     });

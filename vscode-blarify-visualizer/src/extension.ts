@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Neo4jManager } from './neo4jManager';
-import { BlarifyIntegration } from './blarifyIntegration';
+import { BlarifyIntegration } from './cueIntegration';
 import { GraphDataProvider } from './graphDataProvider';
 import { VisualizationPanel } from './visualizationPanel';
 import { StatusBarManager } from './statusBarManager';
@@ -8,7 +8,7 @@ import { ConfigurationManager } from './configurationManager';
 import { PythonEnvironment } from './pythonEnvironment';
 
 let neo4jManager: Neo4jManager;
-let blarifyIntegration: BlarifyIntegration;
+let cueIntegration: BlarifyIntegration;
 let graphDataProvider: GraphDataProvider;
 let statusBarManager: StatusBarManager;
 let configManager: ConfigurationManager;
@@ -64,7 +64,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
     
     try {
-        blarifyIntegration = new BlarifyIntegration(configManager, context.extensionPath, neo4jManager);
+        cueIntegration = new BlarifyIntegration(configManager, context.extensionPath, neo4jManager);
         outputChannel.appendLine('Blarify integration initialized');
     } catch (error) {
         outputChannel.appendLine(`ERROR initializing Blarify integration: ${error}`);
@@ -115,11 +115,11 @@ export async function activate(context: vscode.ExtensionContext) {
             
             // Set up Python environment (including Blarify dependencies)
             outputChannel.appendLine('Setting up Python environment...');
-            if (blarifyIntegration && statusBarManager) {
+            if (cueIntegration && statusBarManager) {
                 statusBarManager.setStatus('Setting up Python...', 'sync~spin');
                 try {
                     // This will trigger the Python environment setup including pip install
-                    const pythonEnv = (blarifyIntegration as any).pythonEnv as PythonEnvironment;
+                    const pythonEnv = (cueIntegration as any).pythonEnv as PythonEnvironment;
                     await pythonEnv.ensureSetup();
                     outputChannel.appendLine('Python environment setup completed');
                 } catch (error) {
@@ -181,20 +181,20 @@ export async function activate(context: vscode.ExtensionContext) {
     outputChannel.appendLine('Registering commands...');
     try {
         const showVisualizationCommand = vscode.commands.registerCommand(
-            'blarifyVisualizer.showVisualization',
+            'cueVisualizer.showVisualization',
             () => showVisualization(context)
         );
         outputChannel.appendLine('  - showVisualization registered');
         
         const ingestWorkspaceCommand = vscode.commands.registerCommand(
-            'blarifyVisualizer.ingestWorkspace',
+            'cueVisualizer.ingestWorkspace',
             async () => {
                 outputChannel.appendLine('Command: ingestWorkspace invoked');
                 outputChannel.appendLine(`  neo4jManager: ${neo4jManager ? 'initialized' : 'NOT INITIALIZED'}`);
-                outputChannel.appendLine(`  blarifyIntegration: ${blarifyIntegration ? 'initialized' : 'NOT INITIALIZED'}`);
+                outputChannel.appendLine(`  cueIntegration: ${cueIntegration ? 'initialized' : 'NOT INITIALIZED'}`);
                 outputChannel.appendLine(`  setupState.isSetupComplete: ${setupState.isSetupComplete}`);
                 
-                if (!neo4jManager || !blarifyIntegration) {
+                if (!neo4jManager || !cueIntegration) {
                     const message = 'Extension components not fully initialized. Please reload the window.';
                     outputChannel.appendLine(`ERROR: ${message}`);
                     vscode.window.showErrorMessage(message);
@@ -239,19 +239,19 @@ export async function activate(context: vscode.ExtensionContext) {
         outputChannel.appendLine('  - ingestWorkspace registered');
         
         const updateGraphCommand = vscode.commands.registerCommand(
-            'blarifyVisualizer.updateGraph',
+            'cueVisualizer.updateGraph',
             updateGraph
         );
         outputChannel.appendLine('  - updateGraph registered');
         
         const searchGraphCommand = vscode.commands.registerCommand(
-            'blarifyVisualizer.searchGraph',
+            'cueVisualizer.searchGraph',
             searchGraph
         );
         outputChannel.appendLine('  - searchGraph registered');
         
         const restartNeo4jCommand = vscode.commands.registerCommand(
-            'blarifyVisualizer.restartNeo4j',
+            'cueVisualizer.restartNeo4j',
             restartNeo4j
         );
         outputChannel.appendLine('  - restartNeo4j registered');
@@ -272,8 +272,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // Register status view provider
     outputChannel.appendLine('Registering tree view...');
     try {
-        const statusProvider = new StatusViewProvider(neo4jManager, blarifyIntegration);
-        const treeView = vscode.window.createTreeView('blarifyStatus', {
+        const statusProvider = new StatusViewProvider(neo4jManager, cueIntegration);
+        const treeView = vscode.window.createTreeView('cueStatus', {
             treeDataProvider: statusProvider,
             showCollapseAll: false
         });
@@ -303,8 +303,8 @@ export async function activate(context: vscode.ExtensionContext) {
     
     // List all registered commands for debugging
     vscode.commands.getCommands().then(commands => {
-        const blarifyCommands = commands.filter(cmd => cmd.startsWith('blarifyVisualizer.'));
-        outputChannel.appendLine(`Registered Blarify commands: ${blarifyCommands.join(', ')}`);
+        const cueCommands = commands.filter(cmd => cmd.startsWith('cueVisualizer.'));
+        outputChannel.appendLine(`Registered Blarify commands: ${cueCommands.join(', ')}`);
     });
 }
 
@@ -352,7 +352,7 @@ async function showVisualization(context: vscode.ExtensionContext) {
 
 async function ingestWorkspace() {
     // Check if components are initialized
-    if (!blarifyIntegration) {
+    if (!cueIntegration) {
         vscode.window.showErrorMessage('Blarify integration not initialized. Please reload the window.');
         return;
     }
@@ -387,7 +387,7 @@ async function ingestWorkspace() {
             }
             progress.report({ increment: 0, message: 'Starting analysis...' });
             
-            const result = await blarifyIntegration.analyzeWorkspace(
+            const result = await cueIntegration.analyzeWorkspace(
                 workspaceFolder.uri.fsPath,
                 progress,
                 token
@@ -434,7 +434,7 @@ async function searchGraph() {
         } else {
             // Open visualization first
             vscode.window.showInformationMessage('Please open the visualization first');
-            await vscode.commands.executeCommand('blarifyVisualizer.showVisualization');
+            await vscode.commands.executeCommand('cueVisualizer.showVisualization');
             // Delay to ensure panel is ready
             setTimeout(() => {
                 VisualizationPanel.currentPanel?.search(query);
@@ -476,7 +476,7 @@ class StatusViewProvider implements vscode.TreeDataProvider<StatusItem> {
     
     constructor(
         private neo4jManager: Neo4jManager,
-        private blarifyIntegration: BlarifyIntegration
+        private cueIntegration: BlarifyIntegration
     ) {}
     
     refresh(): void {
@@ -513,7 +513,7 @@ class StatusViewProvider implements vscode.TreeDataProvider<StatusItem> {
             }
             
             // Last analysis
-            const lastAnalysis = this.blarifyIntegration.getLastAnalysis();
+            const lastAnalysis = this.cueIntegration.getLastAnalysis();
             if (lastAnalysis) {
                 items.push(new StatusItem(
                     `Last analysis: ${new Date(lastAnalysis).toLocaleString()}`,

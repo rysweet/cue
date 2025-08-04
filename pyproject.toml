@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "blarify"
+name = "cue"
 version = "1.2.0"
 description = "A simple graph builder based on LSP calls"
 authors = ["Juan Vargas <juan@blar.io>", "Benjamín Errazuriz <benjamin@blar.io>"]
 readme = "README.md"
 homepage = "https://blar.io"
-repository = "https://github.com/blarApp/blarify"
+repository = "https://github.com/blarApp/cue"
 license = "MIT"
-packages = [{include = "blarify"}]
+packages = [{include = "cue"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<=3.14"
@@ -45,8 +45,8 @@ pyright = "^1.1.350"
 mypy = "^1.8.0"
 
 [tool.vendoring]
-destination = "blarify/vendor"
-namespace = "blarify.vendor"
+destination = "cue/vendor"
+namespace = "cue.vendor"
 requirements = "requirements-vendor.txt"
 
 [build-system]
@@ -65,8 +65,8 @@ skip = "*.csv,*.html,*.json,*.jsonl,*.pdf,*.txt,*.ipynb"
 profile = "black"
 
 [tool.pyright]
-include = ["blarify", "tests"]
-exclude = ["**/node_modules", "**/__pycache__", "**/vendor", "blarify/vendor"]
+include = ["cue", "tests"]
+exclude = ["**/node_modules", "**/__pycache__", "**/vendor", "cue/vendor"]
 typeCheckingMode = "strict"
 reportMissingImports = true
 reportMissingTypeStubs = false

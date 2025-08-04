@@ -75,9 +75,9 @@ These performance issues impact:
 ### Current Implementation Review
 
 The existing graph implementation includes:
-- `blarify/graph/graph.py`: Core graph operations and query interface
-- `blarify/db_managers/*.py`: Database connection and query execution
-- `blarify/graph/query/*.py`: Query building and execution logic
+- `cue/graph/graph.py`: Core graph operations and query interface
+- `cue/db_managers/*.py`: Database connection and query execution
+- `cue/graph/query/*.py`: Query building and execution logic
 
 **Current Limitations:**
 - Queries execute synchronously without batching
@@ -135,7 +135,7 @@ The optimization will integrate with existing components:
 ### Phase 1: Foundation Setup (Week 1)
 
 #### Query Profiling Infrastructure
-1. Create `blarify/graph/profiler/` module
+1. Create `cue/graph/profiler/` module
 2. Implement `QueryProfiler` class with timing and memory tracking
 3. Add profiling decorators for existing query methods
 4. Create performance metrics collection system
@@ -149,7 +149,7 @@ The optimization will integrate with existing components:
 ### Phase 2: Caching System (Week 2)
 
 #### Cache Implementation
-1. Create `blarify/graph/cache/` module
+1. Create `cue/graph/cache/` module
 2. Implement `GraphCache` with pluggable backends
 3. Add cache key generation strategies
 4. Implement cache invalidation policies
@@ -353,7 +353,7 @@ Make incremental commits with clear messages:
 
 ### Query Profiler Example
 ```python
-# blarify/graph/profiler/query_profiler.py
+# cue/graph/profiler/query_profiler.py
 import time
 import psutil
 from typing import Dict, Any
@@ -394,7 +394,7 @@ class QueryProfiler:
 
 ### Cache Implementation Example
 ```python
-# blarify/graph/cache/graph_cache.py
+# cue/graph/cache/graph_cache.py
 import redis
 import pickle
 from typing import Any, Optional

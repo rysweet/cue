@@ -12,7 +12,7 @@ export interface VisualizationConfig {
 }
 
 export class ConfigurationManager {
-    private readonly configSection = 'blarifyVisualizer';
+    private readonly configSection = 'cueVisualizer';
     
     getAzureOpenAIConfig(): AzureOpenAIConfig {
         const config = vscode.workspace.getConfiguration(this.configSection);
@@ -59,7 +59,7 @@ export class ConfigurationManager {
         
         if (configure === 'Configure') {
             await vscode.commands.executeCommand('workbench.action.openSettings', 
-                '@ext:blarify.blarify-visualizer');
+                '@ext:cue.cue-visualizer');
             return true;
         }
         
