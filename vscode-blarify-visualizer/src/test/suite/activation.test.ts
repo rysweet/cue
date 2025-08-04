@@ -6,7 +6,7 @@ import { activate } from '../../extension';
 suite('Extension Activation Test Suite', () => {
     test('Extension should be activated and commands registered', async () => {
         // Check if extension is already activated by VS Code
-        const extension = vscode.extensions.getExtension('blarify.blarify-visualizer');
+        const extension = vscode.extensions.getExtension('cue.cue-visualizer');
         assert.ok(extension, 'Extension should be installed');
         
         // If not active, wait for activation
@@ -19,11 +19,11 @@ suite('Extension Activation Test Suite', () => {
         // Check if all expected commands are registered
         const commands = await vscode.commands.getCommands();
         const expectedCommands = [
-            'blarifyVisualizer.showVisualization',
-            'blarifyVisualizer.ingestWorkspace',
-            'blarifyVisualizer.updateGraph',
-            'blarifyVisualizer.searchGraph',
-            'blarifyVisualizer.restartNeo4j'
+            'cueVisualizer.showVisualization',
+            'cueVisualizer.ingestWorkspace',
+            'cueVisualizer.updateGraph',
+            'cueVisualizer.searchGraph',
+            'cueVisualizer.restartNeo4j'
         ];
         
         for (const cmd of expectedCommands) {
@@ -47,7 +47,7 @@ suite('Extension Activation Test Suite', () => {
         
         // These paths should exist after bundling
         const requiredPaths = [
-            path.join(bundledPath, 'blarify'),
+            path.join(bundledPath, 'cue'),
             path.join(bundledPath, 'neo4j-container-manager')
         ];
         

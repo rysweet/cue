@@ -16,18 +16,18 @@ Blarify supports the following languages out of the box:
 - C#
 - PHP
 
-**Note**: Blarify is designed to be robust. If a language parser is not installed or fails to load, Blarify will continue to work for other supported languages, displaying a warning for the missing language support. See [Language Support Documentation](blarify/LANGUAGE_SUPPORT.md) for more details.
+**Note**: Blarify is designed to be robust. If a language parser is not installed or fails to load, Blarify will continue to work for other supported languages, displaying a warning for the missing language support. See [Language Support Documentation](cue/LANGUAGE_SUPPORT.md) for more details.
 
 # Example
 
-<img src="https://raw.githubusercontent.com/blarApp/blarify/refs/heads/main/docs/visualisation.png"></img>
+<img src="https://raw.githubusercontent.com/blarApp/cue/refs/heads/main/docs/visualisation.png"></img>
 This graph was generated from the code in this repository.
 
 # Quickstart
 
-Get started with blarify by following our quickstart guide:
+Get started with cue by following our quickstart guide:
 
-[➡️ Quickstart Guide](https://github.com/blarApp/blarify/blob/main/docs/quickstart.md)
+[➡️ Quickstart Guide](https://github.com/blarApp/cue/blob/main/docs/quickstart.md)
 
 # Article
 

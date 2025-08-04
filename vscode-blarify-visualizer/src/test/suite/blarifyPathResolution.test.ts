@@ -2,12 +2,12 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { BlarifyIntegration } from '../../blarifyIntegration';
+import { BlarifyIntegration } from '../../cueIntegration';
 import { Neo4jManager } from '../../neo4jManager';
 import { ConfigurationManager } from '../../configurationManager';
 
 suite('Blarify Path Resolution Test Suite', () => {
-    let blarifyIntegration: BlarifyIntegration;
+    let cueIntegration: BlarifyIntegration;
     let configManager: any;
     
     setup(() => {
@@ -24,7 +24,7 @@ suite('Blarify Path Resolution Test Suite', () => {
         const extensionPath = path.resolve(__dirname, '..', '..', '..');
         const realConfigManager = new ConfigurationManager();
         const neo4jManager = new Neo4jManager(realConfigManager, extensionPath);
-        blarifyIntegration = new BlarifyIntegration(configManager, extensionPath, neo4jManager);
+        cueIntegration = new BlarifyIntegration(configManager, extensionPath, neo4jManager);
     });
     
     test('Should find Blarify in workspace parent directory', async function() {
@@ -40,25 +40,25 @@ suite('Blarify Path Resolution Test Suite', () => {
         // Check if Blarify exists in expected locations
         const possiblePaths = [
             // In the workspace itself
-            path.join(workspaceFolder.uri.fsPath, 'blarify', '__main__.py'),
+            path.join(workspaceFolder.uri.fsPath, 'cue', '__main__.py'),
             // In parent of workspace (common dev setup)
-            path.join(workspaceFolder.uri.fsPath, '..', 'blarify', '__main__.py'),
+            path.join(workspaceFolder.uri.fsPath, '..', 'cue', '__main__.py'),
             // Relative to extension (dev mode)
-            path.join(__dirname, '..', '..', '..', '..', 'blarify', '__main__.py')
+            path.join(__dirname, '..', '..', '..', '..', 'cue', '__main__.py')
         ];
         
-        let blarifyFound = false;
+        let cueFound = false;
         let foundPath = '';
         
         for (const testPath of possiblePaths) {
             if (fs.existsSync(testPath)) {
-                blarifyFound = true;
+                cueFound = true;
                 foundPath = testPath;
                 break;
             }
         }
         
-        assert.ok(blarifyFound, `Blarify not found in any expected location. Searched: ${possiblePaths.join(', ')}`);
+        assert.ok(cueFound, `Blarify not found in any expected location. Searched: ${possiblePaths.join(', ')}`);
         console.log(`Blarify found at: ${foundPath}`);
     });
     
@@ -80,7 +80,7 @@ suite('Blarify Path Resolution Test Suite', () => {
             // This should find Blarify and at least start the process
             // It might fail on actual execution if Blarify isn't fully configured,
             // but it should not fail with "Blarify not found"
-            const promise = blarifyIntegration.analyzeWorkspace(
+            const promise = cueIntegration.analyzeWorkspace(
                 workspaceFolder.uri.fsPath,
                 progress as any,
                 token
@@ -107,7 +107,7 @@ suite('Blarify Path Resolution Test Suite', () => {
     });
     
     test('Should check Python availability', async () => {
-        const hasPython = await blarifyIntegration.checkBlarifyInstalled();
+        const hasPython = await cueIntegration.checkBlarifyInstalled();
         assert.ok(hasPython, 'Python should be available for Blarify execution');
     });
 });

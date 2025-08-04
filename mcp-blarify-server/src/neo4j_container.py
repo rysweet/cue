@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Neo4jContainerManager:
-    """Python wrapper for @blarify/neo4j-container-manager."""
+    """Python wrapper for @cue/neo4j-container-manager."""
     
     def __init__(self, data_dir: Optional[str] = None, debug: bool = False):
         """Initialize the container manager.
@@ -21,7 +21,7 @@ class Neo4jContainerManager:
             data_dir: Directory for persisting Neo4j data
             debug: Enable debug logging
         """
-        self.data_dir = data_dir or os.path.join(os.getcwd(), ".blarify", "neo4j")
+        self.data_dir = data_dir or os.path.join(os.getcwd(), ".cue", "neo4j")
         self.debug = debug
         self.container_info: Optional[Dict[str, Any]] = None
         
@@ -43,19 +43,19 @@ class Neo4jContainerManager:
         # Otherwise assume it's installed as an npm package
         try:
             result = subprocess.run(
-                ["npm", "list", "@blarify/neo4j-container-manager", "--json"],
+                ["npm", "list", "@cue/neo4j-container-manager", "--json"],
                 capture_output=True,
                 text=True
             )
             if result.returncode == 0:
-                self.manager_path = "@blarify/neo4j-container-manager"
+                self.manager_path = "@cue/neo4j-container-manager"
                 return
         except Exception:
             pass
         
         raise RuntimeError(
             "neo4j-container-manager not found. Please install it:\n"
-            "npm install @blarify/neo4j-container-manager"
+            "npm install @cue/neo4j-container-manager"
         )
     
     def start(self, config: Dict[str, Any]) -> Dict[str, Any]:

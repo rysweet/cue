@@ -1,5 +1,5 @@
 
-# dont ignore anything in blarify/vendor
+# dont ignore anything in cue/vendor
 
 __pycache__/
 .venv/
@@ -18,7 +18,7 @@ static/
 easy/
 
 
-!blarify/vendor/**/*.json
+!cue/vendor/**/*.json
 !.claude/settings.json
 !pyrightconfig.json
 

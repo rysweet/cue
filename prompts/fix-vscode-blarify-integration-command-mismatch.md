@@ -21,8 +21,8 @@ However, the bundled Blarify version doesn't recognize the 'ingest' command and 
 - The extension appears broken to end users
 
 ### Evidence from Codebase
-- `blarifyIntegration.ts:45` shows: `const args = ['ingest', workspacePath, '--json'];`
-- Test files `test-blarify-extension-style.js` and `test-blarify-no-llm.js` demonstrate the correct environment variable approach
+- `cueIntegration.ts:45` shows: `const args = ['ingest', workspacePath, '--json'];`
+- Test files `test-cue-extension-style.js` and `test-cue-no-llm.js` demonstrate the correct environment variable approach
 - Working pattern: `ROOT_PATH=<path>` with no command-line arguments
 
 ## Feature Requirements
@@ -71,7 +71,7 @@ The current `BlarifyIntegration.analyzeWorkspace()` method:
 4. Handles output parsing correctly ✅
 
 ### Root Cause
-Line 45 in `blarifyIntegration.ts`:
+Line 45 in `cueIntegration.ts`:
 ```typescript
 const args = ['ingest', workspacePath, '--json'];
 ```
@@ -79,13 +79,13 @@ const args = ['ingest', workspacePath, '--json'];
 This should be replaced with environment variable configuration.
 
 ### Working Pattern Analysis
-From `test-blarify-extension-style.js`:
+From `test-cue-extension-style.js`:
 ```javascript
 const child = spawn(pythonPath, [mainPath], {
     cwd: testDir,
     env: {
         ...process.env,
-        PYTHONPATH: blarifyPath,
+        PYTHONPATH: cuePath,
         ROOT_PATH: testDir,
         NEO4J_URI: 'bolt://localhost:7957',
         NEO4J_USER: 'neo4j',
@@ -218,17 +218,17 @@ Create a detailed issue with:
 Title: Fix BlarifyIntegration command mismatch - replace 'ingest' command with environment variables
 
 Description:
-The VS Code extension's BlarifyIntegration class incorrectly tries to call `blarify ingest <path>` 
+The VS Code extension's BlarifyIntegration class incorrectly tries to call `cue ingest <path>` 
 but the bundled Blarify version expects environment variables instead. This causes all workspace 
 analysis to fail.
 
 Root Cause:
-- Line 45 in blarifyIntegration.ts uses command: ['ingest', workspacePath, '--json']
+- Line 45 in cueIntegration.ts uses command: ['ingest', workspacePath, '--json']
 - Bundled Blarify expects ROOT_PATH environment variable instead
 
 Solution:
 Replace command-line arguments with environment variable configuration as demonstrated 
-in test-blarify-extension-style.js
+in test-cue-extension-style.js
 
 Acceptance Criteria:
 - [ ] Remove 'ingest' command from args array
@@ -244,10 +244,10 @@ Milestone: Next Release
 
 ### Step 2: Create Feature Branch
 ```bash
-git checkout -b fix/blarify-integration-environment-variables
+git checkout -b fix/cue-integration-environment-variables
 ```
 
-Branch naming follows pattern: `fix/blarify-integration-environment-variables`
+Branch naming follows pattern: `fix/cue-integration-environment-variables`
 
 ### Step 3: Research and Analysis
 - [x] Analyze current BlarifyIntegration implementation
@@ -257,7 +257,7 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 
 ### Step 4: Implementation Phase 1 - Core Environment Variable Support
 **Files to modify**: 
-- `src/blarifyIntegration.ts`
+- `src/cueIntegration.ts`
 
 **Changes**:
 1. **Remove command-line arguments**:
@@ -296,8 +296,8 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 
 3. **Update process spawn**:
    ```typescript
-   // OLD: const blarify = spawn(pythonPath, [blarifyMainPath, ...args], {
-   // NEW: const blarify = spawn(pythonPath, [blarifyMainPath], {
+   // OLD: const cue = spawn(pythonPath, [cueMainPath, ...args], {
+   // NEW: const cue = spawn(pythonPath, [cueMainPath], {
        cwd: workspacePath,
        env: this.buildEnvironmentVariables(workspacePath, azureConfig, excludePatterns)
    // });
@@ -305,7 +305,7 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 
 ### Step 5: Implementation Phase 2 - Neo4j Integration
 **Files to modify**:
-- `src/blarifyIntegration.ts`
+- `src/cueIntegration.ts`
 - Coordinate with Neo4j manager for connection details
 
 **Changes**:
@@ -332,7 +332,7 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 ### Step 6: Implementation Phase 3 - Testing Updates
 **Files to modify**:
 - `src/test/suite/extension.test.ts`
-- `src/test/suite/blarifyPathResolution.test.ts`
+- `src/test/suite/cuePathResolution.test.ts`
 - Any other test files that mock BlarifyIntegration
 
 **Changes**:
@@ -356,7 +356,7 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 2. **Add environment variable tests**:
    ```typescript
    test('buildEnvironmentVariables should include all required variables', () => {
-       const envVars = blarifyIntegration.buildEnvironmentVariables(
+       const envVars = cueIntegration.buildEnvironmentVariables(
            '/test/path',
            { apiKey: 'test-key', endpoint: 'test-endpoint', deploymentName: 'test-deployment' },
            ['node_modules', '.git']
@@ -371,7 +371,7 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 
 ### Step 7: Documentation Updates
 **Files to modify**:
-- `src/blarifyIntegration.ts` (inline comments)
+- `src/cueIntegration.ts` (inline comments)
 - `EXTENSION-TROUBLESHOOTING.md` (if needed)
 
 **Changes**:
@@ -411,7 +411,7 @@ Branch naming follows pattern: `fix/blarify-integration-environment-variables`
 # Package and install updated extension
 npm run compile
 npm run package
-code-insiders --install-extension blarify-visualizer-0.1.0.vsix --force
+code-insiders --install-extension cue-visualizer-0.1.0.vsix --force
 
 # Test in clean workspace
 mkdir -p /tmp/test-workspace
@@ -419,7 +419,7 @@ cd /tmp/test-workspace
 echo "console.log('test');" > test.js
 code-insiders --new-window .
 
-# Run blarifyVisualizer.ingestWorkspace command
+# Run cueVisualizer.ingestWorkspace command
 # Verify it completes without 'ingest' command errors
 ```
 
@@ -429,7 +429,7 @@ code-insiders --new-window .
 **PR Description**:
 ```markdown
 ## Problem
-The VS Code extension's BlarifyIntegration was calling `blarify ingest <path>` but the bundled 
+The VS Code extension's BlarifyIntegration was calling `cue ingest <path>` but the bundled 
 Blarify version doesn't support the 'ingest' command. Instead, it expects configuration through
 environment variables.
 
@@ -440,7 +440,7 @@ environment variables.
 - Maintained all existing functionality (progress reporting, error handling, cancellation)
 
 ## Changes
-- `src/blarifyIntegration.ts`: Core integration fix with environment variables
+- `src/cueIntegration.ts`: Core integration fix with environment variables
 - Tests updated to reflect new integration pattern
 - Documentation updated with new configuration approach
 
@@ -454,7 +454,7 @@ environment variables.
 None - public API remains unchanged
 
 ## AI Agent Attribution
-This PR was created by Claude Code AI agent following the fix-vscode-blarify-integration-command-mismatch.md prompt.
+This PR was created by Claude Code AI agent following the fix-vscode-cue-integration-command-mismatch.md prompt.
 
 Fixes #[issue-number]
 ```

@@ -8,7 +8,7 @@ export class StatusBarManager implements vscode.Disposable {
             vscode.StatusBarAlignment.Right,
             100
         );
-        this.statusBarItem.command = 'blarifyVisualizer.showVisualization';
+        this.statusBarItem.command = 'cueVisualizer.showVisualization';
         this.statusBarItem.show();
     }
     

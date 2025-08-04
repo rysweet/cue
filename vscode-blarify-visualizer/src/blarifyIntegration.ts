@@ -12,7 +12,7 @@ export interface BlarifyResult {
 }
 
 export class BlarifyIntegration {
-    private static readonly DEFAULT_CONTAINER_NAME = 'blarify-visualizer-development';
+    private static readonly DEFAULT_CONTAINER_NAME = 'cue-visualizer-development';
     private lastAnalysis?: number;
     private pythonEnv: PythonEnvironment;
     
@@ -48,7 +48,7 @@ export class BlarifyIntegration {
             const azureConfig = this.configManager.getAzureOpenAIConfig();
             
             // Use bundled Blarify
-            const bundledBlarifyPath = path.join(this.extensionPath, 'bundled', 'blarify');
+            const bundledBlarifyPath = path.join(this.extensionPath, 'bundled', 'cue');
             console.log(`Using bundled Blarify from: ${bundledBlarifyPath}`);
             
             // Run with bundled Python environment using environment variables
@@ -142,7 +142,7 @@ export class BlarifyIntegration {
     
     private async runBlarifyProcess(
         pythonPath: string,
-        blarifyPath: string,
+        cuePath: string,
         workspacePath: string,
         azureConfig: any,
         excludePatterns: string[],
@@ -156,21 +156,21 @@ export class BlarifyIntegration {
             const env = await this.buildEnvironmentVariables(workspacePath, azureConfig, excludePatterns);
             
             // Spawn Blarify process using bundled Python with environment variables
-            // We need to run blarify's main.py directly since it's not installed as a package
-            const blarifyMainPath = path.join(this.extensionPath, 'bundled', 'blarify', 'main.py');
-            const blarify = spawn(pythonPath, [blarifyMainPath], {
+            // We need to run cue's main.py directly since it's not installed as a package
+            const cueMainPath = path.join(this.extensionPath, 'bundled', 'cue', 'main.py');
+            const cue = spawn(pythonPath, [cueMainPath], {
                 cwd: workspacePath,
                 env: env
             });
             
-            this.handleBlarifyProcess(blarify, progress, token, resolve, reject);
+            this.handleBlarifyProcess(cue, progress, token, resolve, reject);
         } catch (error) {
             reject(new Error(`Failed to build environment variables: ${error}`));
         }
     }
     
     private handleBlarifyProcess(
-        blarify: any,
+        cue: any,
         progress: vscode.Progress<{ message?: string; increment?: number }>,
         token: vscode.CancellationToken,
         resolve: (value: any) => void,
@@ -180,7 +180,7 @@ export class BlarifyIntegration {
         let output = '';
         let errorOutput = '';
         
-        blarify.stdout.on('data', (data: Buffer) => {
+        cue.stdout.on('data', (data: Buffer) => {
             output += data.toString();
             
             // Try to parse progress messages
@@ -192,11 +192,11 @@ export class BlarifyIntegration {
             }
         });
         
-        blarify.stderr.on('data', (data: Buffer) => {
+        cue.stderr.on('data', (data: Buffer) => {
             errorOutput += data.toString();
         });
         
-        blarify.on('close', (code: number | null) => {
+        cue.on('close', (code: number | null) => {
             if (token.isCancellationRequested) {
                 reject(new Error('Analysis cancelled'));
                 return;
@@ -217,7 +217,7 @@ export class BlarifyIntegration {
             }
         });
         
-        blarify.on('error', (error: Error) => {
+        cue.on('error', (error: Error) => {
             if (error.message.includes('ENOENT')) {
                 reject(new Error('Python not found. Please ensure Python 3 is installed and in your PATH'));
             } else {
@@ -227,13 +227,13 @@ export class BlarifyIntegration {
         
         // Handle cancellation
         token.onCancellationRequested(() => {
-            blarify.kill();
+            cue.kill();
         });
     }
     
     async checkBlarifyInstalled(): Promise<boolean> {
         // With bundled Blarify, we just need to check if the bundled directory exists
-        const bundledBlarifyPath = path.join(this.extensionPath, 'bundled', 'blarify', 'main.py');
+        const bundledBlarifyPath = path.join(this.extensionPath, 'bundled', 'cue', 'main.py');
         return fs.existsSync(bundledBlarifyPath);
     }
     
@@ -244,7 +244,7 @@ export class BlarifyIntegration {
     async installBlarify(): Promise<void> {
         const terminal = vscode.window.createTerminal('Blarify Installation');
         terminal.show();
-        terminal.sendText('pip install blarify');
+        terminal.sendText('pip install cue');
         
         // Wait for user to complete installation
         await vscode.window.showInformationMessage(

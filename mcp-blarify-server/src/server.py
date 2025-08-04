@@ -58,7 +58,7 @@ class BlarifyMCPServer:
     
     def __init__(self):
         """Initialize the MCP server."""
-        self.server = Server("mcp-blarify")
+        self.server = Server("mcp-cue")
         self.driver = None
         self.context_tools = None
         self.planning_tools = None

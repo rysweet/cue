@@ -86,7 +86,7 @@ The LLM should analyze documentation content and:
 ## Implementation Plan
 
 ### Architecture Design
-1. Create `blarify/documentation/` module with:
+1. Create `cue/documentation/` module with:
    - `documentation_parser.py`: Main parser class
    - `concept_extractor.py`: LLM-based concept extraction
    - `documentation_linker.py`: Links docs to code nodes
