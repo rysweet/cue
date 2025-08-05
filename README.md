@@ -30,8 +30,9 @@ flowchart LR
     subgraph Core["Cue Core Engine"]
         subgraph GL["Graph Layers"]
             FS["Filesystem<br/>Layer"]
-            CH["Code Hierarchy<br/>Layer"]
+            CH["Code Hierarchy<br/>• AST→Symbols<br/>• Classes/Functions"]
             DOC["Documentation<br/>Layer"]
+            SEM["Semantic Layer<br/>• LLM Summaries<br/>• Code Descriptions"]
         end
         
         subgraph PC["Processing Components"]
@@ -50,6 +51,7 @@ flowchart LR
     CH --> LSP
     CH --> TS
     DOC --> LLM
+    SEM --> LLM
     
     LSP --> Neo4j
     TS --> Neo4j
@@ -61,6 +63,7 @@ flowchart LR
     style FS fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
     style CH fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
     style DOC fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style SEM fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
     style LSP fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
     style TS fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
     style LLM fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
