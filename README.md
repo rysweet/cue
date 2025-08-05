@@ -1,8 +1,8 @@
-# Blarify / Cue
+# Cue
 
 > Transform any codebase into an intelligent multilayer graph for AI-powered code understanding
 
-Blarify (formerly Cue) is a sophisticated code analysis tool that creates comprehensive graph representations of codebases, enabling AI agents and developers to understand, navigate, and modify code with unprecedented precision.
+Cue is a sophisticated code analysis tool that creates comprehensive graph representations of codebases, enabling AI agents and developers to understand, navigate, and modify code with unprecedented precision.
 
 ## 🚀 Key Features
 
@@ -17,11 +17,11 @@ Blarify (formerly Cue) is a sophisticated code analysis tool that creates compre
 
 ## 🏗️ Architecture Overview
 
-Blarify creates a sophisticated multilayer graph representation of your codebase:
+Cue creates a sophisticated multilayer graph representation of your codebase:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Blarify Architecture                       │
+│                        Cue Architecture                         │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
 │  │   VS Code       │  │   MCP Server    │  │   Neo4j Graph   │ │
@@ -36,7 +36,7 @@ Blarify creates a sophisticated multilayer graph representation of your codebase
 │           └─────────────────────┼─────────────────────┘        │
 │                                 │                              │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │                  Blarify Core Engine                    │   │
+│  │                     Cue Core Engine                     │   │
 │  ├─────────────────────────────────────────────────────────┤   │
 │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │   │
 │  │  │ Filesystem  │ │ Code        │ │ Documentation│      │   │
@@ -61,7 +61,7 @@ Blarify creates a sophisticated multilayer graph representation of your codebase
 
 ## 🔧 Components
 
-### Blarify Core
+### Cue Core
 The heart of the system that analyzes codebases and builds graph representations:
 
 - **Language Parsing**: Tree-sitter based parsing for 8+ programming languages
@@ -105,7 +105,7 @@ Graph database storage and querying:
 
 ### Core Installation
 
-1. **Install Blarify Core**:
+1. **Install Cue Core**:
    ```bash
    pip install cue
    ```
@@ -145,7 +145,7 @@ Graph database storage and querying:
    ```
 
 4. **Configure extension settings** in VS Code:
-   - Search for "Blarify Visualizer" in settings
+   - Search for "Cue Visualizer" in settings
    - Add Azure OpenAI credentials (optional)
    - Configure Neo4j connection details
 
@@ -218,8 +218,8 @@ graph_manager.close()
 ### VS Code Extension Usage
 
 1. **Open your project** in VS Code
-2. **Analyze workspace**: Run "Blarify: Analyze Workspace" command
-3. **View visualization**: Run "Blarify: Show 3D Visualization" command
+2. **Analyze workspace**: Run "Cue: Analyze Workspace" command
+3. **View visualization**: Run "Cue: Show 3D Visualization" command
 4. **Explore the graph**:
    - Left drag: Rotate view
    - Right drag: Pan view
@@ -246,7 +246,7 @@ Create an implementation plan using buildPlanForChange:
 
 ### Multilayer Graph Structure
 
-Blarify creates multiple interconnected layers:
+Cue creates multiple interconnected layers:
 
 1. **Filesystem Layer**:
    - File and directory nodes
@@ -281,7 +281,7 @@ Blarify creates multiple interconnected layers:
 ### Smart File Filtering
 
 - **Gitignore Integration**: Automatically respects `.gitignore` patterns
-- **Custom Exclusions**: Use `.cueignore` for Blarify-specific exclusions
+- **Custom Exclusions**: Use `.cueignore` for Cue-specific exclusions
 - **Extension Filtering**: Skip non-code files like `.json`, `.xml`
 - **Performance Optimization**: Focus on relevant code files
 
@@ -388,8 +388,8 @@ export LOGGING_LEVEL=DEBUG
 
 ## 📋 FAQ
 
-**Q: What's the difference between Cue and Blarify?**
-A: Blarify is the evolved name for the project. The package is still called `cue` for compatibility.
+**Q: Why is the package named `cue`?**
+A: The package maintains the name `cue` for compatibility and simplicity.
 
 **Q: Can I use this without AI/LLM features?**
 A: Yes! Set `ENABLE_LLM_DESCRIPTIONS=false` to disable AI features.
@@ -418,7 +418,7 @@ MIT License - see [LICENSE.md](LICENSE.md) for details.
 
 ## 🙏 Acknowledgments
 
-Created by [Juan Vargas](https://github.com/juanvargas) and [Benjamín Errazuriz](https://github.com/benerrazuriz) at [Blar.io](https://blar.io).
+This project was forked from [blarify](https://github.com/blarApp/blarify) by [Juan Vargas](https://github.com/juanvargas) and [Benjamín Errazuriz](https://github.com/benerrazuriz) at [Blar.io](https://blar.io).
 
 Special thanks to the open source community and all contributors who have made this project possible.
 
