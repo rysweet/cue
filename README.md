@@ -20,6 +20,7 @@ Cue is a sophisticated code analysis tool that creates comprehensive graph repre
 Cue creates a sophisticated multilayer graph representation of your codebase:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize': '16px'}}}%%
 graph TB
     subgraph "Cue Architecture"
         subgraph "User Interfaces"
@@ -29,10 +30,12 @@ graph TB
         end
         
         subgraph "Cue Core Engine"
-            subgraph "Graph Layers"
+            subgraph "Graph Layers (Extensible)"
                 FS["Filesystem Layer<br/>• Files<br/>• Folders<br/>• Structure"]
-                CH["Code Hierarchy Layer<br/>• Classes<br/>• Functions<br/>• Variables"]
+                CH["Code Hierarchy Layer<br/>• AST→Symbols<br/>• Classes<br/>• Functions<br/>• Variables"]
                 DOC["Documentation Layer<br/>• Concepts<br/>• Entities<br/>• Auto-Link"]
+                SEM["Semantic Layer<br/>• LLM Summaries<br/>• Code Descriptions<br/>• Context"]
+                EXT["\+ Add Custom Layers<br/>• Github PR Layer<br/>• Security Layer<br/>• Metrics Layer<br/>• Your Layer Here"]
             end
             
             subgraph "Processing Components"
@@ -51,21 +54,27 @@ graph TB
         CH --> LSP
         CH --> TS
         DOC --> LLM
+        SEM --> LLM
+        EXT -.-> LSP
+        EXT -.-> TS
+        EXT -.-> LLM
         
         LSP --> Neo4j
         TS --> Neo4j
         LLM --> Neo4j
     end
     
-    style VSCode fill:#e1f5fe
-    style MCP fill:#e8f5e9
-    style Neo4j fill:#fff3e0
-    style FS fill:#f3e5f5
-    style CH fill:#f3e5f5
-    style DOC fill:#f3e5f5
-    style LSP fill:#fce4ec
-    style TS fill:#fce4ec
-    style LLM fill:#fce4ec
+    style VSCode fill:#1976d2,color:#ffffff,stroke:#0d47a1,stroke-width:2px
+    style MCP fill:#388e3c,color:#ffffff,stroke:#1b5e20,stroke-width:2px
+    style Neo4j fill:#f57c00,color:#ffffff,stroke:#e65100,stroke-width:2px
+    style FS fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style CH fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style DOC fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style SEM fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style EXT fill:#546e7a,color:#ffffff,stroke:#37474f,stroke-width:2px,stroke-dasharray: 5 5
+    style LSP fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
+    style TS fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
+    style LLM fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
 ```
 
 ## 🔧 Components
