@@ -19,44 +19,53 @@ Cue is a sophisticated code analysis tool that creates comprehensive graph repre
 
 Cue creates a sophisticated multilayer graph representation of your codebase:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Cue Architecture                         │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │   VS Code       │  │   MCP Server    │  │   Neo4j Graph   │ │
-│  │   Extension     │  │   (AI Agents)   │  │   Database      │ │
-│  │                 │  │                 │  │                 │ │
-│  │ • 3D Visualizer │  │ • Context Tools │  │ • Node Storage  │ │
-│  │ • Search/Filter │  │ • Query Builder │  │ • Relationships │ │
-│  │ • Interactive   │  │ • Plan Builder  │  │ • Graph Queries │ │
-│  │   Exploration   │  │ • LLM Processor │  │ • Cypher API    │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-│           │                     │                     │        │
-│           └─────────────────────┼─────────────────────┘        │
-│                                 │                              │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │                     Cue Core Engine                     │   │
-│  ├─────────────────────────────────────────────────────────┤   │
-│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │   │
-│  │  │ Filesystem  │ │ Code        │ │ Documentation│      │   │
-│  │  │ Layer       │ │ Hierarchy   │ │ Layer        │      │   │
-│  │  │             │ │ Layer       │ │              │      │   │
-│  │  │ • Files     │ │ • Classes   │ │ • Concepts   │      │   │
-│  │  │ • Folders   │ │ • Functions │ │ • Entities   │      │   │
-│  │  │ • Structure │ │ • Variables │ │ • Auto-Link  │      │   │
-│  │  └─────────────┘ └─────────────┘ └─────────────┘      │   │
-│  │                                                        │   │
-│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │   │
-│  │  │ LSP         │ │ Tree-Sitter │ │ LLM         │      │   │
-│  │  │ Integration │ │ Parsing     │ │ Integration │      │   │
-│  │  │             │ │             │ │             │      │   │
-│  │  │ • References│ │ • AST Parse │ │ • Summaries │      │   │
-│  │  │ • Symbols   │ │ • Language  │ │ • Context   │      │   │
-│  │  │ • Workspace │ │   Specific  │ │ • Planning  │      │   │
-│  │  └─────────────┘ └─────────────┘ └─────────────┘      │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Cue Architecture"
+        subgraph "User Interfaces"
+            VSCode["VS Code Extension<br/>• 3D Visualizer<br/>• Search/Filter<br/>• Interactive Exploration"]
+            MCP["MCP Server<br/>(AI Agents)<br/>• Context Tools<br/>• Query Builder<br/>• Plan Builder<br/>• LLM Processor"]
+            Neo4j["Neo4j Graph Database<br/>• Node Storage<br/>• Relationships<br/>• Graph Queries<br/>• Cypher API"]
+        end
+        
+        subgraph "Cue Core Engine"
+            subgraph "Graph Layers"
+                FS["Filesystem Layer<br/>• Files<br/>• Folders<br/>• Structure"]
+                CH["Code Hierarchy Layer<br/>• Classes<br/>• Functions<br/>• Variables"]
+                DOC["Documentation Layer<br/>• Concepts<br/>• Entities<br/>• Auto-Link"]
+            end
+            
+            subgraph "Processing Components"
+                LSP["LSP Integration<br/>• References<br/>• Symbols<br/>• Workspace"]
+                TS["Tree-Sitter Parsing<br/>• AST Parse<br/>• Language Specific"]
+                LLM["LLM Integration<br/>• Summaries<br/>• Context<br/>• Planning"]
+            end
+        end
+        
+        VSCode --> Core[Cue Core Engine]
+        MCP --> Core
+        Neo4j --> Core
+        
+        FS --> LSP
+        FS --> TS
+        CH --> LSP
+        CH --> TS
+        DOC --> LLM
+        
+        LSP --> Neo4j
+        TS --> Neo4j
+        LLM --> Neo4j
+    end
+    
+    style VSCode fill:#e1f5fe
+    style MCP fill:#e8f5e9
+    style Neo4j fill:#fff3e0
+    style FS fill:#f3e5f5
+    style CH fill:#f3e5f5
+    style DOC fill:#f3e5f5
+    style LSP fill:#fce4ec
+    style TS fill:#fce4ec
+    style LLM fill:#fce4ec
 ```
 
 ## 🔧 Components
