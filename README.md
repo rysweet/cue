@@ -20,42 +20,40 @@ Cue is a sophisticated code analysis tool that creates comprehensive graph repre
 Cue creates a sophisticated multilayer graph representation of your codebase:
 
 ```mermaid
-graph TB
-    subgraph "Cue Architecture"
-        subgraph "User Interfaces"
-            VSCode["VS Code Extension<br/>• 3D Visualizer<br/>• Search/Filter<br/>• Interactive Exploration"]
-            MCP["MCP Server<br/>(AI Agents)<br/>• Context Tools<br/>• Query Builder<br/>• Plan Builder<br/>• LLM Processor"]
-            Neo4j["Neo4j Graph Database<br/>• Node Storage<br/>• Relationships<br/>• Graph Queries<br/>• Cypher API"]
-        end
-        
-        subgraph "Cue Core Engine"
-            subgraph "Graph Layers"
-                FS["Filesystem Layer<br/>• Files<br/>• Folders<br/>• Structure"]
-                CH["Code Hierarchy Layer<br/>• Classes<br/>• Functions<br/>• Variables"]
-                DOC["Documentation Layer<br/>• Concepts<br/>• Entities<br/>• Auto-Link"]
-            end
-            
-            subgraph "Processing Components"
-                LSP["LSP Integration<br/>• References<br/>• Symbols<br/>• Workspace"]
-                TS["Tree-Sitter Parsing<br/>• AST Parse<br/>• Language Specific"]
-                LLM["LLM Integration<br/>• Summaries<br/>• Context<br/>• Planning"]
-            end
-        end
-        
-        VSCode --> Core[Cue Core Engine]
-        MCP --> Core
-        Neo4j --> Core
-        
-        FS --> LSP
-        FS --> TS
-        CH --> LSP
-        CH --> TS
-        DOC --> LLM
-        
-        LSP --> Neo4j
-        TS --> Neo4j
-        LLM --> Neo4j
+flowchart LR
+    subgraph UI["User Interfaces"]
+        VSCode["VS Code Extension<br/>• 3D Visualizer<br/>• Search/Filter<br/>• Interactive"]
+        MCP["MCP Server<br/>(AI Agents)<br/>• Context Tools<br/>• Query Builder"]
+        Neo4j["Neo4j Database<br/>• Node Storage<br/>• Graph Queries"]
     end
+    
+    subgraph Core["Cue Core Engine"]
+        subgraph GL["Graph Layers"]
+            FS["Filesystem<br/>Layer"]
+            CH["Code Hierarchy<br/>Layer"]
+            DOC["Documentation<br/>Layer"]
+        end
+        
+        subgraph PC["Processing Components"]
+            LSP["LSP<br/>Integration"]
+            TS["Tree-Sitter<br/>Parsing"]
+            LLM["LLM<br/>Integration"]
+        end
+    end
+    
+    VSCode --> Core
+    MCP --> Core
+    Neo4j --> Core
+    
+    FS --> LSP
+    FS --> TS
+    CH --> LSP
+    CH --> TS
+    DOC --> LLM
+    
+    LSP --> Neo4j
+    TS --> Neo4j
+    LLM --> Neo4j
     
     style VSCode fill:#1976d2,color:#ffffff,stroke:#0d47a1,stroke-width:2px
     style MCP fill:#388e3c,color:#ffffff,stroke:#1b5e20,stroke-width:2px
