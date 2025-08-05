@@ -23,6 +23,78 @@ Blarify supports the following languages out of the box:
 <img src="https://raw.githubusercontent.com/blarApp/cue/refs/heads/main/docs/visualisation.png"></img>
 This graph was generated from the code in this repository.
 
+# Architecture
+
+Cue creates a sophisticated multilayer graph representation of your codebase:
+
+```mermaid
+graph TB
+    subgraph "Cue Architecture"
+        subgraph "User Interfaces"
+            VSCode["VS Code Extension<br/>• 3D Visualizer<br/>• Search/Filter<br/>• Interactive Exploration"]
+            MCP["MCP Server<br/>(AI Agents)<br/>• Context Tools<br/>• Query Builder<br/>• Plan Builder<br/>• LLM Processor"]
+            Neo4j["Neo4j Graph Database<br/>• Node Storage<br/>• Relationships<br/>• Graph Queries<br/>• Cypher API"]
+        end
+        
+        subgraph "Cue Core Engine"
+            subgraph "Graph Layers"
+                FS["Filesystem Layer<br/>• Files<br/>• Folders<br/>• Structure"]
+                CH["Code Hierarchy Layer<br/>• Classes<br/>• Functions<br/>• Variables"]
+                DOC["Documentation Layer<br/>• Concepts<br/>• Entities<br/>• Auto-Link"]
+            end
+            
+            subgraph "Processing Components"
+                LSP["LSP Integration<br/>• References<br/>• Symbols<br/>• Workspace"]
+                TS["Tree-Sitter Parsing<br/>• AST Parse<br/>• Language Specific"]
+                LLM["LLM Integration<br/>• Summaries<br/>• Context<br/>• Planning"]
+            end
+        end
+        
+        VSCode --> Core[Cue Core Engine]
+        MCP --> Core
+        Neo4j --> Core
+        
+        FS --> LSP
+        FS --> TS
+        CH --> LSP
+        CH --> TS
+        DOC --> LLM
+        
+        LSP --> Neo4j
+        TS --> Neo4j
+        LLM --> Neo4j
+    end
+    
+    style VSCode fill:#b3d9ff,stroke:#1976d2,stroke-width:2px,color:#000
+    style MCP fill:#c8e6c9,stroke:#388e3c,stroke-width:2px,color:#000
+    style Neo4j fill:#ffcc80,stroke:#f57c00,stroke-width:2px,color:#000
+    style FS fill:#ce93d8,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style CH fill:#ce93d8,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style DOC fill:#ce93d8,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style LSP fill:#f8bbd9,stroke:#c2185b,stroke-width:2px,color:#000
+    style TS fill:#f8bbd9,stroke:#c2185b,stroke-width:2px,color:#000
+    style LLM fill:#f8bbd9,stroke:#c2185b,stroke-width:2px,color:#000
+```
+
+## Components
+
+The architecture consists of three main layers:
+
+**User Interfaces:**
+- **VS Code Extension**: Interactive 3D visualization and exploration tools
+- **MCP Server**: AI agent integration for context-aware assistance
+- **Neo4j Database**: Graph storage and query engine
+
+**Graph Layers:**
+- **Filesystem Layer**: Directory structure and file organization
+- **Code Hierarchy Layer**: Classes, functions, and variable relationships
+- **Documentation Layer**: Concept extraction and automated linking
+
+**Processing Components:**
+- **LSP Integration**: Language server protocol for semantic analysis
+- **Tree-Sitter Parsing**: Abstract syntax tree generation
+- **LLM Integration**: AI-powered summarization and context generation
+
 # Quickstart
 
 Get started with cue by following our quickstart guide:
