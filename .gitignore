@@ -8,6 +8,8 @@ lsp-ws-proxy/
 ruby-on-rails-sample-app/
 .python-version
 .vscode/
+.vscode-test/
+vscode-*/.vscode-test/
 .idea/
 dist/
 fil-result/

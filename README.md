@@ -1,4 +1,4 @@
-# Cue
+# CUE - the Code-Understanding-Engine
 
 > Transform any codebase into an intelligent multilayer graph for AI-powered code understanding
 
@@ -35,7 +35,6 @@ graph TB
                 CH["Code Hierarchy Layer<br/>• AST→Symbols<br/>• Classes<br/>• Functions<br/>• Variables"]
                 DOC["Documentation Layer<br/>• Concepts<br/>• Entities<br/>• Auto-Link"]
                 SEM["Semantic Layer<br/>• LLM Summaries<br/>• Code Descriptions<br/>• Context"]
-                EXT["\+ Add Custom Layers<br/>• Github PR Layer<br/>• Security Layer<br/>• Metrics Layer<br/>• Your Layer Here"]
             end
             
             subgraph "Processing Components"
@@ -43,10 +42,14 @@ graph TB
                 TS["Tree-Sitter Parsing<br/>• AST Parse<br/>• Language Specific"]
                 LLM["LLM Integration<br/>• Summaries<br/>• Context<br/>• Planning"]
             end
+            
+            EXT["\+ Add Custom Layers<br/>• Github PR Layer<br/>• Security Layer<br/>• Metrics Layer<br/>• Your Layer Here"]
         end
         
         VSCode --> Core[Cue Core Engine]
+        VSCode --> Neo4j
         MCP --> Core
+        MCP --> Neo4j
         Neo4j --> Core
         
         FS --> LSP
