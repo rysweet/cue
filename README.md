@@ -57,15 +57,15 @@ graph TB
         LLM --> Neo4j
     end
     
-    style VSCode fill:#e1f5fe
-    style MCP fill:#e8f5e9
-    style Neo4j fill:#fff3e0
-    style FS fill:#f3e5f5
-    style CH fill:#f3e5f5
-    style DOC fill:#f3e5f5
-    style LSP fill:#fce4ec
-    style TS fill:#fce4ec
-    style LLM fill:#fce4ec
+    style VSCode fill:#1976d2,color:#ffffff,stroke:#0d47a1,stroke-width:2px
+    style MCP fill:#388e3c,color:#ffffff,stroke:#1b5e20,stroke-width:2px
+    style Neo4j fill:#f57c00,color:#ffffff,stroke:#e65100,stroke-width:2px
+    style FS fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style CH fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style DOC fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style LSP fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
+    style TS fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
+    style LLM fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
 ```
 
 ## 🔧 Components
