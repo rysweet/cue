@@ -389,7 +389,7 @@ export LOGGING_LEVEL=DEBUG
 ## 📋 FAQ
 
 **Q: Why is the package named `cue`?**
-A: The package maintains the name `cue` for compatibility and simplicity.
+A: The package maintains the name `cue` for Code Understanding Engine
 
 **Q: Can I use this without AI/LLM features?**
 A: Yes! Set `ENABLE_LLM_DESCRIPTIONS=false` to disable AI features.
@@ -402,15 +402,6 @@ A: Successfully tested on repositories with 100k+ files. Performance depends on 
 
 **Q: Can I extend language support?**
 A: Yes! Add new tree-sitter parsers and language definitions in `code_hierarchy/languages/`.
-
-## 🏆 Future Roadmap
-
-- [ ] Vector embeddings for semantic code search
-- [ ] Web-based dashboard for team collaboration
-- [ ] Integration with more IDEs (IntelliJ, Sublime Text)
-- [ ] Performance optimizations for enterprise-scale codebases
-- [ ] Advanced AI features (code generation, refactoring suggestions)
-- [ ] Plugin system for custom analyzers
 
 ## 📄 License
 
