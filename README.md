@@ -20,42 +20,49 @@ Cue is a sophisticated code analysis tool that creates comprehensive graph repre
 Cue creates a sophisticated multilayer graph representation of your codebase:
 
 ```mermaid
-flowchart LR
-    subgraph UI["User Interfaces"]
-        VSCode["VS Code Extension<br/>• 3D Visualizer<br/>• Search/Filter<br/>• Interactive"]
-        MCP["MCP Server<br/>(AI Agents)<br/>• Context Tools<br/>• Query Builder"]
-        Neo4j["Neo4j Database<br/>• Node Storage<br/>• Graph Queries"]
-    end
-    
-    subgraph Core["Cue Core Engine"]
-        subgraph GL["Graph Layers"]
-            FS["Filesystem<br/>Layer"]
-            CH["Code Hierarchy<br/>• AST→Symbols<br/>• Classes/Functions"]
-            DOC["Documentation<br/>Layer"]
-            SEM["Semantic Layer<br/>• LLM Summaries<br/>• Code Descriptions"]
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize': '16px'}}}%%
+graph TB
+    subgraph "Cue Architecture"
+        subgraph "User Interfaces"
+            VSCode["VS Code Extension<br/>• 3D Visualizer<br/>• Search/Filter<br/>• Interactive Exploration"]
+            MCP["MCP Server<br/>(AI Agents)<br/>• Context Tools<br/>• Query Builder<br/>• Plan Builder<br/>• LLM Processor"]
+            Neo4j["Neo4j Graph Database<br/>• Node Storage<br/>• Relationships<br/>• Graph Queries<br/>• Cypher API"]
         end
         
-        subgraph PC["Processing Components"]
-            LSP["LSP<br/>Integration"]
-            TS["Tree-Sitter<br/>Parsing"]
-            LLM["LLM<br/>Integration"]
+        subgraph "Cue Core Engine"
+            subgraph "Graph Layers (Extensible)"
+                FS["Filesystem Layer<br/>• Files<br/>• Folders<br/>• Structure"]
+                CH["Code Hierarchy Layer<br/>• AST→Symbols<br/>• Classes<br/>• Functions<br/>• Variables"]
+                DOC["Documentation Layer<br/>• Concepts<br/>• Entities<br/>• Auto-Link"]
+                SEM["Semantic Layer<br/>• LLM Summaries<br/>• Code Descriptions<br/>• Context"]
+                EXT["+ Add Custom Layers<br/>• Tests Layer<br/>• Security Layer<br/>• Metrics Layer<br/>• Your Layer Here"]
+            end
+            
+            subgraph "Processing Components"
+                LSP["LSP Integration<br/>• References<br/>• Symbols<br/>• Workspace"]
+                TS["Tree-Sitter Parsing<br/>• AST Parse<br/>• Language Specific"]
+                LLM["LLM Integration<br/>• Summaries<br/>• Context<br/>• Planning"]
+            end
         end
+        
+        VSCode --> Core[Cue Core Engine]
+        MCP --> Core
+        Neo4j --> Core
+        
+        FS --> LSP
+        FS --> TS
+        CH --> LSP
+        CH --> TS
+        DOC --> LLM
+        SEM --> LLM
+        EXT -.-> LSP
+        EXT -.-> TS
+        EXT -.-> LLM
+        
+        LSP --> Neo4j
+        TS --> Neo4j
+        LLM --> Neo4j
     end
-    
-    VSCode --> Core
-    MCP --> Core
-    Neo4j --> Core
-    
-    FS --> LSP
-    FS --> TS
-    CH --> LSP
-    CH --> TS
-    DOC --> LLM
-    SEM --> LLM
-    
-    LSP --> Neo4j
-    TS --> Neo4j
-    LLM --> Neo4j
     
     style VSCode fill:#1976d2,color:#ffffff,stroke:#0d47a1,stroke-width:2px
     style MCP fill:#388e3c,color:#ffffff,stroke:#1b5e20,stroke-width:2px
@@ -64,6 +71,7 @@ flowchart LR
     style CH fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
     style DOC fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
     style SEM fill:#7b1fa2,color:#ffffff,stroke:#4a148c,stroke-width:2px
+    style EXT fill:#546e7a,color:#ffffff,stroke:#37474f,stroke-width:2px,stroke-dasharray: 5 5
     style LSP fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
     style TS fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
     style LLM fill:#c2185b,color:#ffffff,stroke:#880e4f,stroke-width:2px
