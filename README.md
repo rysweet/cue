@@ -1,4 +1,4 @@
-# Cue
+# CUE - the Code-Understanding-Engine
 
 > Transform any codebase into an intelligent multilayer graph for AI-powered code understanding
 
@@ -43,7 +43,7 @@ graph TB
                 LLM["LLM Integration<br/>• Summaries<br/>• Context<br/>• Planning"]
             end
             
-            EXT["+ Add Custom Layers<br/>• Github PR Layer<br/>• Security Layer<br/>• Metrics Layer<br/>• Your Layer Here"]
+            EXT["\+ Add Custom Layers<br/>• Github PR Layer<br/>• Security Layer<br/>• Metrics Layer<br/>• Your Layer Here"]
         end
         
         VSCode --> Core[Cue Core Engine]
